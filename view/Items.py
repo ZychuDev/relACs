@@ -104,18 +104,18 @@ class DataCollectionItem(StandardItem):
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file
-        #dlg = QtWidgets.QFileDialog()
-        #dlg.setFileMode(QFileDialog.AnyFile) #TMP
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QFileDialog.AnyFile) #TMP
 
-        # if dlg.exec_():
-        #     filenames = "C:\\Users\\wikto\\Desktop\\ACMA\\ac_0_Oe.dat"  #TMP dlg.selectedFiles()
-        # else:
-        #     return
+        if dlg.exec_():
+            filenames = dlg.selectedFiles()
+        else:
+            return
 
-        # if len(filenames) != 1 :
-        #      return 
+        if len(filenames) != 1 :
+             return 
 
-        filepath = "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat" # filenames[0] #TMP
+        filepath = filenames[0] # "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat" #TMP
         if not os.path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return
@@ -241,14 +241,11 @@ class FitTauItem(StandardItem):
 class FitTauCollectionItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
-        button = QPushButton("Whatever")
         self.markColor = QColor(46,184,199)
         #self.setBackground(markColor)
         self.ui = mainPage
         self.container = {}
 
-        self.ui.LeftPanel.insertWidget(0, button )
-        self.ui.RightPanel.insertWidget(0, Plot(caption='3D WooDoo'))
 
     def showMenu(self, position):
         menu = QMenu()
@@ -257,7 +254,7 @@ class FitTauCollectionItem(StandardItem):
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def makeFit(self):
-        self.ui.WorkingSpace.setCurrentWidget(self.mainPage.fit3Dpage)
+        self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
 
     def append(self, item):
         if item.name in self.container:
@@ -269,10 +266,9 @@ class FitTauCollectionItem(StandardItem):
     
     def showMenu(self, position):
         menu = QMenu()
-        inspect = menu.addAction("Inspect", self.action)
-        action = menu.exec_(self.mainPage.window.mapToGlobal(position))
-        if action == inspect:
-            self.action()
+        inspect = menu.addAction("Make new fit", self.makeFit)
+        action = menu.exec_(self.ui.window.mapToGlobal(position))
+        return
 
 
 
@@ -282,6 +278,9 @@ class FitFrequencyItem(StandardItem):
     def __init__(self, mainPage, df, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
+
+        self.previous = {"alpha": 0, "beta": 0, "tau" : 0, "chiT" : 0, "chiS" : 0}
+        self.current = {"alpha": 1, "beta": 1, "tau" : 1, "chiT" : 1, "chiS" : 1}
 
         self.name = txt
         self.df = df.copy()
@@ -295,7 +294,7 @@ class FitFrequencyItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        menu.addAction("Inspect data", self.show)
+        menu.addAction("Inspect fit", self.show)
         menu.addAction("Rename", self.rename)
         
         menu.exec_(self.ui.window.mapToGlobal(position))
@@ -311,6 +310,9 @@ class FitFrequencyItem(StandardItem):
         self.ui.plotChi.change(self)
         self.ui.plotMain.change(self)
 
+    def rename(self):
+        return
+
 
 
     
@@ -319,12 +321,10 @@ class FitFrequencyItem(StandardItem):
 class FitFrequencyCollectionItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
-        button = QPushButton("Whatever")
+
         self.ui = mainPage
         self.container = {}
 
-        self.ui.LeftPanel.insertWidget(0, button )
-        self.ui.RightPanel.insertWidget(0, Plot(caption='3D WooDoo'))
 
     def showMenu(self, position):
         menu = QMenu()
@@ -333,7 +333,7 @@ class FitFrequencyCollectionItem(StandardItem):
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def makeFit(self):
-        self.ui.WorkingSpace.setCurrentWidget(self.mainPage.fit2Dpage)
+        self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
 
     def append(self, item):
         if item.name in self.container:

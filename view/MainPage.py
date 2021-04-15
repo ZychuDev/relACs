@@ -28,7 +28,7 @@ class MainPage(Ui_MainWindow):
         button.clicked.connect(lambda x:self.WorkingSpace.setCurrentWidget(self.fit2Dpage))
         self.LeftPanel.insertWidget(0, button )
 
-        self.RightPanel.insertWidget(0, Plot(caption='3D WooDoo'))
+        self.RightPanel.insertWidget(0, Plot3D())
         self.WorkingSpace.setCurrentWidget(self.fit2Dpage)
         self.Model.setRootIsDecorated(False)
         self.Model.setAlternatingRowColors(True)
@@ -41,9 +41,8 @@ class MainPage(Ui_MainWindow):
         self.Model.customContextMenuRequested.connect(self.showMenu)
 
         self.treeModel = QStandardItemModel()
-        
 
- 
+
         rootNode = self.treeModel.invisibleRootItem()
 
         chlor = CompoundItem(self, "Chlor")
@@ -61,7 +60,7 @@ class MainPage(Ui_MainWindow):
         self.plotFr = plotFitChi()
         self.plotChi = plotFitChi2()
         self.plotMain = plotFitChi1()
-
+        
         self.UpperPlots.insertWidget(0, self.plotFr)
         self.UpperPlots.insertWidget(1, self.plotChi)
         self.MainPlot.insertWidget(0, self.plotMain)
