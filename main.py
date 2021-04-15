@@ -10,7 +10,7 @@ if __name__ == "__main__":
     MainWindow = QtWidgets.QMainWindow()
     ui = MainPage(MainWindow)
     
-    
-    MainWindow.show()
+
+    MainWindow.showMaximized()
 
     sys.exit(app.exec_())
