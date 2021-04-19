@@ -4,6 +4,8 @@ import pandas as pd
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from mpl_toolkits.mplot3d import Axes3D
 
+from numba import jit
+
 class Plot(FigureCanvasQTAgg):
     def __init__(self, caption):
         fig, self.ax = plt.subplots(figsize=(5,4), dpi=100)
@@ -152,6 +154,8 @@ class plotFitChi(FigureCanvasQTAgg):
     real = []
     img = []
     domain = []
+
+    nr_of_connections = 0
     def __init__(self):
         self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=100)
         super().__init__(self.fig)
@@ -162,12 +166,29 @@ class plotFitChi(FigureCanvasQTAgg):
         self.name = fitFrequecyItem.name
         self.df = fitFrequecyItem.df
 
+        self.refresh()
+
+        print(plotFitChi.nr_of_connections)
+        if plotFitChi.nr_of_connections == 3:
+            try:
+                self.fitItem.ui.horizontalSlider_Alpha.valueChanged.disconnect()
+                self.fitItem.ui.horizontalSlider_Beta.valueChanged.disconnect()
+                self.fitItem.ui.horizontalSlider_Tau.valueChanged.disconnect()
+                self.fitItem.ui.horizontalSlider_ChiS.valueChanged.disconnect()
+                self.fitItem.ui.horizontalSlider_ChiT.valueChanged.disconnect()
+                plotFitChi.nr_of_connections = 0
+            except Exception: pass
+
+        plotFitChi.nr_of_connections = plotFitChi.nr_of_connections + 1
         self.fitItem.ui.horizontalSlider_Alpha.valueChanged.connect(self.valueChanged)
         self.fitItem.ui.horizontalSlider_Beta.valueChanged.connect(self.valueChanged)
         self.fitItem.ui.horizontalSlider_Tau.valueChanged.connect(self.valueChanged)
         self.fitItem.ui.horizontalSlider_ChiS.valueChanged.connect(self.valueChanged)
         self.fitItem.ui.horizontalSlider_ChiT.valueChanged.connect(self.valueChanged)
-        self.refresh()
+
+        
+
+        
 
     def refresh(self):
         self.ax.cla()
@@ -176,8 +197,7 @@ class plotFitChi(FigureCanvasQTAgg):
 
         self.ax.set(xlabel="log v", ylabel="Chi'", title="Ch'(log v)")
         self.ax.grid()
-        print("###")
-        print(df)
+        print("rChi")
         shown = df.loc[df["Show"]== True]
         hiden = df.loc[df["Show"]== False]
 
@@ -193,7 +213,11 @@ class plotFitChi(FigureCanvasQTAgg):
 
         plotFitChi.yy = []
         for x in plotFitChi.domain:
-            plotFitChi.yy.append(self.model(x))
+            plotFitChi.yy.append(self.model(x, alpha = self.fitItem.current["alpha"]
+        , beta = self.fitItem.current["beta"]
+        , tau = self.fitItem.current["tau"]
+        , chiT = self.fitItem.current["chiT"]
+        , chiS = self.fitItem.current["chiS"] ))
 
         plotFitChi.real = []
         plotFitChi.img = []
@@ -267,13 +291,13 @@ class plotFitChi(FigureCanvasQTAgg):
         self.fitItem.ui.lineEdit_ChiS.setText(str(self.fitItem.current["chiS"]))
 
         self.refresh()
-
-    def model(self, logFrequency):
-        alpha = self.fitItem.current["alpha"]
-        beta = self.fitItem.current["beta"]
-        tau = self.fitItem.current["tau"]
-        chiT = self.fitItem.current["chiT"]
-        chiS = self.fitItem.current["chiS"]
+    @jit()
+    def model(self, logFrequency, alpha, beta, tau, chiT, chiS):
+        # alpha = self.fitItem.current["alpha"]
+        # beta = self.fitItem.current["beta"]
+        # tau = self.fitItem.current["tau"]
+        # chiT = self.fitItem.current["chiT"]
+        # chiS = self.fitItem.current["chiS"]
         return chiS + (chiT)/((1 + (10**logFrequency * 2 * np.pi * np.power(10, tau) * 1j )**(1- alpha))**beta)
         #return chiS + (chiT - chiS)/np.power((1 + np.power(2*np.pi, np.power(10, logFrequency)*tau*1j), 1 - alpha), beta)
 
@@ -290,6 +314,7 @@ class plotFitChi1(plotFitChi):
         self.xStr = "FrequencyLog"
 
     def refresh(self):
+        print('rChi1')
         self.ax.cla()
         df = self.df
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
@@ -309,6 +334,7 @@ class plotFitChi2(plotFitChi):
         self.xStr = "FrequencyLog"
 
     def refresh(self):
+        print("rCHi2")
         self.ax.cla()
         df = self.df
         self.fig.canvas.mpl_connect('pick_event', self.onClick)

@@ -4,7 +4,10 @@ from .MainPageUI2 import *
 from .MainPageUI3 import *
 #from .Fit2D import Fit2D
 
-from .Items import *
+from .DataItems import *
+from .TauItems import *
+from .FrequencyItems import *
+from .CompoundItems import *
 
 from PyQt5.QtGui import QStandardItemModel
 from model.dataFrameModel import pandasModel
@@ -20,7 +23,9 @@ class MainPage(Ui_MainWindow):
     def __init__ (self, window):
         super().__init__()
         self.setupUi(window)
-        self.appState = AppState(self)
+        self.whole = RootItem(self, 'Main')
+
+        
         self.window = window
         #self.window.showMaximized()
 
@@ -36,6 +41,7 @@ class MainPage(Ui_MainWindow):
         
 
         self.Model.doubleClicked.connect(self.getValue)
+        
 
         self.Model.setContextMenuPolicy(Qt.CustomContextMenu)
         self.Model.customContextMenuRequested.connect(self.showMenu)
@@ -46,10 +52,10 @@ class MainPage(Ui_MainWindow):
         rootNode = self.treeModel.invisibleRootItem()
 
         chlor = CompoundItem(self, "Chlor")
-        self.appState.whole.compounds.append(chlor)
+        self.whole.compounds.append(chlor)
 
         
-        rootNode.appendRow(self.appState.whole)
+        rootNode.appendRow(self.whole)
 
         self.Model.setModel(self.treeModel)
         self.Model.expandAll()
@@ -81,6 +87,7 @@ class MainPage(Ui_MainWindow):
         self.inspectPlots.addWidget(self.pointPlotChi, 0, 1)
         self.inspectPlots.addWidget(self.table, 1, 1)
 
+        
         
 
 
