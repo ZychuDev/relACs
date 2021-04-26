@@ -108,18 +108,18 @@ class DataCollectionItem(StandardItem):
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file
-        dlg = QtWidgets.QFileDialog()
-        dlg.setFileMode(QFileDialog.AnyFile) #TMP
+        # dlg = QtWidgets.QFileDialog()
+        # dlg.setFileMode(QFileDialog.AnyFile) #TMP
 
-        if dlg.exec_():
-            filenames = dlg.selectedFiles()
-        else:
-            return
+        # if dlg.exec_():
+        #     filenames = dlg.selectedFiles()
+        # else:
+        #     return
 
-        if len(filenames) != 1 :
-             return 
+        # if len(filenames) != 1 :
+        #      return 
 
-        filepath = filenames[0] # "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat" #TMP
+        filepath =  "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat" #TMP filenames[0] #
         if not os.path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1235</width>
-    <height>877</height>
+    <width>1546</width>
+    <height>934</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -187,7 +187,7 @@
                  <rect>
                   <x>20</x>
                   <y>10</y>
-                  <width>897</width>
+                  <width>900</width>
                   <height>176</height>
                  </rect>
                 </property>
@@ -198,12 +198,15 @@
                     <widget class="QLabel" name="label_8">
                      <property name="minimumSize">
                       <size>
-                       <width>35</width>
+                       <width>65</width>
                        <height>0</height>
                       </size>
                      </property>
                      <property name="text">
-                      <string>Chi_T</string>
+                      <string>Chi_T-Chi_S</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
                      </property>
                     </widget>
                    </item>
@@ -233,7 +236,7 @@
                      </property>
                      <property name="maximumSize">
                       <size>
-                       <width>50</width>
+                       <width>100</width>
                        <height>16777215</height>
                       </size>
                      </property>
@@ -254,12 +257,15 @@
                     <widget class="QLabel" name="label_7">
                      <property name="minimumSize">
                       <size>
-                       <width>35</width>
+                       <width>65</width>
                        <height>0</height>
                       </size>
                      </property>
                      <property name="text">
                       <string>Chi_S</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
                      </property>
                     </widget>
                    </item>
@@ -280,10 +286,17 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_ChiS"/>
+                    <widget class="QLineEdit" name="lineEdit_ChiS">
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                    </widget>
                    </item>
                    <item>
-                    <widget class="QCheckBox" name="checkBox_ChIS">
+                    <widget class="QCheckBox" name="checkBox_ChiS">
                      <property name="text">
                       <string>Blocked</string>
                      </property>
@@ -297,12 +310,15 @@
                     <widget class="QLabel" name="label_6">
                      <property name="minimumSize">
                       <size>
-                       <width>35</width>
+                       <width>65</width>
                        <height>0</height>
                       </size>
                      </property>
                      <property name="text">
                       <string>Beta</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
                      </property>
                     </widget>
                    </item>
@@ -323,7 +339,14 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_Beta"/>
+                    <widget class="QLineEdit" name="lineEdit_Beta">
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QCheckBox" name="checkBox_Beta">
@@ -340,12 +363,15 @@
                     <widget class="QLabel" name="label">
                      <property name="minimumSize">
                       <size>
-                       <width>35</width>
+                       <width>65</width>
                        <height>0</height>
                       </size>
                      </property>
                      <property name="text">
                       <string>log Tau</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
                      </property>
                     </widget>
                    </item>
@@ -366,7 +392,14 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_Tau"/>
+                    <widget class="QLineEdit" name="lineEdit_Tau">
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QCheckBox" name="checkBox_Tau">
@@ -383,12 +416,15 @@
                     <widget class="QLabel" name="Alpha">
                      <property name="minimumSize">
                       <size>
-                       <width>35</width>
+                       <width>65</width>
                        <height>0</height>
                       </size>
                      </property>
                      <property name="text">
                       <string>Alfa</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignCenter</set>
                      </property>
                     </widget>
                    </item>
@@ -409,7 +445,14 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QLineEdit" name="lineEdit_Alpha"/>
+                    <widget class="QLineEdit" name="lineEdit_Alpha">
+                     <property name="maximumSize">
+                      <size>
+                       <width>100</width>
+                       <height>16777215</height>
+                      </size>
+                     </property>
+                    </widget>
                    </item>
                    <item>
                     <widget class="QCheckBox" name="checkBox_Alpha">
@@ -491,8 +534,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1235</width>
-     <height>26</height>
+     <width>1546</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

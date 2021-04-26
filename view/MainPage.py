@@ -8,6 +8,8 @@ from .DataItems import *
 from .TauItems import *
 from .FrequencyItems import *
 from .CompoundItems import *
+from .PlotsFit import *
+from .Plot3D import *
 
 from PyQt5.QtGui import QStandardItemModel
 from model.dataFrameModel import pandasModel
@@ -100,11 +102,10 @@ class MainPage(Ui_MainWindow):
 
     def nextWidget(self):
         self.WorkingSpace.setCurrentIndex((self.WorkingSpace.currentIndex() + 1) % 3)
-        print(self.WorkingSpace.currentIndex())
+
 
     def previousWidget(self):
         self.WorkingSpace.setCurrentIndex((self.WorkingSpace.currentIndex() - 1) % 3)
-        print(self.WorkingSpace.currentIndex())
     
 
     def refreshInspect(self):

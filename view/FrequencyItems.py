@@ -11,8 +11,8 @@ class FitFrequencyItem(StandardItem):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
 
-        self.previous = {"alpha": 0, "beta": 0, "tau" : 0, "chiT" : 0, "chiS" : 0}
-        self.current = {"alpha": 1, "beta": 1, "tau" : 1, "chiT" : 1, "chiS" : 1}
+        self.previous = {"alpha": 1.0, "beta": 1.0, "tau" : 1.0, "chiT" : 1.0, "chiS" : 1.0}
+        self.current = {"alpha": 1.0, "beta": 1.0, "tau" : -1.0, "chiT" : 1.0, "chiS" : 1.0}
 
         self.name = txt
         self.df = df.copy()
@@ -22,7 +22,6 @@ class FitFrequencyItem(StandardItem):
             pass
 
         self.df["Show"] = pd.Series(np.ones(len(df["Frequency"])), index=df.index)
-        print(self.df)
 
     def showMenu(self, position):
         menu = QMenu()
