@@ -1,7 +1,5 @@
-from PyQt5.QtCore import QLocale
-from PyQt5.QtGui import QDoubleValidator
 from numba.core.types.scalars import Float, Integer
-from view.AppState import AppState
+from view.AppStateBase import *
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,20 +9,7 @@ from numba import jit
 from scipy.optimize import least_squares
 from scipy.interpolate import interp1d
 
-
-class Validator(QDoubleValidator):
-    def __init__(self, fitItem, param, lineEdit):
-        bottom = AppState.ranges[param][0]
-        top = AppState.ranges[param][1]
-        super().__init__(bottom, top, 6)
-        self.fitItem = fitItem
-        self.param = param
-        self.lineEdit = lineEdit
-
-    def fixup(self, a0: str) -> str:
-        a0 = self.lineEdit.setText(str(self.fitItem.current[self.param]))
-        return a0
-
+from .Validator import Validator
 
 class plotFitChi(FigureCanvasQTAgg):
     yy = []
@@ -45,22 +30,16 @@ class plotFitChi(FigureCanvasQTAgg):
 
         self.refresh()
 
-        l = QLocale(QLocale.c())
-        l.setNumberOptions(QLocale.RejectGroupSeparator)
+
         v = Validator(self.fitItem, 'alpha', self.fitItem.ui.lineEdit_Alpha)
-        v.setLocale(l)
         self.fitItem.ui.lineEdit_Alpha.setValidator(v)
         v = Validator(self.fitItem, 'beta', self.fitItem.ui.lineEdit_Beta)
-        v.setLocale(l)
         self.fitItem.ui.lineEdit_Beta.setValidator(v)
         v = Validator(self.fitItem, 'tau', self.fitItem.ui.lineEdit_Tau)
-        v.setLocale(l)
         self.fitItem.ui.lineEdit_Tau.setValidator(v)
         v = Validator(self.fitItem, 'chiT', self.fitItem.ui.lineEdit_ChiT)
-        v.setLocale(l)
         self.fitItem.ui.lineEdit_ChiT.setValidator(v)
         v = Validator(self.fitItem, 'chiS', self.fitItem.ui.lineEdit_ChiS)
-        v.setLocale(l)
         self.fitItem.ui.lineEdit_ChiS.setValidator(v)
         print("Nr of connections" + str(plotFitChi.nr_of_connections))
         if plotFitChi.nr_of_connections == 3:
@@ -81,11 +60,11 @@ class plotFitChi(FigureCanvasQTAgg):
             except Exception: pass
 
         plotFitChi.nr_of_connections = plotFitChi.nr_of_connections + 1
-        self.fitItem.ui.horizontalSlider_Alpha.valueChanged.connect(self.valueChanged)
-        self.fitItem.ui.horizontalSlider_Beta.valueChanged.connect(self.valueChanged)
-        self.fitItem.ui.horizontalSlider_Tau.valueChanged.connect(self.valueChanged)
-        self.fitItem.ui.horizontalSlider_ChiS.valueChanged.connect(self.valueChanged)
-        self.fitItem.ui.horizontalSlider_ChiT.valueChanged.connect(self.valueChanged)
+        self.fitItem.ui.horizontalSlider_Alpha.valueChanged.connect(self.value_changed_alpha)
+        self.fitItem.ui.horizontalSlider_Beta.valueChanged.connect(self.value_changed_beta)
+        self.fitItem.ui.horizontalSlider_Tau.valueChanged.connect(self.value_changed_tau)
+        self.fitItem.ui.horizontalSlider_ChiS.valueChanged.connect(self.value_changed_chiS)
+        self.fitItem.ui.horizontalSlider_ChiT.valueChanged.connect(self.value_changed_chiT)
         self.fitItem.ui.pushButtonFit.clicked.connect(self.makeAutoFit)
         self.fitItem.ui.lineEdit_Alpha.editingFinished.connect(self.value_edited)
         self.fitItem.ui.lineEdit_Beta.editingFinished.connect(self.value_edited)
@@ -99,7 +78,7 @@ class plotFitChi(FigureCanvasQTAgg):
         df = self.df
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
 
-        self.ax.set(xlabel="log v", ylabel="Chi'", title="Ch'(log v)")
+        self.ax.set(xlabel="Chi '", ylabel="Chi''", title="Ch'(log v)")
         self.ax.grid()
         shown = df.loc[df["Show"]== True]
         hiden = df.loc[df["Show"]== False]
@@ -153,9 +132,6 @@ class plotFitChi(FigureCanvasQTAgg):
         self.fitItem.ui.refreshFitFr()
 
     def map_value(self, slider, name=""):
-        #resolution = (slider.maximum() - slider.minimum())/slider.singleStep()
-        #max = self.fitItem.ui.appState.ranges[name][1] #ranges -> tuple
-        #min = self.fitItem.ui.appState.ranges[name][0] #ranges -> tuple
         max = AppState.ranges[name][1]
         min = AppState.ranges[name][0]
         leftSpan = slider.maximum() - slider.minimum()
@@ -173,15 +149,29 @@ class plotFitChi(FigureCanvasQTAgg):
         v = float(m(v))
         return round(v)
 
-    def valueChanged(self):
+    def value_changed_alpha(self):
         self.slider_to_edit(self.fitItem.ui.horizontalSlider_Alpha, self.fitItem.ui.lineEdit_Alpha, 'alpha')
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_Beta, self.fitItem.ui.lineEdit_Beta, 'beta')
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_Tau, self.fitItem.ui.lineEdit_Tau, 'tau')
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiT, self.fitItem.ui.lineEdit_ChiT, 'chiT')
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiS, self.fitItem.ui.lineEdit_ChiS, 'chiS')
-
-        #self.refresh()
         self.fitItem.show()
+
+    def value_changed_beta(self):
+        self.slider_to_edit(self.fitItem.ui.horizontalSlider_Beta, self.fitItem.ui.lineEdit_Beta, 'beta')
+        self.fitItem.show()
+
+    def value_changed_tau(self):
+        self.slider_to_edit(self.fitItem.ui.horizontalSlider_Tau, self.fitItem.ui.lineEdit_Tau, 'tau')
+        self.fitItem.show()
+
+    def value_changed_chiT(self):
+        self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiT, self.fitItem.ui.lineEdit_ChiT, 'chiT')
+        self.fitItem.show()
+
+    def value_changed_chiS(self):
+        self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiS, self.fitItem.ui.lineEdit_ChiS, 'chiS')
+        self.fitItem.show()
+    
+        
+        
+        
 
     def value_edited(self): 
         self.edit_to_slider(self.fitItem.ui.horizontalSlider_Alpha, self.fitItem.ui.lineEdit_Alpha, 'alpha')
@@ -198,8 +188,7 @@ class plotFitChi(FigureCanvasQTAgg):
             v = self.fitItem.current[name]
         self.fitItem.current[name] = float(v)
         slider.blockSignals(True)
-        slider.setValue(
-            self.map_value_reverse(slider,edit , name))
+        slider.setValue(self.map_value_reverse(slider,edit , name))
         slider.blockSignals(False)
 
     def slider_to_edit(self, slider, edit, name):
@@ -226,7 +215,7 @@ class plotFitChi(FigureCanvasQTAgg):
     def makeAutoFit(self):
         r = AppState.ranges 
         b = ([r['alpha'][0], r['beta'][0], r['tau'][0], r['chiT'][0], r['chiS'][0]], [r['alpha'][1], r['beta'][1], r['tau'][1], r['chiT'][1], r['chiS'][1]])
-        eps = 0.0000001
+        eps = 0.000000000001
         ui = self.fitItem.ui
 
         if ui.checkBox_ChiS.isChecked():
@@ -259,8 +248,6 @@ class plotFitChi(FigureCanvasQTAgg):
 
         self.value_edited()
 
-        #self.fitItem.show()
-        print(self.fitItem.current)
 
 
 

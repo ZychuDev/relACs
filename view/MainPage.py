@@ -31,11 +31,47 @@ class MainPage(Ui_MainWindow):
         self.window = window
         #self.window.showMaximized()
 
-        button = QPushButton("Whatever")
-        button.clicked.connect(lambda x:self.WorkingSpace.setCurrentWidget(self.fit2Dpage))
-        self.LeftPanel.insertWidget(0, button )
+        self.plot3d = Plot3D()
+        self.plot3d.setMinimumSize(QtCore.QSize(AppState.screen_size[0]*0.4, 16777215))
+        self.plot3d.setObjectName("plot3d")
+        self.slider3D = {'Adir': self.horizontalSlider_Adir,
+        'Ndir': self.horizontalSlider_Ndir,
+        'B1': self.horizontalSlider_B1,
+        'B2': self.horizontalSlider_B2,
+        'B3': self.horizontalSlider_B3,
+        'CRaman': self.horizontalSlider_Craman,
+        'NRaman': self.horizontalSlider_Nraman,
+        'NHRaman': self.horizontalSlider_NHraman,
+        'Tau0': self.horizontalSlider_Tau0,
+        'DeltaE': self.horizontalSlider_DeltaE
+        }
 
-        self.RightPanel.insertWidget(0, Plot3D())
+        self.edit3D = {'Adir': self.lineEdit_Adir,
+        'Ndir': self.lineEdit_Ndir,
+        'B1': self.lineEdit_B1,
+        'B2': self.lineEdit_B2,
+        'B3': self.lineEdit_B3,
+        'CRaman': self.lineEdit_Craman,
+        'NRaman': self.lineEdit_Nraman,
+        'NHRaman': self.lineEdit_NHraman,
+        'Tau0': self.lineEdit_Tau0,
+        'DeltaE': self.lineEdit_DeltaE
+        }
+
+        self.check3D = {'Adir': self.checkBox_Adir,
+        'Ndir': self.checkBox_Ndir,
+        'B1': self.checkBox_B1,
+        'B2': self.checkBox_B2,
+        'B3': self.checkBox_B3,
+        'CRaman': self.checkBox_Craman,
+        'NRaman': self.checkBox_Nraman,
+        'NHRaman': self.checkBox_NHraman,
+        'Tau0': self.checkBox_Tau0,
+        'DeltaE': self.checkBox_DeltaE
+        }
+
+
+        self.RightPanel.insertWidget(0, self.plot3d)
         self.WorkingSpace.setCurrentWidget(self.fit2Dpage)
         self.Model.setRootIsDecorated(False)
         self.Model.setAlternatingRowColors(True)
@@ -79,10 +115,12 @@ class MainPage(Ui_MainWindow):
         self.pointPlotChi = PlotChi()
         self.table = QTableView()
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.ContiguousSelection)
-        width = self.window.frameGeometry().width() 
-        height = self.window.frameGeometry().height()
-        self.table.setMaximumHeight(height*0.75)
-        self.table.setMaximumWidth(width*0.75)
+        # width = self.window.frameGeometry().width() 
+        # height = self.window.frameGeometry().height()
+        # print(width)
+        # print(height)
+        self.table.setMaximumWidth(AppState.screen_size[0]*0.4)
+        self.table.setMaximumHeight(AppState.screen_size[1]*0.5)
 
         self.inspectPlots.addWidget(self.pointPlotChi1, 0, 0)
         self.inspectPlots.addWidget(self.pointPlotChi2, 1 ,0)
@@ -119,6 +157,7 @@ class MainPage(Ui_MainWindow):
         self.plotFr.refresh()
         self.plotChi.refresh()
         self.plotMain.refresh()
+
 
 
 

@@ -16,7 +16,6 @@ from .StandardItem import StandardItem
 from model.dataFrameModel import pandasModel
 
 from .FrequencyItems import *
-from .AppState import AppState
 
 
 class DataItem(StandardItem):
@@ -90,6 +89,7 @@ class DataItem(StandardItem):
         fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency")
         self.parent().parent().child(1).append(fit)
         fit.show()
+    
 
 
 class DataCollectionItem(StandardItem):
@@ -101,9 +101,10 @@ class DataCollectionItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        load = menu.addAction("Load from file", self.loadFromFile)
+        menu.addAction("Load from file", self.loadFromFile)
+        menu.addAction("Make fits from all laded data", self.make_all_fits)
 
-        action = menu.exec_(self.ui.window.mapToGlobal(position))
+        menu.exec_(self.ui.window.mapToGlobal(position))
 
 
     def loadFromFile(self):
@@ -203,3 +204,9 @@ class DataCollectionItem(StandardItem):
         self.appendRow(item)
         self.container[item.name] = item
         #self.ui.Model.resetHorizontalScrollMode()
+
+    def make_all_fits(self):
+        i = 0 
+        while(self.child(i) != None):
+            self.child(i).makeFit()
+            i += 1
