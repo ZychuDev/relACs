@@ -9,12 +9,9 @@ if __name__ == "__main__":
 
     app = QtWidgets.QApplication(sys.argv)
     screen = app.primaryScreen()
-    print('Screen: %s' % screen.name())
     size = screen.size()
     AppState.screen_size = (size.width(), size.height())
-    print('Size: %d x %d' % (size.width(), size.height()))
     rect = screen.availableGeometry()
-    print('Available: %d x %d' % (rect.width(), rect.height()))
     MainWindow = QtWidgets.QMainWindow()
     ui = MainPage(MainWindow)
 

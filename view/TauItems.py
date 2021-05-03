@@ -1,7 +1,7 @@
 from .StandardItem import StandardItem
 
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMenu
+from PyQt5.QtWidgets import QMenu, QInputDialog
 from .Plot3D import *
 
 import pandas as pd
@@ -25,15 +25,15 @@ class FitTauItem(StandardItem):
         'DeltaE': 0
         }
 
-        self.current = {'Adir': 0,
+        self.current = {'Adir': 1,
         'Ndir': 0,
-        'B1': 0,
-        'B2': 0,
-        'B3': 0,
+        'B1': 1,
+        'B2': 1,
+        'B3': 1,
         'CRaman': 0,
         'NRaman': 0,
         'NHRaman': 0,
-        'Tau0': 1,
+        'Tau0': 0.1,
         'DeltaE': 0
         }
 
@@ -41,20 +41,46 @@ class FitTauItem(StandardItem):
     def show(self):
         self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
 
-        self.ui.plot3d.change(self)
+        self.ui.plot3d.refresh()
+        self.ui.slice.refresh()
 
     def change(self):
         self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
 
-        self.ui.plot3D.change(self)
-        # self.ui.plot2.change()
+        self.ui.plot3d.change(self)
+        self.ui.slice.change(self)
         # self.ui.plotMain.change()
+    
+    def rename(self):
+        text, ok = QInputDialog.getText(self.ui.window, 'Renaming dataPoint', 'Enter new dataPoint name:')
+        names = self.parent().container
+        if ok:
+            if text in names:
+                print("Name already taken")
+                return
+
+            names.pop(self.name, None)
+
+            self.name = str(text)
+            names[self.name] = self
+            self.setText(self.name)
+
+    def remove(self):
+        self.parent().removeRow(self.index().row()) 
+
 
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Inspect", self.show)
+        menu.addAction("Rename", self.rename)
 
         menu.exec_(self.ui.window.mapToGlobal(position))
+
+    def double_click(self):
+        self.show()
+
+    def click(self):
+        self.show()
 
 
 class FitTauCollectionItem(StandardItem):
@@ -88,15 +114,24 @@ class FitTauCollectionItem(StandardItem):
 
             i += 1
 
+        if i == 0:
+            return
+            
         tau_item = FitTauItem(self.ui, txt='First')
         tau_item.points = points
-        unzipped = list(zip(*points))
-        tau_item.tau = unzipped[0]
-        tau_item.temp = unzipped[1]
-        tau_item.field = unzipped[2]
+        unzipped = pd.Series(list(zip(*points)))
+        tau_item.tau = pd.Series(list(unzipped[0]))
+        tau_item.temp = pd.Series(list(unzipped[1]))
+        tau_item.field = pd.Series(list(unzipped[2]))
 
-        #if self.append(tau_item) == True:
-        self.append(tau_item)
+        print('#########')
+        print(points)
+        print(tau_item.tau)
+        print(tau_item.tau.tolist() )
+        print('#########')
+
+        if self.append(tau_item) == True:
+            self.append(tau_item)
         tau_item.change()
 
     # def show(self):

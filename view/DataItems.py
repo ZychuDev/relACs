@@ -48,6 +48,7 @@ class DataItem(StandardItem):
         menu = QMenu()
         menu.addAction("Inspect data", self.show)
         menu.addAction("Rename", self.rename)
+        menu.addAction("Remove", self.remove)
         menu.addSeparator()
         menu.addAction("Make fit", self.makeFit)
         menu.exec_(self.ui.window.mapToGlobal(position))
@@ -70,6 +71,14 @@ class DataItem(StandardItem):
         for i in range(0,self.ui.table.model().rowCount()):
             self.ui.table.selectRow(i)
         
+    def double_click(self):
+        self.show()
+    
+    def click(self):
+        self.show()
+
+    def remove(self):
+        self.parent().removeRow(self.index().row()) 
 
     def rename(self):
         text, ok = QInputDialog.getText(self.ui.window, 'Renaming dataPoint', 'Enter new dataPoint name:')
@@ -148,6 +157,9 @@ class DataCollectionItem(StandardItem):
         data = data[DataItem.columnsHeadersInternal]
 
         molarMass = self.parent().molarMass
+        # probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:')
+        # if status != True:
+        #     return
         probeMass = 0.01 # TO DO:: value form dialog window
 
         data["ChiPrimeMol"] = data["ChiPrime"] * molarMass/probeMass

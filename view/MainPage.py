@@ -1,7 +1,6 @@
 from .Plots import *
 
 from .MainPageUI2 import *
-from .MainPageUI3 import *
 #from .Fit2D import Fit2D
 
 from .DataItems import *
@@ -29,11 +28,45 @@ class MainPage(Ui_MainWindow):
 
         
         self.window = window
-        #self.window.showMaximized()
+        self.WorkingSpace.setCurrentWidget(self.fit2Dpage)
+        self.Model.setRootIsDecorated(False)
+        self.Model.setAlternatingRowColors(True)
+        self.Model.setHeaderHidden(True)
+        
 
+        self.Model.doubleClicked.connect(self.double_click)
+        self.Model.clicked.connect(self.click)
+        
+
+        self.Model.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.Model.customContextMenuRequested.connect(self.showMenu)
+
+        self.treeModel = QStandardItemModel()
+
+
+        rootNode = self.treeModel.invisibleRootItem()
+
+        chlor = CompoundItem(self, "Chlor")
+        self.whole.compounds.append(chlor)
+
+        
+        rootNode.appendRow(self.whole)
+
+        self.Model.setModel(self.treeModel)
+        self.Model.expandAll()
+
+        """Workspace implementation"""
+        """fitTau"""
         self.plot3d = Plot3D()
-        self.plot3d.setMinimumSize(QtCore.QSize(AppState.screen_size[0]*0.4, 16777215))
+        # self.plot3d.setMinimumSize(QtCore.QSize(AppState.screen_size[0]*0.45, AppState.screen_size[1]*0.45))
         self.plot3d.setObjectName("plot3d")
+        self.RightPanel.insertWidget(0, self.plot3d)
+
+        self.slice = Slice()
+        # self.slice.setMinimumSize(QtCore.QSize(AppState.screen_size[0]*0.45, AppState.screen_size[1]*0.45))
+        self.slice.setObjectName('slice')
+        self.RightPanel.insertWidget(1, self.slice)
+
         self.slider3D = {'Adir': self.horizontalSlider_Adir,
         'Ndir': self.horizontalSlider_Ndir,
         'B1': self.horizontalSlider_B1,
@@ -70,37 +103,20 @@ class MainPage(Ui_MainWindow):
         'DeltaE': self.checkBox_DeltaE
         }
 
+        self.check3D_2 = {'Adir': self.checkBox_Adir_2,
+        'Ndir': self.checkBox_Ndir_2,
+        'B1': self.checkBox_B1_2,
+        'B2': self.checkBox_B2_2,
+        'B3': self.checkBox_B3_2,
+        'CRaman': self.checkBox_Craman_2,
+        'NRaman': self.checkBox_Nraman_2,
+        'NHRaman': self.checkBox_NHraman_2,
+        'Tau0': self.checkBox_Tau0_2,
+        'DeltaE': self.checkBox_DeltaE_2
+        }
 
-        self.RightPanel.insertWidget(0, self.plot3d)
-        self.WorkingSpace.setCurrentWidget(self.fit2Dpage)
-        self.Model.setRootIsDecorated(False)
-        self.Model.setAlternatingRowColors(True)
-        self.Model.setHeaderHidden(True)
-        
-
-        self.Model.doubleClicked.connect(self.getValue)
-        
-
-        self.Model.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.Model.customContextMenuRequested.connect(self.showMenu)
-
-        self.treeModel = QStandardItemModel()
-
-
-        rootNode = self.treeModel.invisibleRootItem()
-
-        chlor = CompoundItem(self, "Chlor")
-        self.whole.compounds.append(chlor)
-
-        
-        rootNode.appendRow(self.whole)
-
-        self.Model.setModel(self.treeModel)
-        self.Model.expandAll()
-
-        """Workspace implementation"""
-        
         """fit2dplot"""
+
         self.plotFr = plotFitChi()
         self.plotChi = plotFitChi2()
         self.plotMain = plotFitChi1()
@@ -119,20 +135,25 @@ class MainPage(Ui_MainWindow):
         # height = self.window.frameGeometry().height()
         # print(width)
         # print(height)
-        self.table.setMaximumWidth(AppState.screen_size[0]*0.4)
-        self.table.setMaximumHeight(AppState.screen_size[1]*0.5)
+        # self.table.setMaximumWidth(AppState.screen_size[0]*0.4)
+        # self.table.setMaximumHeight(AppState.screen_size[1]*0.5)
 
         self.inspectPlots.addWidget(self.pointPlotChi1, 0, 0)
         self.inspectPlots.addWidget(self.pointPlotChi2, 1 ,0)
         self.inspectPlots.addWidget(self.pointPlotChi, 0, 1)
         self.inspectPlots.addWidget(self.table, 1, 1)
 
-        
-        
+        self.inspectPlots.setRowStretch(0,1)
+        self.inspectPlots.setRowStretch(1,1)
+        self.inspectPlots.setColumnStretch(0,1)
+        self.inspectPlots.setColumnStretch(1,1)
 
 
-    def getValue(self, val):
-        self.treeModel.itemFromIndex(val).action()
+    def double_click(self, val):
+        self.treeModel.itemFromIndex(val).double_click()
+    
+    def click(self, val):
+        self.treeModel.itemFromIndex(val).click()
 
     def showMenu(self, position):
         index = self.Model.indexAt(position)

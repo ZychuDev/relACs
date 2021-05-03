@@ -12,5 +12,8 @@ class StandardItem(QStandardItem):
         self.setFont(fnt)
         self.setText(txt)
         #self.setIcon(jakasTam.png)
-    def action(self):
+    def double_click(self):
         print("No provided action for this item")
+
+    def click(self):
+        print("No provided action for single click")

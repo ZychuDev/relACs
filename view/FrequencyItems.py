@@ -27,6 +27,7 @@ class FitFrequencyItem(StandardItem):
         menu = QMenu()
         menu.addAction("Inspect fit", self.show)
         menu.addAction("Rename", self.rename)
+        menu.addAction("Remove", self.remove)
         
         menu.exec_(self.ui.window.mapToGlobal(position))
 
@@ -36,6 +37,15 @@ class FitFrequencyItem(StandardItem):
         self.ui.plotFr.change(self)
         self.ui.plotChi.change(self)
         self.ui.plotMain.change(self)
+
+    def double_click(self):
+        self.show()
+        
+    def click(self):
+        self.show()
+
+    def remove(self):
+        self.parent().removeRow(self.index().row())
 
     def rename(self):
         return

@@ -16,10 +16,9 @@ class CompoundCollectionItem(StandardItem):
     
     def showMenu(self, position):
         menu = QMenu()
-        new = menu.addAction("New", self.action)
-        action = menu.exec_(self.ui.window.mapToGlobal(position))
-        if action == new:
-            self.add()
+        menu.addAction("New", self.add)
+        menu.exec_(self.ui.window.mapToGlobal(position))
+
 
     def add(self):
         name, status = QtWidgets.QInputDialog.getText(self.ui.window, "Compund Creation",
@@ -29,7 +28,9 @@ class CompoundCollectionItem(StandardItem):
                 #TO DO: Ui information
                 print("Compound already exists choose other name or delete old one!")
                 return False #To DO throw exception
-            new = CompoundItem(self.ui, name)
+        molar_mass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Compund Creation', 'Enter molar mass:')
+        if status == True:
+            new = CompoundItem(self.ui, name, molarMass= molar_mass)
             self.appendRow(new)
             self.container[name] = new
 
