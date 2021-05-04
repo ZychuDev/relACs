@@ -5,7 +5,7 @@ class AppStateBase:
         self.columnsHeadersExternal = ["Temperature (K)","Magnetic Field (Oe)","AC X' (emu/Oe)","AC X'' (emu/Oe)","AC Frequency (Hz)"]
         self.epsTemp = 0.05
         self.epsField = 1
-        self.ranges ={'alpha':(0,1), 'beta':(0,1), 'tau':(-10,0), 'chiT':(0,10), 'chiS':(0,10),
+        self.ranges ={'alpha':(0,1), 'beta':(0,1), 'tau':(-10,0), 'chiT':(0,20), 'chiS':(0,20),
         'Adir': (-15,1),
         'Ndir': (0,8),
         'B1': (-2,11),
