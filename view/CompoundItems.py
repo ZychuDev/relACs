@@ -28,7 +28,7 @@ class CompoundCollectionItem(StandardItem):
                 #TO DO: Ui information
                 print("Compound already exists choose other name or delete old one!")
                 return False #To DO throw exception
-        molar_mass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Compund Creation', 'Enter molar mass:')
+        molar_mass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Compund Creation', 'Enter molar mass:', decimals=6)
         if status == True:
             new = CompoundItem(self.ui, name, molarMass= molar_mass)
             self.appendRow(new)

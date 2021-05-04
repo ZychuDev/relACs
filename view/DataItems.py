@@ -161,7 +161,7 @@ class DataCollectionItem(StandardItem):
         data = data[DataItem.columnsHeadersInternal]
 
         molarMass = self.parent().molarMass
-        probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:')
+        probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:', decimals=8)
         if status != True:
             return
         #probeMass = 0.01 # TO DO:: value form dialog window
