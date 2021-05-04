@@ -46,8 +46,8 @@ class MainPage(Ui_MainWindow):
 
         rootNode = self.treeModel.invisibleRootItem()
 
-        chlor = CompoundItem(self, "Chlor")
-        self.whole.compounds.append(chlor)
+        # chlor = CompoundItem(self, "Chlor")
+        # self.whole.compounds.append(chlor)
 
         
         rootNode.appendRow(self.whole)

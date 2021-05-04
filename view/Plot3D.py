@@ -234,7 +234,7 @@ class Slice(FigureCanvasQTAgg):
     def change(self, item):
         self.tau_item = item
         self.x_ax = item.temp
-        self.const = 0
+        self.const = item.field[0] #0
 
         self.refresh()
 
@@ -297,10 +297,10 @@ class Slice(FigureCanvasQTAgg):
         self.ax.plot(xx, np.log10(self.tau_item.tau), 'o')
 
         a = [1/t for t in a]
-        self.ax.plot(a, direct_y, '-', label ='Direct process')
-        self.ax.plot(a, QTM_y, '-', label='QTM')
-        self.ax.plot(a, Raman_y, '-', label='Raman')
-        self.ax.plot(a, Orbach_y, '-', label='Orbach')
+        self.ax.plot(a, direct_y, 'y--', label ='Direct process')
+        self.ax.plot(a, QTM_y, 'g--', label='QTM')
+        self.ax.plot(a, Raman_y, 'r--', label='Raman')
+        self.ax.plot(a, Orbach_y, 'm--', label='Orbach')
         
         self.ax.plot(a, yy, 'b-', label='Sum')
 

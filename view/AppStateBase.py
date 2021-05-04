@@ -18,8 +18,9 @@ class AppStateBase:
         'DeltaE': (0,3000)
         }
         self.log_params = ('Adir', 'B1', 'B2', 'B3', 'Tau0')
- 
+        self.resolution = 100
         self.sample_mass = 0.01
+        self.separator = ';'
     # def addModel(self, name):
     #     if name in self.models:
     #         print("Model already exists choose other name or delete old one!")

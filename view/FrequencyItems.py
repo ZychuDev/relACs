@@ -1,3 +1,4 @@
+from PyQt5 import QtWidgets
 from .StandardItem import StandardItem
 
 from PyQt5.QtGui import QColor
@@ -5,6 +6,7 @@ from PyQt5.QtWidgets import QMenu
 
 import pandas as pd
 import numpy as np
+
 
 class FitFrequencyItem(StandardItem):
     def __init__(self, mainPage, df, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
@@ -26,8 +28,10 @@ class FitFrequencyItem(StandardItem):
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Inspect fit", self.show)
+        menu.addAction("Save to file", self.save_to_file)
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
+
         
         menu.exec_(self.ui.window.mapToGlobal(position))
 
@@ -47,6 +51,51 @@ class FitFrequencyItem(StandardItem):
     def remove(self):
         self.parent().removeRow(self.index().row())
 
+    def save_to_file(self):
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+        try:
+            with  open(name[0] + '.csv', 'w') as f:
+                self.result().to_csv(f.name, index=False, sep=AppState.separator)
+        except Exception as e:
+            print(e)
+            return
+
+    def result(self):
+        df_param = pd.DataFrame([['T', self.temp], ['H', self.field]], columns=['Name', 'Value'])
+        for name in self.current:
+            row = {'Name': name, 'Value': self.current[name]}
+            df_param = df_param.append(row, ignore_index=True)
+
+
+        df_experimental = self.df[["Frequency", "ChiPrimeMol", "ChiBisMol"]]
+        df_experimental.reset_index(drop=True, inplace=True)
+
+        columns=["FrequencyModel", "ChiPrimeModel", "ChiBisModel"]
+        df_model = pd.DataFrame(columns=columns)
+        xx = np.linspace(self.df["Frequency"].min(),self.df["Frequency"].max(), AppState.resolution)
+        df_model[columns[0]] = pd.Series(xx)
+        yy = []
+        for x in xx:
+            yy.append(self.ui.plotFr.model(x, self.current['alpha'], self.current['beta'], self.current['tau'], self.current['chiT'], self.current['chiS']))
+
+        real = []
+        img = []
+        for c in yy:
+            real.append(c.real)
+            img.append(-c.imag)
+        df_model[columns[1]] = pd.Series(real)
+        df_model[columns[2]] = pd.Series(img)
+
+        tmp = pd.concat([df_param, df_experimental], axis=1)
+        df = pd.concat([tmp, df_model], axis=1)
+        return df
+
+
+
+
+
+
+
     def rename(self):
         return
 
@@ -62,6 +111,7 @@ class FitFrequencyCollectionItem(StandardItem):
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Make fit", self.makeFit)
+        menu.addAction("Save all to file", self.save_to_file)
 
         menu.exec_(self.ui.window.mapToGlobal(position))
 
@@ -75,3 +125,17 @@ class FitFrequencyCollectionItem(StandardItem):
 
         self.appendRow(item)
         self.container[item.name] = item
+        
+    def save_to_file(self):
+        df = pd.DataFrame()
+        i = 0
+        while(self.child(i) != None):
+            df = pd.concat([df, self.child(i).result()], axis=1)
+            i += 1
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+        try:
+            with  open(name[0] + '.csv', 'w') as f:
+                df.to_csv(f.name, index=False, sep= AppState.separator)
+        except Exception as e:
+            print(e)
+            return

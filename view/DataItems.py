@@ -39,6 +39,8 @@ class DataItem(StandardItem):
         length = len(df["Frequency"])
         df["Selected"] = pd.Series(np.zeros(length), index=df.index)
         result.df =df
+        result.temp = temp
+        result.field = field
         return result
 
     def action(self):
@@ -96,6 +98,8 @@ class DataItem(StandardItem):
 
     def makeFit(self):
         fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency")
+        fit.temp = self.temp
+        fit.field = self.field
         self.parent().parent().child(1).append(fit)
         fit.show()
     
@@ -118,18 +122,18 @@ class DataCollectionItem(StandardItem):
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file
-        # dlg = QtWidgets.QFileDialog()
-        # dlg.setFileMode(QFileDialog.AnyFile) #TMP
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QFileDialog.AnyFile) #TMP
 
-        # if dlg.exec_():
-        #     filenames = dlg.selectedFiles()
-        # else:
-        #     return
+        if dlg.exec_():
+            filenames = dlg.selectedFiles()
+        else:
+            return
 
-        # if len(filenames) != 1 :
-        #      return 
+        if len(filenames) != 1 :
+             return 
 
-        filepath =  "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat" #TMP filenames[0] #
+        filepath =   filenames[0] #"C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat" #TMP
         if not os.path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return
@@ -157,10 +161,10 @@ class DataCollectionItem(StandardItem):
         data = data[DataItem.columnsHeadersInternal]
 
         molarMass = self.parent().molarMass
-        # probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:')
-        # if status != True:
-        #     return
-        probeMass = 0.01 # TO DO:: value form dialog window
+        probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:')
+        if status != True:
+            return
+        #probeMass = 0.01 # TO DO:: value form dialog window
 
         data["ChiPrimeMol"] = data["ChiPrime"] * molarMass/probeMass
         data["ChiBisMol"] = data["ChiBis"] * molarMass/probeMass

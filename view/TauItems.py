@@ -2,6 +2,7 @@ from .StandardItem import StandardItem
 
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMenu, QInputDialog
+from PyQt5 import QtWidgets
 from .Plot3D import *
 
 import pandas as pd
@@ -73,8 +74,64 @@ class FitTauItem(StandardItem):
         menu = QMenu()
         menu.addAction("Inspect", self.show)
         menu.addAction("Rename", self.rename)
+        menu.addAction("Save to file", self.save_to_file)
 
         menu.exec_(self.ui.window.mapToGlobal(position))
+
+    def save_to_file(self):
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+        try:
+            with  open(name[0] + '.csv', 'w') as f:
+                self.result().to_csv(f.name, index=False, sep=AppState.separator)
+        except Exception as e:
+            print(e)
+            return
+
+    def result(self):
+        df_param = pd.DataFrame(columns=['Name', 'Value'])
+        for p in self.current:
+            row = {'Name': p, 'Value':self.current[p]}
+            df_param = df_param.append(row, ignore_index=True)
+
+        a = pd.DataFrame(self.temp).rename(columns={0:'T'})
+        b = pd.DataFrame(self.field).rename(columns={0:'H'})
+        c = pd.DataFrame(self.tau).rename(columns={0:'Tau'})
+        df_experimental = pd.concat([a,b,c], axis=1)
+
+        x = np.linspace(self.temp.min(),self.temp.max(),50)
+        y = np.linspace(self.field.min(),self.field.max(), 50)
+        X, Y = np.meshgrid(x,y)
+
+        a = list(self.current.values())
+        Z = 1/self.ui.plot3d.model(X,Y,a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9])
+
+        temp = []
+        for x in X:
+            for t in x:
+                temp.append(t)
+
+        field = []
+        for y in Y:
+            for h in y:
+                field.append(h)
+
+        tau = []
+        for z in Z:
+            for v in z:
+                tau.append(v)
+
+        a=pd.DataFrame(pd.Series(temp)).rename(columns={0:'TempModel'})
+        b=pd.DataFrame(pd.Series(field)).rename(columns={0:'FieldModel'})
+        c=pd.DataFrame(pd.Series(tau)).rename(columns={0:'TauModel'})
+        df_model = pd.concat([a,b,c], axis=1)
+
+        return pd.concat([df_param, df_experimental, df_model], axis=1)
+
+
+
+
+
+
 
     def double_click(self):
         self.show()
