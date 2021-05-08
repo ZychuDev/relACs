@@ -14,6 +14,8 @@ class FitTauItem(StandardItem):
         self.ui = mainPage
         self.name = txt
 
+        self.error = [0,0,0,0,0]
+
         self.previous = {'Adir': 1,
         'Ndir': 0,
         'B1': 1,
@@ -88,9 +90,11 @@ class FitTauItem(StandardItem):
             return
 
     def result(self):
-        df_param = pd.DataFrame(columns=['Name', 'Value'])
+        df_param = pd.DataFrame(columns=['Name', 'Value','Error'])
+        i = 0
         for p in self.current:
-            row = {'Name': p, 'Value':self.current[p]}
+            row = {'Name': p, 'Value':self.current[p], 'Error':self.error[i]}
+            i += 1
             df_param = df_param.append(row, ignore_index=True)
 
         a = pd.DataFrame(self.temp).rename(columns={0:'T'})

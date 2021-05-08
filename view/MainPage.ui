@@ -555,7 +555,7 @@
                 <item>
                  <widget class="QCheckBox" name="checkBox_Adir_2">
                   <property name="text">
-                   <string>CheckBox</string>
+                   <string>Block on 0</string>
                   </property>
                  </widget>
                 </item>

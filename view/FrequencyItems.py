@@ -16,6 +16,7 @@ class FitFrequencyItem(StandardItem):
         self.previous = {"alpha": 1.0, "beta": 1.0, "tau" : 1.0, "chiT" : 1.0, "chiS" : 1.0}
         self.current = {"alpha": 1.0, "beta": 1.0, "tau" : -1.0, "chiT" : 1.0, "chiS" : 1.0}
 
+        self.error = [0,0,0,0,0]
         self.name = txt
         self.df = df.copy()
         try:
@@ -61,9 +62,11 @@ class FitFrequencyItem(StandardItem):
             return
 
     def result(self):
-        df_param = pd.DataFrame([['T', self.temp], ['H', self.field]], columns=['Name', 'Value'])
+        df_param = pd.DataFrame([['T', self.temp, 0], ['H', self.field, 0]], columns=['Name', 'Value','Error'])
+        i = 0
         for name in self.current:
-            row = {'Name': name, 'Value': self.current[name]}
+            row = {'Name': name, 'Value': self.current[name], 'Error': self.error[i]}
+            i += 1
             df_param = df_param.append(row, ignore_index=True)
 
 
@@ -76,13 +79,15 @@ class FitFrequencyItem(StandardItem):
         df_model[columns[0]] = pd.Series(xx)
         yy = []
         for x in xx:
-            yy.append(self.ui.plotFr.model(x, self.current['alpha'], self.current['beta'], self.current['tau'], self.current['chiT'], self.current['chiS']))
-
+            yy.append(self.ui.plotFr.model(np.log10(x), self.current['alpha'], self.current['beta'], self.current['tau'], self.current['chiT'], self.current['chiS']))
+        print('yy len:', len(yy), 'yy:', yy)
         real = []
         img = []
         for c in yy:
             real.append(c.real)
             img.append(-c.imag)
+        print('real: ', real)
+        print('img:', img)
         df_model[columns[1]] = pd.Series(real)
         df_model[columns[2]] = pd.Series(img)
 

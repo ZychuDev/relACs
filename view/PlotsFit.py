@@ -8,6 +8,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from numba import jit
 from scipy.optimize import least_squares
 from scipy.interpolate import interp1d
+from scipy import linalg
 
 from .Validator import Validator
 
@@ -207,8 +208,8 @@ class plotFitChi(FigureCanvasQTAgg):
 
     def costF(self, p):
         rest = self.df.loc[self.df['Show']==True]
-        dif1 = np.abs(self.model(rest["FrequencyLog"].values, p[0], p[1], p[2], p[3], p[4]).real - rest['ChiPrimeMol'])
-        dif2 = np.abs(-self.model(rest["FrequencyLog"].values, p[0], p[1], p[2], p[3], p[4]).imag - rest['ChiBisMol'])
+        dif1 = np.power(self.model(rest["FrequencyLog"].values, p[0], p[1], p[2], p[3], p[4]).real - rest['ChiPrimeMol'], 2)
+        dif2 = np.power(-self.model(rest["FrequencyLog"].values, p[0], p[1], p[2], p[3], p[4]).imag - rest['ChiBisMol'], 2)
         return  dif1 + dif2
 
 
@@ -235,6 +236,7 @@ class plotFitChi(FigureCanvasQTAgg):
             b[1][0] = min(self.fitItem.current["alpha"] + eps, b[1][0])
 
         res = least_squares(self.costF, tuple(self.fitItem.current.values()), bounds=b)
+
         i = 0
         for key in self.fitItem.current.keys():
             self.fitItem.current[key] = res.x[i]
@@ -247,6 +249,17 @@ class plotFitChi(FigureCanvasQTAgg):
         ui.lineEdit_ChiS.setText(str(round(self.fitItem.current["chiS"],6)))
 
         self.value_edited()
+        U, s, Vh = linalg.svd(res.jac, full_matrices=False)
+        tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
+        w = s > tol
+        cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
+
+        chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
+        cov *= chi2dof
+
+        perr = np.sqrt(np.diag(cov))     # 1sigma uncertainty on fitted parameters
+
+        self.fitItem.error = perr
 
 
 

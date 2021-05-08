@@ -12,6 +12,7 @@ from .Validator import Validator
 from numba import jit
 from scipy.optimize._lsq.least_squares import least_squares
 from scipy.interpolate import interp1d
+from scipy import linalg
 
 from functools import partial
 
@@ -52,8 +53,8 @@ class Plot3D(FigureCanvasQTAgg):
         + Tau0 *np.exp(-DeltaE/(temp))
 
     def cost_function(self, p):
-        return np.abs(self.model(self.tau_item.temp, self.tau_item.field,
-        p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]) - (1/self.tau_item.tau))
+        return np.power(self.model(self.tau_item.temp, self.tau_item.field,
+        p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]) - (1/self.tau_item.tau), 2)
 
     def make_auto_fit(self):
         np.seterr(divide = 'ignore') 
@@ -104,6 +105,7 @@ class Plot3D(FigureCanvasQTAgg):
         
 
         res = least_squares(self.cost_function, tuple(self.tau_item.current.values()), bounds = b)
+        J = res.jac
         i = 0
         for key in self.tau_item.current:
             self.tau_item.current[key] = res.x[i]
@@ -123,7 +125,17 @@ class Plot3D(FigureCanvasQTAgg):
             # if ui.blockedOnZero[k].isChecked() == False:
             self.value_edited(k)
 
-        print(self.tau_item.current)
+        U, s, Vh = linalg.svd(res.jac, full_matrices=False)
+        tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
+        w = s > tol
+        cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
+
+        chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
+        cov *= chi2dof
+        
+        perr = np.sqrt(np.diag(cov))
+        self.tau_item.error = perr
+        print(perr)
 
 
     def value_edited(self, k):
