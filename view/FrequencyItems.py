@@ -75,7 +75,8 @@ class FitFrequencyItem(StandardItem):
 
         columns=["FrequencyModel", "ChiPrimeModel", "ChiBisModel"]
         df_model = pd.DataFrame(columns=columns)
-        xx = np.linspace(self.df["Frequency"].min(),self.df["Frequency"].max(), AppState.resolution)
+        xx = np.logspace(np.log10(self.df["Frequency"].min()),np.log10(self.df["Frequency"].max()), AppState.resolution)
+
         df_model[columns[0]] = pd.Series(xx)
         yy = []
         for x in xx:

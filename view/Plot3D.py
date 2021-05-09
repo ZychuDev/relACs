@@ -99,7 +99,7 @@ class Plot3D(FigureCanvasQTAgg):
             if self.tau_item.ui.check3D_2[k].isChecked():
                 self.tau_item.current[k] = 0
                 b[0][i] = 0
-                b[1][i] = 1e-30
+                b[1][i] = 1e-64
             i += 1
 
         
