@@ -42,7 +42,7 @@ class Plot3D(FigureCanvasQTAgg):
         X, Y = np.meshgrid(x,y)
         self.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1)
         t_invert = [1/t for t in self.tau_item.temp]
-        self.axes.scatter(t_invert, self.tau_item.field, np.log10(self.tau_item.tau.tolist()), marker='o')
+        self.axes.scatter(t_invert, self.tau_item.field, np.log10(self.tau_item.tau.tolist()), marker='o', color='r')
         self.draw()
 
 
@@ -85,13 +85,15 @@ class Plot3D(FigureCanvasQTAgg):
         
         print(self.tau_item.current[k])
         print(b)
-        eps = 0.000000001   
+        #eps = 0.000000001 
+        fraction = 100000000  
 
         i = 0
         for k in self.tau_item.ui.check3D:
+            print('%',k,'%')
             if self.tau_item.ui.check3D[k].isChecked():
-                b[0][i] = max(self.tau_item.current[k] - eps, b[0][i])
-                b[1][i] = min(self.tau_item.current[k] + eps, b[1][i])
+                b[0][i] = max(self.tau_item.current[k] - self.tau_item.current[k]/fraction, b[0][i])
+                b[1][i] = min(self.tau_item.current[k] + self.tau_item.current[k]/fraction, b[1][i])
             i += 1
 
         i = 0
