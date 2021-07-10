@@ -122,18 +122,18 @@ class DataCollectionItem(StandardItem):
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file
-        dlg = QtWidgets.QFileDialog()
-        dlg.setFileMode(QFileDialog.AnyFile) #TMP
+        #dlg = QtWidgets.QFileDialog()
+        #dlg.setFileMode(QFileDialog.AnyFile) #TMP
 
-        if dlg.exec_():
-            filenames = dlg.selectedFiles()
-        else:
-            return
+        #if dlg.exec_():
+        #    filenames = dlg.selectedFiles()
+        #else:
+        #    return
 
-        if len(filenames) != 1 :
-             return 
+        #if len(filenames) != 1 :
+        #     return 
 
-        filepath =   filenames[0] #"C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat" #TMP
+        filepath = "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat"  #filenames[0]  #TMP
         if not os.path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return
@@ -161,10 +161,10 @@ class DataCollectionItem(StandardItem):
         data = data[DataItem.columnsHeadersInternal]
 
         molarMass = self.parent().molarMass
-        probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:', decimals=8)
-        if status != True:
-            return
-        #probeMass = 0.01 # TO DO:: value form dialog window
+        #probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:', decimals=8, min=0.0)
+        #if status != True:
+         #   return
+        probeMass = 0.01 # TO DO:: value form dialog window
 
         data["ChiPrimeMol"] = data["ChiPrime"] * molarMass/probeMass
         data["ChiBisMol"] = data["ChiBis"] * molarMass/probeMass
@@ -182,6 +182,8 @@ class DataCollectionItem(StandardItem):
         for x in fields:
             for y in x:
                 self.append(DataItem.dfToDataItem(self.ui, y, sufix))
+
+        self.make_all_fits()# TMP
 
         
 

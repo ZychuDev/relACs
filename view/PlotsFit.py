@@ -51,6 +51,9 @@ class plotFitChi(FigureCanvasQTAgg):
                 self.fitItem.ui.horizontalSlider_ChiS.valueChanged.disconnect()
                 self.fitItem.ui.horizontalSlider_ChiT.valueChanged.disconnect()
                 self.fitItem.ui.pushButtonFit.clicked.disconnect()
+                self.fitItem.ui.pushButtonSave.clicked.disconnect()
+                self.fitItem.ui.pushButtonNext.clicked.disconnect()
+                self.fitItem.ui.pushButtonPrevious.clicked.disconnect()
 
                 self.fitItem.ui.lineEdit_Alpha.editingFinished.disconnect()
                 self.fitItem.ui.lineEdit_Beta.editingFinished.disconnect()
@@ -67,11 +70,15 @@ class plotFitChi(FigureCanvasQTAgg):
         self.fitItem.ui.horizontalSlider_ChiS.valueChanged.connect(self.value_changed_chiS)
         self.fitItem.ui.horizontalSlider_ChiT.valueChanged.connect(self.value_changed_chiT)
         self.fitItem.ui.pushButtonFit.clicked.connect(self.makeAutoFit)
+        self.fitItem.ui.pushButtonSave.clicked.connect(self.saveFit)
+        self.fitItem.ui.pushButtonNext.clicked.connect(self.next)
+        self.fitItem.ui.pushButtonPrevious.clicked.connect(self.previous)
         self.fitItem.ui.lineEdit_Alpha.editingFinished.connect(self.value_edited)
         self.fitItem.ui.lineEdit_Beta.editingFinished.connect(self.value_edited)
         self.fitItem.ui.lineEdit_Tau.editingFinished.connect(self.value_edited)
         self.fitItem.ui.lineEdit_ChiT.editingFinished.connect(self.value_edited)
         self.fitItem.ui.lineEdit_ChiS.editingFinished.connect(self.value_edited)
+
 
 
     def refresh(self):
@@ -95,12 +102,20 @@ class plotFitChi(FigureCanvasQTAgg):
             min += step
 
         plotFitChi.yy = []
+        
+        plotFitChi.yySaved = []
         for x in plotFitChi.domain:
             plotFitChi.yy.append(self.model(x, alpha = self.fitItem.current["alpha"]
-        , beta = self.fitItem.current["beta"]
-        , tau = self.fitItem.current["tau"]
-        , chiT = self.fitItem.current["chiT"]
-        , chiS = self.fitItem.current["chiS"] ))
+                , beta = self.fitItem.current["beta"]
+                , tau = self.fitItem.current["tau"]
+                , chiT = self.fitItem.current["chiT"]
+                , chiS = self.fitItem.current["chiS"] ))
+
+            plotFitChi.yySaved.append(self.model(x, alpha = self.fitItem.previous["alpha"]
+                , beta = self.fitItem.previous["beta"]
+                , tau = self.fitItem.previous["tau"]
+                , chiT = self.fitItem.previous["chiT"]
+                , chiS = self.fitItem.previous["chiS"] ))
 
         plotFitChi.real = []
         plotFitChi.img = []
@@ -108,7 +123,16 @@ class plotFitChi(FigureCanvasQTAgg):
             plotFitChi.real.append(c.real)
             plotFitChi.img.append(-c.imag)
 
-        self.ax.plot(plotFitChi.real, plotFitChi.img, "-")
+        plotFitChi.realSaved = []
+        plotFitChi.imgSaved = []
+        for c in plotFitChi.yySaved:
+            plotFitChi.realSaved.append(c.real)
+            plotFitChi.imgSaved.append(-c.imag)
+
+        
+        self.ax.plot(plotFitChi.real, plotFitChi.img, "-", color="blue")
+        if self.fitItem.wasSaved: 
+            self.ax.plot(plotFitChi.realSaved, plotFitChi.imgSaved, "-", color="red" )
 
         self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),fancybox=True, shadow=True, ncol=3)
         self.draw()
@@ -261,6 +285,21 @@ class plotFitChi(FigureCanvasQTAgg):
 
         self.fitItem.error = perr
 
+    def saveFit(self):
+        self.fitItem.wasSaved = True
+        for key in self.fitItem.ui.editFit2D:
+            self.fitItem.previous[key] = self.fitItem.current[key]
+
+        self.fitItem.show()
+
+    def next(self):
+        p = self.fitItem.parent()
+        p.child((self.fitItem.row() + 1) % p.rowCount(), 0).changePage()
+
+    def previous(self):
+        p = self.fitItem.parent()
+        p.child((self.fitItem.row() - 1) % p.rowCount(), 0).changePage()
+
 
 
 
@@ -287,7 +326,9 @@ class plotFitChi1(plotFitChi):
 
         self.ax.plot( shown["FrequencyLog"].values, shown["ChiPrimeMol"].values, "o", label = "Experimental data", picker=15)
         self.ax.plot( hiden["FrequencyLog"].values, hiden["ChiPrimeMol"].values, "o", label = "Hiden Experimental data", picker=15)
-        self.ax.plot(plotFitChi.domain, plotFitChi.real, '-')
+        self.ax.plot(plotFitChi.domain, plotFitChi.real, '-', color="blue")
+        if self.fitItem.wasSaved: 
+            self.ax.plot(plotFitChi.domain, plotFitChi.realSaved, '-', color="red")
         self.draw()
     
     def valueChanged(self):
@@ -318,7 +359,9 @@ class plotFitChi2(plotFitChi):
 
         self.ax.plot( shown["FrequencyLog"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15)
         self.ax.plot( hiden["FrequencyLog"].values, hiden["ChiBisMol"].values, "o", label = "Hiden Experimental data", picker=15)
-        self.ax.plot(plotFitChi.domain, plotFitChi.img, '-')
+        self.ax.plot(plotFitChi.domain, plotFitChi.img, '-', color="blue")
+        if self.fitItem.wasSaved: 
+            self.ax.plot(plotFitChi.domain, plotFitChi.imgSaved, '-', color="red")
         self.draw()
 
     def valueChanged(self):

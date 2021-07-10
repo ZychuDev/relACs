@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1686</width>
-    <height>1067</height>
+    <width>1571</width>
+    <height>1058</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -114,7 +114,7 @@
          </size>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="fit2Dpage">
          <property name="sizePolicy">
@@ -246,6 +246,9 @@
                        <height>16777215</height>
                       </size>
                      </property>
+                     <property name="text">
+                      <string>2.0</string>
+                     </property>
                     </widget>
                    </item>
                    <item>
@@ -298,6 +301,9 @@
                        <width>100</width>
                        <height>16777215</height>
                       </size>
+                     </property>
+                     <property name="text">
+                      <string>2.0</string>
                      </property>
                     </widget>
                    </item>
@@ -352,6 +358,9 @@
                        <height>16777215</height>
                       </size>
                      </property>
+                     <property name="text">
+                      <string>0.1</string>
+                     </property>
                     </widget>
                    </item>
                    <item>
@@ -404,6 +413,9 @@
                        <width>100</width>
                        <height>16777215</height>
                       </size>
+                     </property>
+                     <property name="text">
+                      <string>-1.0</string>
                      </property>
                     </widget>
                    </item>
@@ -458,6 +470,9 @@
                        <height>16777215</height>
                       </size>
                      </property>
+                     <property name="text">
+                      <string>0.1</string>
+                     </property>
                     </widget>
                    </item>
                    <item>
@@ -476,7 +491,7 @@
              </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
+             <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,1,1,1,1">
               <item>
                <widget class="QPushButton" name="pushButtonFit">
                 <property name="text">
@@ -497,6 +512,37 @@
                  <string>Save</string>
                 </property>
                </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxRemember">
+                <property name="text">
+                 <string>Remember parameters from the previous curve</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,0">
+                <property name="sizeConstraint">
+                 <enum>QLayout::SetMinimumSize</enum>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="pushButtonPrevious">
+                  <property name="text">
+                   <string>&lt;</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButtonNext">
+                  <property name="text">
+                   <string>&gt;</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </item>
@@ -1175,8 +1221,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1686</width>
-     <height>21</height>
+     <width>1571</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

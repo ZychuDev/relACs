@@ -13,8 +13,9 @@ class FitFrequencyItem(StandardItem):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
 
-        self.previous = {"alpha": 1.0, "beta": 1.0, "tau" : 1.0, "chiT" : 1.0, "chiS" : 1.0}
-        self.current = {"alpha": 1.0, "beta": 1.0, "tau" : -1.0, "chiT" : 1.0, "chiS" : 1.0}
+        self.wasSaved = False
+        self.previous = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 2.0, "chiS" : 2.0}
+        self.current = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 2.0, "chiS" : 2.0}
 
         self.error = [0,0,0,0,0]
         self.name = txt
@@ -28,7 +29,7 @@ class FitFrequencyItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        menu.addAction("Inspect fit", self.show)
+        menu.addAction("Inspect fit", self.changePage)
         menu.addAction("Save to file", self.save_to_file)
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
@@ -37,14 +38,35 @@ class FitFrequencyItem(StandardItem):
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def show(self):
+        for key in self.ui.editFit2D:
+            self.current[key] = float(self.ui.editFit2D[key].text())
+
         self.ui.WorkingSpace.setCurrentWidget(self.ui.fit2Dpage)
 
         self.ui.plotFr.change(self)
         self.ui.plotChi.change(self)
         self.ui.plotMain.change(self)
 
-    def double_click(self):
+        
+
+    def changePage(self):
+        editFit2D = self.ui.editFit2D
+ 
+
+        if not self.ui.checkBoxRemember.checkState():
+            for key in editFit2D:
+                editFit2D[key].setText(str(self.previous[key]))
+
+            self.ui.plotFr.value_edited()
+
+
+
+            
         self.show()
+
+
+    def double_click(self):
+        self.changePage()
         
     def click(self):
         self.show()
@@ -64,8 +86,8 @@ class FitFrequencyItem(StandardItem):
     def result(self):
         df_param = pd.DataFrame([['T', self.temp, 0], ['H', self.field, 0]], columns=['Name', 'Value','Error'])
         i = 0
-        for name in self.current:
-            row = {'Name': name, 'Value': self.current[name], 'Error': self.error[i]}
+        for name in self.previous:
+            row = {'Name': name, 'Value': self.previous[name], 'Error': self.error[i]}
             i += 1
             df_param = df_param.append(row, ignore_index=True)
 
@@ -80,7 +102,7 @@ class FitFrequencyItem(StandardItem):
         df_model[columns[0]] = pd.Series(xx)
         yy = []
         for x in xx:
-            yy.append(self.ui.plotFr.model(np.log10(x), self.current['alpha'], self.current['beta'], self.current['tau'], self.current['chiT'], self.current['chiS']))
+            yy.append(self.ui.plotFr.model(np.log10(x), self.previous['alpha'], self.previous['beta'], self.previous['tau'], self.previous['chiT'], self.previous['chiS']))
         print('yy len:', len(yy), 'yy:', yy)
         real = []
         img = []

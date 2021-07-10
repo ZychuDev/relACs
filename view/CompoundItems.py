@@ -21,18 +21,20 @@ class CompoundCollectionItem(StandardItem):
 
 
     def add(self):
-        name, status = QtWidgets.QInputDialog.getText(self.ui.window, "Compund Creation",
-        "Enter name for new compound:")
+        #name, status = QtWidgets.QInputDialog.getText(self.ui.window, "Compund Creation",
+        #"Enter name for new compound:")
+        name = "AAA"
+        status =True
         if status == True:
             if name in self.container:
                 #TO DO: Ui information
                 print("Compound already exists choose other name or delete old one!")
                 return False #To DO throw exception
-        molar_mass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Compund Creation', 'Enter molar mass:', decimals=6)
-        if status == True:
-            new = CompoundItem(self.ui, name, molarMass= molar_mass)
-            self.appendRow(new)
-            self.container[name] = new
+        #molar_mass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Compund Creation', 'Enter molar mass:', decimals=6, min = 0.0)
+        #if status == True:
+        new = CompoundItem(self.ui, name, molarMass= 1000) # molar_mass)
+        self.appendRow(new)
+        self.container[name] = new
 
     def append(self, compound):
         if compound.name in self.container:

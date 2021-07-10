@@ -21,6 +21,8 @@ class AppStateBase:
         self.resolution = 125
         self.sample_mass = 0.01
         self.separator = ';'
+
+        
     # def addModel(self, name):
     #     if name in self.models:
     #         print("Model already exists choose other name or delete old one!")

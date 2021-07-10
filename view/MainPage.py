@@ -118,12 +118,19 @@ class MainPage(Ui_MainWindow):
         """fit2dplot"""
 
         self.plotFr = plotFitChi()
-        self.plotChi = plotFitChi2()
-        self.plotMain = plotFitChi1()
+        self.plotChi = plotFitChi1()
+        self.plotMain = plotFitChi2()
         
         self.UpperPlots.insertWidget(0, self.plotFr)
         self.UpperPlots.insertWidget(1, self.plotChi)
         self.MainPlot.insertWidget(0, self.plotMain)
+
+        self.editFit2D = { "alpha": self.lineEdit_Alpha,
+         "beta": self.lineEdit_Beta,
+         "tau" : self.lineEdit_Tau,
+         "chiT" : self.lineEdit_ChiT,
+         "chiS" : self.lineEdit_ChiS
+        }
 
         """dataInspect"""
         self.pointPlotChi1 = PlotChi1()
