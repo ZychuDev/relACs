@@ -34,6 +34,7 @@ class CompoundCollectionItem(StandardItem):
         #if status == True:
         new = CompoundItem(self.ui, name, molarMass= 1000) # molar_mass)
         self.appendRow(new)
+        self.ui.TModel.expandAll()
         self.container[name] = new
 
     def append(self, compound):
@@ -42,6 +43,7 @@ class CompoundCollectionItem(StandardItem):
             print("Compound already exists choose other name or delete old one!")
             return False #To DO throw exception
         self.appendRow(compound)
+        self.ui.TModel.expandAll()
         self.container[compound.name] = compound
 
                 
@@ -56,15 +58,18 @@ class CompoundItem(StandardItem):
         self.molarMass = molarMass #TO DO: implement dialog box option for it
 
         self.data = DataCollectionItem(self.ui, 'Data')
-        self.FrequencyFits = FitFrequencyCollectionItem(self.ui, 'FrequencyFits(2D)')
+        self.FrequencyFits = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Single Relaxation')
+        self.FrequencyFits2 = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Double Relaxations')
         self.TauFits = FitTauCollectionItem(self.ui, 'TauFits(3D)')
 
         self.appendRow(self.data)
         self.appendRow(self.FrequencyFits)
+        self.appendRow(self.FrequencyFits2)
         self.appendRow(self.TauFits)
 
     def addTo(self, collection):
         collection.appendRow(self)
+        
 
     def showMenu(self, position):
         pass
@@ -78,10 +83,9 @@ class RootItem(StandardItem):
         self.ui = mainPage
 
         self.compounds = CompoundCollectionItem(self.ui, "Compounds")
-        self.models = ModelCollectionItem(self.ui, "Models")
-
+        
         self.appendRow(self.compounds)
-        self.appendRow(self.models)
+        
 
     def showMenu(self, position):
         return

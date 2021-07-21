@@ -11,6 +11,7 @@ from .PlotsFit import *
 from .Plot3D import *
 
 from PyQt5.QtGui import QStandardItemModel
+from PyQt5.QtWidgets import QHeaderView
 from model.dataFrameModel import pandasModel
 import sys
 import os
@@ -29,17 +30,21 @@ class MainPage(Ui_MainWindow):
         
         self.window = window
         self.WorkingSpace.setCurrentWidget(self.fit2Dpage)
-        self.Model.setRootIsDecorated(False)
-        self.Model.setAlternatingRowColors(True)
-        self.Model.setHeaderHidden(True)
+        self.TModel.setRootIsDecorated(False)
+        self.TModel.setAlternatingRowColors(True)
+        self.TModel.setHeaderHidden(True)
+        
+        #self.TModel.setAnimated(True)
+
+        self.TModel.doubleClicked.connect(self.double_click)
+        self.TModel.clicked.connect(self.click)
         
 
-        self.Model.doubleClicked.connect(self.double_click)
-        self.Model.clicked.connect(self.click)
-        
+        self.TModel.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.TModel.customContextMenuRequested.connect(self.showMenu)
 
-        self.Model.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.Model.customContextMenuRequested.connect(self.showMenu)
+    
+        # self.TModel.activated.connect(self.resize_model)
 
         self.treeModel = QStandardItemModel()
 
@@ -51,9 +56,15 @@ class MainPage(Ui_MainWindow):
 
         
         rootNode.appendRow(self.whole)
-
-        self.Model.setModel(self.treeModel)
-        self.Model.expandAll()
+        #rootNode.appendColumn([RootItem(self, '')])
+        
+        self.TModel.setModel(self.treeModel)
+        self.TModel.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        
+        
+        
+        
+        self.TModel.expandAll()
 
         """Workspace implementation"""
         """fitTau"""
@@ -132,12 +143,21 @@ class MainPage(Ui_MainWindow):
          "chiS" : self.lineEdit_ChiS
         }
 
+        self.sliderFit2D = {"alpha": self.horizontalSlider_Alpha,
+         "beta": self.horizontalSlider_Beta,
+         "tau" : self.horizontalSlider_Tau,
+         "chiT" : self.horizontalSlider_ChiT,
+         "chiS" : self.horizontalSlider_ChiS
+        }
+
         """dataInspect"""
         self.pointPlotChi1 = PlotChi1()
         self.pointPlotChi2 = PlotChi2()
         self.pointPlotChi = PlotChi()
         self.table = QTableView()
-        self.table.setSelectionMode(QAbstractItemView.SelectionMode.ContiguousSelection)
+
+        #self.table.setSelectionMode(QAbstractItemView.SelectionMode.ContiguousSelection)
+
         # width = self.window.frameGeometry().width() 
         # height = self.window.frameGeometry().height()
         # print(width)
@@ -163,7 +183,7 @@ class MainPage(Ui_MainWindow):
         self.treeModel.itemFromIndex(val).click()
 
     def showMenu(self, position):
-        index = self.Model.indexAt(position)
+        index = self.TModel.indexAt(position)
         self.treeModel.itemFromIndex(index).showMenu(position)
 
     def nextWidget(self):
@@ -185,6 +205,9 @@ class MainPage(Ui_MainWindow):
         self.plotFr.refresh()
         self.plotChi.refresh()
         self.plotMain.refresh()
+
+    # def resize_model(self):
+    #     self.TModel.resizeColumnToContents(0)
 
 
 

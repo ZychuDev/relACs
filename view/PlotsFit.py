@@ -1,8 +1,13 @@
 from numba.core.types.scalars import Float, Integer
 from view.AppStateBase import *
+
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
+
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+from matplotlib.ticker import LinearLocator, AutoMinorLocator
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 from numba import jit
@@ -12,17 +17,62 @@ from scipy import linalg
 
 from .Validator import Validator
 
+class Curve():
+    def __init__(self):
+        self.yy = []
+        self.real = []
+        self.img = []
+
+        self.yy_saved = []
+        self.real_saved = []
+        self.img_saved = []
+
+    def __radd__(self, other):
+        if other == 0:
+            return self
+        else:
+            return self.__add__(other)
+
+    def __add__(self, other):
+        "Adding to curves all fileds should be lists of the same length"
+        result = Curve()
+        result_vars = vars(result)
+        other_vars = vars(other)
+
+        for key, val in vars(self).items():
+            #diffrent length allowed version
+            # tmp = other_vars[key][:] #shallow copy
+            # size_diff = len(val) - len(other_vars[key])
+            # if size_diff != 0:
+            
+            #     zero_padding = [0] * abs(size_diff)
+            #     if size_diff < 0:
+            #         val = val + zero_padding
+            #     else:
+            #         tmp = other_vars[key] + zero_padding
+
+            # result_vars[key] = [sum(x) for x in zip(val, tmp)]
+            result_vars[key] = [sum(x) for x in zip(val, other_vars[key])]
+
+        return result
+
 class plotFitChi(FigureCanvasQTAgg):
-    yy = []
-    real = []
-    img = []
+    curves = [Curve()]
     domain = []
+    curves_sum = []
+    curves_sum_saved = []
 
     nr_of_connections = 0
+
+    nr_of_relaxation = 0
+
     def __init__(self):
-        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=100)
+        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=80)
+        self.fig.patch.set_facecolor("#f0f0f0")
         super().__init__(self.fig)
         self.xStr = "ChiPrimeMol"
+
+        self.colors_names = ["tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink"]
 
     def change(self, fitFrequecyItem):
         self.fitItem = fitFrequecyItem
@@ -43,56 +93,96 @@ class plotFitChi(FigureCanvasQTAgg):
         v = Validator(self.fitItem, 'chiS', self.fitItem.ui.lineEdit_ChiS)
         self.fitItem.ui.lineEdit_ChiS.setValidator(v)
         print("Nr of connections" + str(plotFitChi.nr_of_connections))
+
+        ui = self.fitItem.ui
+        ui.spinBoxRelaxation.setRange(1, len(self.fitItem.relaxations))
+        try:
+            ui.spinBoxRelaxation.valueChanged.disconnect()
+        except Exception: pass
+
+        ui.spinBoxRelaxation.valueChanged.connect(self.change_relaxation)
+
         if plotFitChi.nr_of_connections == 3:
             try:
-                self.fitItem.ui.horizontalSlider_Alpha.valueChanged.disconnect()
-                self.fitItem.ui.horizontalSlider_Beta.valueChanged.disconnect()
-                self.fitItem.ui.horizontalSlider_Tau.valueChanged.disconnect()
-                self.fitItem.ui.horizontalSlider_ChiS.valueChanged.disconnect()
-                self.fitItem.ui.horizontalSlider_ChiT.valueChanged.disconnect()
-                self.fitItem.ui.pushButtonFit.clicked.disconnect()
-                self.fitItem.ui.pushButtonSave.clicked.disconnect()
-                self.fitItem.ui.pushButtonNext.clicked.disconnect()
-                self.fitItem.ui.pushButtonPrevious.clicked.disconnect()
 
-                self.fitItem.ui.lineEdit_Alpha.editingFinished.disconnect()
-                self.fitItem.ui.lineEdit_Beta.editingFinished.disconnect()
-                self.fitItem.ui.lineEdit_Tau.editingFinished.disconnect()
-                self.fitItem.ui.lineEdit_ChiT.editingFinished.disconnect()
-                self.fitItem.ui.lineEdit_ChiS.editingFinished.disconnect()
+                ui.horizontalSlider_Alpha.valueChanged.disconnect()
+                ui.horizontalSlider_Beta.valueChanged.disconnect()
+                ui.horizontalSlider_Tau.valueChanged.disconnect()
+                ui.horizontalSlider_ChiS.valueChanged.disconnect()
+                ui.horizontalSlider_ChiT.valueChanged.disconnect()
+
+                ui.pushButtonFit.clicked.disconnect()
+                ui.pushButtonSave.clicked.disconnect()
+                ui.pushButtonNext.clicked.disconnect()
+                ui.pushButtonPrevious.clicked.disconnect()
+                ui.pushButtonSetSavedAsCurrent.clicked.disconnect()
+
+                
+
+                ui.lineEdit_Alpha.editingFinished.disconnect()
+                ui.lineEdit_Beta.editingFinished.disconnect()
+                ui.lineEdit_Tau.editingFinished.disconnect()
+                ui.lineEdit_ChiT.editingFinished.disconnect()
+                ui.lineEdit_ChiS.editingFinished.disconnect()
                 plotFitChi.nr_of_connections = 0
             except Exception: pass
 
         plotFitChi.nr_of_connections = plotFitChi.nr_of_connections + 1
-        self.fitItem.ui.horizontalSlider_Alpha.valueChanged.connect(self.value_changed_alpha)
-        self.fitItem.ui.horizontalSlider_Beta.valueChanged.connect(self.value_changed_beta)
-        self.fitItem.ui.horizontalSlider_Tau.valueChanged.connect(self.value_changed_tau)
-        self.fitItem.ui.horizontalSlider_ChiS.valueChanged.connect(self.value_changed_chiS)
-        self.fitItem.ui.horizontalSlider_ChiT.valueChanged.connect(self.value_changed_chiT)
-        self.fitItem.ui.pushButtonFit.clicked.connect(self.makeAutoFit)
-        self.fitItem.ui.pushButtonSave.clicked.connect(self.saveFit)
-        self.fitItem.ui.pushButtonNext.clicked.connect(self.next)
-        self.fitItem.ui.pushButtonPrevious.clicked.connect(self.previous)
-        self.fitItem.ui.lineEdit_Alpha.editingFinished.connect(self.value_edited)
-        self.fitItem.ui.lineEdit_Beta.editingFinished.connect(self.value_edited)
-        self.fitItem.ui.lineEdit_Tau.editingFinished.connect(self.value_edited)
-        self.fitItem.ui.lineEdit_ChiT.editingFinished.connect(self.value_edited)
-        self.fitItem.ui.lineEdit_ChiS.editingFinished.connect(self.value_edited)
+        ui.horizontalSlider_Alpha.valueChanged.connect(self.value_changed_alpha)
+        ui.horizontalSlider_Beta.valueChanged.connect(self.value_changed_beta)
+        ui.horizontalSlider_Tau.valueChanged.connect(self.value_changed_tau)
+        ui.horizontalSlider_ChiS.valueChanged.connect(self.value_changed_chiS)
+        ui.horizontalSlider_ChiT.valueChanged.connect(self.value_changed_chiT)
+
+        ui.pushButtonFit.clicked.connect(self.makeAutoFit)
+        ui.pushButtonSave.clicked.connect(self.saveFit)
+        ui.pushButtonNext.clicked.connect(self.next)
+        ui.pushButtonPrevious.clicked.connect(self.previous)
+        ui.pushButtonSetSavedAsCurrent.clicked.connect(self.set_saved_as_current)
+
+        
+
+        ui.lineEdit_Alpha.editingFinished.connect(self.value_edited)
+        ui.lineEdit_Beta.editingFinished.connect(self.value_edited)
+        ui.lineEdit_Tau.editingFinished.connect(self.value_edited)
+        ui.lineEdit_ChiT.editingFinished.connect(self.value_edited)
+        ui.lineEdit_ChiS.editingFinished.connect(self.value_edited)
+
+    def change_relaxation(self):
+        ui = self.fitItem.ui 
+        print(" ### Spin box vchanged \n")
+        plotFitChi.nr_of_relaxation = ui.spinBoxRelaxation.value() - 1
+
+        current = self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current
+        for key, edit  in ui.editFit2D.items():
+            edit.setText(str(round(current[key],6)))
+            self.edit_to_slider(ui.sliderFit2D[key], edit, key)
 
 
 
     def refresh(self):
+        #plot points
         self.ax.cla()
         df = self.df
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
 
-        self.ax.set(xlabel="Chi '", ylabel="Chi''", title="Ch'(log v)")
-        self.ax.grid()
+        
+        self.ax.set(title=r"Cole-Cole", xlabel=r"$\chi^{\prime \prime} /cm^3*mol^{-1}$", ylabel=r"$\chi^{\prime \prime} / cm^3*mol^{-1}$")
+        
+        self.ax.grid(True, linestyle='--', linewidth=1, color=mcolors.CSS4_COLORS["silver"])
+        #self.ax.grid(True, which="minor", linestyle="--")
+        
+        self.ax.xaxis.set_major_locator(LinearLocator(10))
+        # self.ax.xaxis.set_minor_locator(AutoMinorLocator(2))
+
+        self.ax.yaxis.set_major_locator(LinearLocator(8))
+        # self.ax.yaxis.set_minor_locator(AutoMinorLocator(2))
+
         shown = df.loc[df["Show"]== True]
         hiden = df.loc[df["Show"]== False]
 
-        self.ax.plot( shown["ChiPrimeMol"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15)
-        self.ax.plot( hiden["ChiPrimeMol"].values, hiden["ChiBisMol"].values, "o", label = "Hiden Experimental data", picker=15)
+        self.ax.plot( shown["ChiPrimeMol"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
+        self.ax.plot( hiden["ChiPrimeMol"].values, hiden["ChiBisMol"].values, "o", label = "Hiden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
 
         step = (df['FrequencyLog'].max() - df['FrequencyLog'].min())/50
         min = df['FrequencyLog'].min()
@@ -101,40 +191,54 @@ class plotFitChi(FigureCanvasQTAgg):
             plotFitChi.domain.append(min)
             min += step
 
-        plotFitChi.yy = []
+        #plot curves
+        plotFitChi.curves = []
+        for r in self.fitItem.relaxations:
+           plotFitChi.curves.append(Curve())
+
+        i = 0
+        while i < len(self.fitItem.relaxations):
+            r = self.fitItem.relaxations[i]
+            curve = plotFitChi.curves[i]
+
+            for x in plotFitChi.domain:
+                curve.yy.append(self.model(x, alpha = r.current["alpha"]
+                    , beta = r.current["beta"]
+                    , tau = r.current["tau"]
+                    , chiT = r.current["chiT"]
+                    , chiS = r.current["chiS"] ))
+
+                curve.yy_saved.append(self.model(x, alpha = r.previous["alpha"]
+                    , beta = r.previous["beta"]
+                    , tau = r.previous["tau"]
+                    , chiT = r.previous["chiT"]
+                    , chiS = r.previous["chiS"] ))
+
+            for c in curve.yy:
+                curve.real.append(c.real)
+                curve.img.append(-c.imag)
+
+            for c in curve.yy_saved:
+                curve.real_saved.append(c.real)
+                curve.img_saved.append(-c.imag)
         
-        plotFitChi.yySaved = []
-        for x in plotFitChi.domain:
-            plotFitChi.yy.append(self.model(x, alpha = self.fitItem.current["alpha"]
-                , beta = self.fitItem.current["beta"]
-                , tau = self.fitItem.current["tau"]
-                , chiT = self.fitItem.current["chiT"]
-                , chiS = self.fitItem.current["chiS"] ))
+            i += 1
 
-            plotFitChi.yySaved.append(self.model(x, alpha = self.fitItem.previous["alpha"]
-                , beta = self.fitItem.previous["beta"]
-                , tau = self.fitItem.previous["tau"]
-                , chiT = self.fitItem.previous["chiT"]
-                , chiS = self.fitItem.previous["chiS"] ))
+        color_nr = 0
+        for c in plotFitChi.curves:
+            self.ax.plot(c.real, c.img, "--", c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]])
+            if self.fitItem.wasSaved: 
+                self.ax.plot(c.real_saved, c.img_saved, "-", c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]])
+            color_nr = (color_nr + 1) % len(self.colors_names)
 
-        plotFitChi.real = []
-        plotFitChi.img = []
-        for c in plotFitChi.yy:
-            plotFitChi.real.append(c.real)
-            plotFitChi.img.append(-c.imag)
+        if len(plotFitChi.curves) > 1:
+            plotFitChi.curves_sum = sum(plotFitChi.curves)
+            self.ax.plot(plotFitChi.curves_sum.real, plotFitChi.curves_sum.img, '--', c=mcolors.TABLEAU_COLORS["tab:cyan"] )
 
-        plotFitChi.realSaved = []
-        plotFitChi.imgSaved = []
-        for c in plotFitChi.yySaved:
-            plotFitChi.realSaved.append(c.real)
-            plotFitChi.imgSaved.append(-c.imag)
+            if self.fitItem.wasSaved:
+                self.ax.plot(plotFitChi.curves_sum.real_saved, plotFitChi.curves_sum.img_saved, '-', c=mcolors.TABLEAU_COLORS["tab:cyan"])
 
-        
-        self.ax.plot(plotFitChi.real, plotFitChi.img, "-", color="blue")
-        if self.fitItem.wasSaved: 
-            self.ax.plot(plotFitChi.realSaved, plotFitChi.imgSaved, "-", color="red" )
-
-        self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),fancybox=True, shadow=True, ncol=3)
+        #self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),fancybox=True, shadow=True)
         self.draw()
 
     def onClick(self, event):
@@ -169,34 +273,30 @@ class plotFitChi(FigureCanvasQTAgg):
         m = interp1d([r[name][0], r[name][1]], [slider.minimum(), slider.maximum()])
         v = str(edit.text())
         if v == '':
-            v = self.fitItem.current[name]
+            v = self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current[name]
         v = float(v)
         v = float(m(v))
         return round(v)
 
     def value_changed_alpha(self):
         self.slider_to_edit(self.fitItem.ui.horizontalSlider_Alpha, self.fitItem.ui.lineEdit_Alpha, 'alpha')
-        self.fitItem.show()
+        self.refresh()
 
     def value_changed_beta(self):
         self.slider_to_edit(self.fitItem.ui.horizontalSlider_Beta, self.fitItem.ui.lineEdit_Beta, 'beta')
-        self.fitItem.show()
+        self.refresh()
 
     def value_changed_tau(self):
         self.slider_to_edit(self.fitItem.ui.horizontalSlider_Tau, self.fitItem.ui.lineEdit_Tau, 'tau')
-        self.fitItem.show()
+        self.refresh()
 
     def value_changed_chiT(self):
         self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiT, self.fitItem.ui.lineEdit_ChiT, 'chiT')
-        self.fitItem.show()
+        self.refresh()
 
     def value_changed_chiS(self):
         self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiS, self.fitItem.ui.lineEdit_ChiS, 'chiS')
-        self.fitItem.show()
-    
-        
-        
-        
+        self.refresh()
 
     def value_edited(self): 
         self.edit_to_slider(self.fitItem.ui.horizontalSlider_Alpha, self.fitItem.ui.lineEdit_Alpha, 'alpha')
@@ -205,74 +305,106 @@ class plotFitChi(FigureCanvasQTAgg):
         self.edit_to_slider(self.fitItem.ui.horizontalSlider_ChiT, self.fitItem.ui.lineEdit_ChiT, 'chiT')
         self.edit_to_slider(self.fitItem.ui.horizontalSlider_ChiS, self.fitItem.ui.lineEdit_ChiS, 'chiS')
 
-        self.fitItem.show()
+        self.fitItem.ui.refreshFitFr()
 
     def edit_to_slider(self, slider, edit, name):
         v = str(edit.text())
         if v == '':
-            v = self.fitItem.current[name]
-        self.fitItem.current[name] = float(v)
+            v = self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current[name]
+        self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current[name] = float(v)
         slider.blockSignals(True)
         slider.setValue(self.map_value_reverse(slider,edit , name))
         slider.blockSignals(False)
 
     def slider_to_edit(self, slider, edit, name):
-        self.fitItem.current[name] = self.map_value(slider, name)
+        self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current[name] = self.map_value(slider, name)
         edit.blockSignals(True)
-        edit.setText(str(self.fitItem.current[name]))
+        edit.setText(str(self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current[name]))
         edit.blockSignals(False)
 
 
     @jit()
     def model(self, logFrequency, alpha, beta, tau, chiT, chiS):
-        return chiS + (chiT)/((1 + (10**logFrequency * 2 * np.pi * np.power(10, tau) * 1j )**(1- alpha))**beta)
+        return chiS + (chiT)/((1 + (10**logFrequency * np.power(10, tau) * 1j )**(1- alpha))**beta)
         #return chiS + (chiT - chiS)/np.power((1 + np.power(2*np.pi, np.power(10, logFrequency)*tau*1j), 1 - alpha), beta)
 
 
 
     def costF(self, p):
         rest = self.df.loc[self.df['Show']==True]
-        dif1 = np.power(self.model(rest["FrequencyLog"].values, p[0], p[1], p[2], p[3], p[4]).real - rest['ChiPrimeMol'], 2)
-        dif2 = np.power(-self.model(rest["FrequencyLog"].values, p[0], p[1], p[2], p[3], p[4]).imag - rest['ChiBisMol'], 2)
-        return  dif1 + dif2
+
+
+        sum_real = 0
+        sum_img = 0
+        i = 0
+        while i < len(self.fitItem.relaxations):
+            sum_real += self.model(rest["FrequencyLog"].values, p[0+i*5], p[1+i*5], p[2+i*5], p[3+i*5], p[4+i*5]).real
+            sum_img += -self.model(rest["FrequencyLog"].values, p[0+i*5], p[1+i*5], p[2+i*5], p[3+i*5], p[4+i*5]).imag
+
+            i += 1
+
+        dif_real = np.power(sum_real - rest['ChiPrimeMol'], 2)
+        dif_img = np.power(sum_img - rest['ChiBisMol'], 2)
+
+
+        return  dif_real + dif_img
 
 
     def makeAutoFit(self):
+        l = len(self.fitItem.relaxations)
         r = AppState.ranges 
         b = ([r['alpha'][0], r['beta'][0], r['tau'][0], r['chiT'][0], r['chiS'][0]], [r['alpha'][1], r['beta'][1], r['tau'][1], r['chiT'][1], r['chiS'][1]])
+        tmp = (b[0]*l, b[1]*l)
+        b  = tmp
         eps = 0.000000000001
         ui = self.fitItem.ui
 
-        if ui.checkBox_ChiS.isChecked():
-            b[0][4] = max(self.fitItem.current["chiS"] - eps, b[0][4])
-            b[1][4] = min(self.fitItem.current["chiS"] + eps, b[1][4])
-        if ui.checkBox_ChiT.isChecked():
-            b[0][3] = max(self.fitItem.current["chiT"] - eps, b[0][3])
-            b[1][3] = min(self.fitItem.current["chiT"] + eps, b[1][3])
-        if ui.checkBox_Tau.isChecked():
-            b[0][2] = max(self.fitItem.current["tau"] - eps, b[0][2])
-            b[1][2] = min(self.fitItem.current["tau"] + eps, b[1][2])
-        if ui.checkBox_Beta.isChecked():
-            b[0][1] = max(self.fitItem.current["beta"] - eps, b[0][1])
-            b[1][1] = min(self.fitItem.current["beta"] + eps, b[1][1])
-        if ui.checkBox_Alpha.isChecked():
-            b[0][0] = max(self.fitItem.current["alpha"] - eps, b[0][0])
-            b[1][0] = min(self.fitItem.current["alpha"] + eps, b[1][0])
-
-        res = least_squares(self.costF, tuple(self.fitItem.current.values()), bounds=b)
-
+        p = []
         i = 0
-        for key in self.fitItem.current.keys():
-            self.fitItem.current[key] = res.x[i]
-            i = i + 1
+        while i < l:
 
-        ui.lineEdit_Alpha.setText(str(round(self.fitItem.current["alpha"],6)))
-        ui.lineEdit_Beta.setText(str(round(self.fitItem.current["beta"],6)))
-        ui.lineEdit_Tau.setText(str(round(self.fitItem.current["tau"],6)))
-        ui.lineEdit_ChiT.setText(str(round(self.fitItem.current["chiT"],6)))
-        ui.lineEdit_ChiS.setText(str(round(self.fitItem.current["chiS"],6)))
+            current = self.fitItem.relaxations[i].current
 
-        self.value_edited()
+            if ui.checkBox_ChiS.isChecked():
+                b[0][4+i*5] = max(current["chiS"] - eps, b[0][4+i*5])
+                b[1][4+i*5] = min(current["chiS"] + eps, b[1][4+i*5])
+            if ui.checkBox_ChiT.isChecked():
+                b[0][3+i*5] = max(current["chiT"] - eps, b[0][3+i*5])
+                b[1][3+i*5] = min(current["chiT"] + eps, b[1][3+i*5])
+            if ui.checkBox_Tau.isChecked():
+                b[0][2+i*5] = max(current["tau"] - eps, b[0][2+i*5])
+                b[1][2+i*5] = min(current["tau"] + eps, b[1][2+i*5])
+            if ui.checkBox_Beta.isChecked():
+                b[0][1+i*5] = max(current["beta"] - eps, b[0][1+i*5])
+                b[1][1+i*5] = min(current["beta"] + eps, b[1][1+i*5])
+            if ui.checkBox_Alpha.isChecked():
+                b[0][0+i*5] = max(current["alpha"] - eps, b[0][0+i*5])
+                b[1][0+i*5] = min(current["alpha"] + eps, b[1][0+i*5])
+
+            p = p + list(current.values())
+            i += 1
+
+        res = least_squares(self.costF, tuple(p), bounds=b)
+
+        print("Fit results: ", res.x)
+        i = 0
+        while i < len(self.fitItem.relaxations):
+            current = self.fitItem.relaxations[i].current
+            j = 0 + i*5
+            for key in current.keys():
+                print(res.x[j])
+                current[key] = res.x[j]
+                j += 1
+            i += 1
+
+        current = self.fitItem.relaxations[self.nr_of_relaxation].current
+        for key, edit  in ui.editFit2D.items():
+            edit.setText(str(round(current[key],6)))
+            self.edit_to_slider(ui.sliderFit2D[key], edit, key)
+
+        self.fitItem.ui.refreshFitFr()
+
+
         U, s, Vh = linalg.svd(res.jac, full_matrices=False)
         tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
         w = s > tol
@@ -283,30 +415,30 @@ class plotFitChi(FigureCanvasQTAgg):
 
         perr = np.sqrt(np.diag(cov))     # 1sigma uncertainty on fitted parameters
 
-        self.fitItem.error = perr
+        for i in range(len(self.fitItem.relaxations)):
+            self.fitItem.relaxations[i].error = perr[i*5:i*5+5]
 
     def saveFit(self):
         self.fitItem.wasSaved = True
-        for key in self.fitItem.ui.editFit2D:
-            self.fitItem.previous[key] = self.fitItem.current[key]
+        for r in self.fitItem.relaxations:
+            for key in self.fitItem.ui.editFit2D:
+                r.previous[key] = r.current[key]
 
-        self.fitItem.show()
+        self.fitItem.ui.refreshFitFr()
 
     def next(self):
         p = self.fitItem.parent()
-        p.child((self.fitItem.row() + 1) % p.rowCount(), 0).changePage()
+        p.child((self.fitItem.row() + 1) % p.rowCount(), 0).changePage(self.fitItem)
 
     def previous(self):
         p = self.fitItem.parent()
-        p.child((self.fitItem.row() - 1) % p.rowCount(), 0).changePage()
+        p.child((self.fitItem.row() - 1) % p.rowCount(), 0).changePage(self.fitItem)
 
-
-
-
-
-
-
-
+    def set_saved_as_current(self):
+        for r in self.fitItem.relaxations:
+            for key in r.current.keys():
+                r.current[key] = r.previous[key]
+        self.refresh()
 
 
 class plotFitChi1(plotFitChi):
@@ -318,17 +450,37 @@ class plotFitChi1(plotFitChi):
         print('rChi1')
         self.ax.cla()
         df = self.df
+
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
-        self.ax.grid()
-        self.ax.set(title="PlotFitChi1")
+        self.ax.set(title=r"$\chi^{\prime}$", xlabel=r"$\log (v / Hz)$", ylabel=r"$\chi^{\prime} /cm^3*mol^{-1}$")
+        self.ax.grid(True, linestyle='--', linewidth=1, color=mcolors.CSS4_COLORS["silver"])
+        #self.ax.grid(True, which="minor", linestyle="--")
+        
+        self.ax.xaxis.set_major_locator(LinearLocator(10))
+        # self.ax.xaxis.set_minor_locator(AutoMinorLocator(2))
+
+        self.ax.yaxis.set_major_locator(LinearLocator(8))
+        # self.ax.yaxis.set_minor_locator(AutoMinorLocator(2))
+
         shown = df.loc[df["Show"]== True]
         hiden = df.loc[df["Show"]== False]
 
-        self.ax.plot( shown["FrequencyLog"].values, shown["ChiPrimeMol"].values, "o", label = "Experimental data", picker=15)
-        self.ax.plot( hiden["FrequencyLog"].values, hiden["ChiPrimeMol"].values, "o", label = "Hiden Experimental data", picker=15)
-        self.ax.plot(plotFitChi.domain, plotFitChi.real, '-', color="blue")
-        if self.fitItem.wasSaved: 
-            self.ax.plot(plotFitChi.domain, plotFitChi.realSaved, '-', color="red")
+        
+        self.ax.plot( shown["FrequencyLog"].values, shown["ChiPrimeMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
+        self.ax.plot( hiden["FrequencyLog"].values, hiden["ChiPrimeMol"].values, "o", label = "Hiden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+        color_nr = 0
+        for c in plotFitChi.curves:
+            self.ax.plot(plotFitChi.domain, c.real, '--', c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]])
+            if self.fitItem.wasSaved: 
+                self.ax.plot(plotFitChi.domain, c.real_saved, '-', c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]] )
+            color_nr = (color_nr + 1) % len(self.colors_names)
+
+        if len(plotFitChi.curves) > 1:
+            self.ax.plot(plotFitChi.domain, plotFitChi.curves_sum.real, '--', c=mcolors.TABLEAU_COLORS["tab:cyan"] )
+
+            if self.fitItem.wasSaved:
+                self.ax.plot(plotFitChi.domain, plotFitChi.curves_sum.real_saved, '-', c=mcolors.TABLEAU_COLORS["tab:cyan"])
+
         self.draw()
     
     def valueChanged(self):
@@ -351,17 +503,43 @@ class plotFitChi2(plotFitChi):
     def refresh(self):
         self.ax.cla()
         df = self.df
+
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
-        self.ax.grid()
-        self.ax.set(title="plotFitChi2")
+
+        self.ax.set(title=r"$\chi^{\prime \prime}$", xlabel=r"$\log (v / Hz)$", ylabel=r"$\chi^{\prime \prime} /cm^3*mol^{-1}$")
+
+        self.ax.grid(True, linestyle='--', linewidth=1, color=mcolors.CSS4_COLORS["silver"])
+        #self.ax.grid(True, which="minor", linestyle="--")
+        
+        self.ax.xaxis.set_major_locator(LinearLocator(10))
+        # self.ax.xaxis.set_minor_locator(AutoMinorLocator(2))
+
+        self.ax.yaxis.set_major_locator(LinearLocator(8))
+        # self.ax.yaxis.set_minor_locator(AutoMinorLocator(2))
+        
         shown = df.loc[df["Show"]== True]
         hiden = df.loc[df["Show"]== False]
 
-        self.ax.plot( shown["FrequencyLog"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15)
-        self.ax.plot( hiden["FrequencyLog"].values, hiden["ChiBisMol"].values, "o", label = "Hiden Experimental data", picker=15)
-        self.ax.plot(plotFitChi.domain, plotFitChi.img, '-', color="blue")
-        if self.fitItem.wasSaved: 
-            self.ax.plot(plotFitChi.domain, plotFitChi.imgSaved, '-', color="red")
+        self.ax.plot( shown["FrequencyLog"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
+        self.ax.plot( hiden["FrequencyLog"].values, hiden["ChiBisMol"].values, "o", label = "Hiden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+
+        color_nr = 0
+        for c in plotFitChi.curves:
+            self.ax.plot(plotFitChi.domain, c.img, '--', c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]], label=f"relaxation nr {color_nr+1}")
+            if self.fitItem.wasSaved: 
+                self.ax.plot(plotFitChi.domain, c.img_saved, '-', c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]], label=f"saved relaxation nr {color_nr+1}")
+            color_nr = (color_nr + 1) % len(self.colors_names)
+
+        if len(plotFitChi.curves) > 1:
+            self.ax.plot(plotFitChi.domain, plotFitChi.curves_sum.img, '--', c=mcolors.TABLEAU_COLORS["tab:cyan"], label="sum of relaxations" )
+
+            if self.fitItem.wasSaved:
+                self.ax.plot(plotFitChi.domain, plotFitChi.curves_sum.img_saved, '-', c=mcolors.TABLEAU_COLORS["tab:cyan"], label="saved sum of relaxations")
+
+        leg = self.ax.legend()
+        if leg:
+            leg.set_draggable(True)
+
         self.draw()
 
     def valueChanged(self):

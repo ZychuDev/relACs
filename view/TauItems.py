@@ -166,12 +166,14 @@ class FitTauCollectionItem(StandardItem):
         i = 0
         while(f_items.child(i) != None):
             f_item = f_items.child(i) #frequency_item
-            params = f_item.current
-            tau = np.power(10, params['tau'])
-            temp = round((f_item.df["Temperature"].max() + f_item.df["Temperature"].min())/2, 1)
-            field = round((f_item.df["MagneticField"].max() + f_item.df["MagneticField"].min())/2, 0)
-            point = (tau,temp,field)
-            points.append(point)
+        
+            for r in f_item.relaxations:
+                params = r.previous
+                tau = np.power(10, params['tau'])
+                temp = round((f_item.df["Temperature"].max() + f_item.df["Temperature"].min())/2, 1)
+                field = round((f_item.df["MagneticField"].max() + f_item.df["MagneticField"].min())/2, 0)
+                point = (tau,temp,field)
+                points.append(point)
 
             i += 1
 

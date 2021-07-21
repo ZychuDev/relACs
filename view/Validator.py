@@ -1,6 +1,8 @@
 from PyQt5.QtGui import QDoubleValidator
 
 from PyQt5.QtCore import QLocale
+from matplotlib.pyplot import plot
+
 
 class Validator(QDoubleValidator):
     def __init__(self, fitItem, param, lineEdit):
@@ -17,5 +19,5 @@ class Validator(QDoubleValidator):
         self.setLocale(l)
 
     def fixup(self, a0: str) -> str:
-        a0 = self.lineEdit.setText(str(self.fitItem.current[self.param]))
+        a0 = self.lineEdit.setText(str(self.fitItem.relaxations[0].current[self.param]))
         return a0

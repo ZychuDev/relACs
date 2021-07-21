@@ -18,9 +18,11 @@ from functools import partial
 
 class Plot3D(FigureCanvasQTAgg): 
     def __init__(self):
-        self.fig = plt.figure(figsize=(1,1), dpi = 100, constrained_layout=True )
+        self.fig = plt.figure(figsize=(1,1), dpi = 100, constrained_layout=True)
+        self.fig.patch.set_facecolor("#f0f0f0")
         super().__init__(self.fig) # creating FigureCanvas
         self.axes = self.fig.gca(projection='3d') # generates 3D Axes object
+        self.axes.set_facecolor("#f0f0f0")
         self.setWindowTitle("Main") # sets Window title
 
         self.nr_of_connections = 0
@@ -45,8 +47,23 @@ class Plot3D(FigureCanvasQTAgg):
         self.axes.scatter(t_invert, self.tau_item.field, np.log10(self.tau_item.tau.tolist()), marker='o', color='r')
         self.draw()
 
+    def my_power(self, b, x):
+
+        result = np.ndarray((len(b), len(b[0])))
+        for i in range(len(b)):
+            for j in range(len(b[i])):
+                if b[i][j] <= 0.1:
+                    result[i][j] = np.power(1, x)
+                else:
+                    result[i][j] = np.power(b[i][j], x)
+        
+            return result
+
+            
 
     def model(self, temp, field, Adir, Ndir, B1, B2, B3, CRaman, Nraman, NHraman, Tau0, DeltaE):
+
+        print(type(field))
         return Adir*temp*(field**Ndir) \
         + B1*(1+B3*field*field)/(1+B2*field*field) \
         + CRaman*np.power(field if field.all() != 0 else 1, NHraman ) * np.power(temp, Nraman) \
@@ -229,6 +246,7 @@ class Plot3D(FigureCanvasQTAgg):
 class Slice(FigureCanvasQTAgg):
     def __init__(self):
         self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=100)
+        self.fig.patch.set_facecolor("#f0f0f0")
         super().__init__(self.fig)
         self.xStr = "temp"
         self.x_ax = []

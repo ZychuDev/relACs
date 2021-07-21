@@ -10,11 +10,14 @@ import os
 import pandas as pd
 import numpy as np
 
+import json
+
 from .Plots import *
 from .StandardItem import StandardItem
 
 from model.dataFrameModel import pandasModel
 
+from PyQt5.QtCore import Qt
 from .FrequencyItems import *
 
 
@@ -28,6 +31,9 @@ class DataItem(StandardItem):
         self.name = txt
         self.df = pd.DataFrame(columns=self.columnsHeadersInternal)
         self.setToolTip(txt)
+
+        self.setUserTristate(True)
+        self.setCheckState(Qt.Unchecked)
 
     def dfToDataItem(ui, df, sufix=''):
         temp = round((df["Temperature"].max() + df["Temperature"].min())/2, 1)
@@ -51,9 +57,12 @@ class DataItem(StandardItem):
         menu.addAction("Inspect data", self.show)
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
+        menu.addAction("Save", self.save)
         menu.addSeparator()
-        menu.addAction("Make fit", self.makeFit)
+        menu.addAction("Make fit with 1 relaxation process", self.make_fit)
+        menu.addAction("Make fit with 2 relaxation process", self.make_fit_2)
         menu.exec_(self.ui.window.mapToGlobal(position))
+        
 
         return
 
@@ -75,33 +84,60 @@ class DataItem(StandardItem):
         
     def double_click(self):
         self.show()
+        if self.checkState() == Qt.Unchecked:
+            self.setCheckState(Qt.Checked)
+        else:
+            self.setCheckState(Qt.Unchecked)
+
+        
     
     def click(self):
         self.show()
 
     def remove(self):
         self.parent().removeRow(self.index().row()) 
+        self.parent().names.remove(self.name)
 
     def rename(self):
         text, ok = QInputDialog.getText(self.ui.window, 'Renaming dataPoint', 'Enter new dataPoint name:')
-        names = self.parent().container
+        names = self.parent().names
         if ok:
             if text in names:
                 print("Name already taken")
                 return
 
-            names.pop(self.name, None)
+            names.remove(self.name)
 
             self.name = str(text)
-            names[self.name] = self
+            names.add(self.name)
             self.setText(self.name)
 
-    def makeFit(self):
+    def make_fit(self, show=True):
+        print("Halo")
         fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency")
         fit.temp = self.temp
         fit.field = self.field
         self.parent().parent().child(1).append(fit)
+        if show:
+            fit.show()
+
+    def make_fit_2(self):
+        fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency2Relaxations")
+        fit.add_relaxation()
+
+        fit.temp = self.temp
+        fit.field = self.field
+        self.parent().parent().child(2).append(fit)
         fit.show()
+
+    def to_json(self):
+        pass
+
+    def from_json(self):
+        pass
+    
+    def save(self):
+        pass
     
 
 
@@ -109,13 +145,21 @@ class DataCollectionItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
-        self.container = {}
+        self.names = set()
 
 
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Load from file", self.loadFromFile)
         menu.addAction("Make fits from all laded data", self.make_all_fits)
+        menu.addAction("Make fits from checked data", self.make_fits_checked)
+        menu.addSeparator()
+        menu.addAction("Check all", self.check_all)
+        menu.addAction("Uncheck all", self.uncheck_all)
+        menu.addSeparator()
+        menu.addAction("Remove selected", self.remove_selected)
+        
+        
 
         menu.exec_(self.ui.window.mapToGlobal(position))
 
@@ -183,6 +227,7 @@ class DataCollectionItem(StandardItem):
             for y in x:
                 self.append(DataItem.dfToDataItem(self.ui, y, sufix))
 
+        self.ui.TModel.resizeColumnToContents(0)
         self.make_all_fits()# TMP
 
         
@@ -215,16 +260,65 @@ class DataCollectionItem(StandardItem):
             return results
 
     def append(self, item):
-        if item.name in self.container:
+        if item.name in self.names:
             print("DataItem already exists choose other name or delete old one!")
             return False #To DO throw exception
 
         self.appendRow(item)
-        self.container[item.name] = item
-        #self.ui.Model.resetHorizontalScrollMode()
+        self.names.add(item.name)
+        #self.ui.TModel.resetHorizontalScrollMode()
 
     def make_all_fits(self):
         i = 0 
         while(self.child(i) != None):
-            self.child(i).makeFit()
+            self.child(i).make_fit(False)
             i += 1
+        self.child(i-1).show()
+
+        self.ui.TModel.expandAll()
+    
+
+    def remove_selected(self):
+        # indexes = self.ui.TModel.selectionModel().selectedIndexes()
+
+        # i = 0
+        # nr_of_rows = self.rowCount()
+        # while i < nr_of_rows:
+        #     if self.child(i).index() in indexes:
+        #         print(f"{i} - selected")
+        #         self.removeRow(i)
+        #         nr_of_rows -= 1
+        #         i -= 1
+        #         indexes = self.ui.TModel.selectionModel().selectedIndexes()
+
+        #     i += 1
+
+        i = 0
+        nr_of_rows = self.rowCount()
+        while i < nr_of_rows:
+            child = self.child(i)
+            if child.checkState() == Qt.Checked:
+                self.names.remove(child.name)
+                self.removeRow(i)
+                nr_of_rows -= 1
+                i -= 1
+            i += 1
+
+    def check_all(self):
+        for i in range(self.rowCount()):
+            self.child(i).setCheckState(Qt.Checked)
+
+    def uncheck_all(self):
+        for i in range(self.rowCount()):
+            self.child(i).setCheckState(Qt.Unchecked)
+
+    def make_fits_checked(self):
+        for i in range(self.rowCount()):
+            if self.child(i).checkState() == Qt.Checked:
+                self.child(i).make_fit(False)
+                if i == self.rowCount():
+                    self.child(i).show()
+        
+
+
+        

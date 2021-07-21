@@ -41,6 +41,7 @@ class Plot(FigureCanvasQTAgg):
 class PlotChi(FigureCanvasQTAgg):
     def __init__(self):
         self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=100)
+        self.fig.patch.set_facecolor("#f0f0f0")
         super().__init__(self.fig)
         self.xStr = "ChiPrimeMol"
 
