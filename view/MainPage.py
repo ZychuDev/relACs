@@ -78,6 +78,7 @@ class MainPage(Ui_MainWindow):
         self.slice.setObjectName('slice')
         self.RightPanel.insertWidget(1, self.slice)
 
+        self.comboBox_slice.currentIndexChanged.connect(self.slice_change_const)
         self.slider3D = {'Adir': self.horizontalSlider_Adir,
         'Ndir': self.horizontalSlider_Ndir,
         'B1': self.horizontalSlider_B1,
@@ -184,7 +185,11 @@ class MainPage(Ui_MainWindow):
 
     def showMenu(self, position):
         index = self.TModel.indexAt(position)
-        self.treeModel.itemFromIndex(index).showMenu(position)
+        try:
+            self.treeModel.itemFromIndex(index).showMenu(position)
+        except AttributeError:
+            pass
+            #print("Non object clicked!")
 
     def nextWidget(self):
         self.WorkingSpace.setCurrentIndex((self.WorkingSpace.currentIndex() + 1) % 3)
@@ -205,6 +210,37 @@ class MainPage(Ui_MainWindow):
         self.plotFr.refresh()
         self.plotChi.refresh()
         self.plotMain.refresh()
+
+    def slice_change_const(self):
+        
+        text = self.comboBox_slice.currentText()
+        if text == "Field":
+            self.label_slice_const.setText("Temp:")
+        else:
+            self.label_slice_const.setText("Field:")
+            self.comboBox_slice.setCurrentText("Temperature")
+        
+        self.slice.change_slice_x_ax()
+
+        if self.slice is not None:
+            self.comboBox_slice2.blockSignals(True)
+            self.comboBox_slice2.clear()
+            self.slice.intervals = set()
+            for value in self.slice.const_ax:
+                if value not in self.slice.intervals:
+                    self.slice.intervals.add(value)
+                    self.comboBox_slice2.addItem(f"{value} {self.slice.unit}")
+            self.comboBox_slice2.setCurrentIndex(-1)
+            self.comboBox_slice2.blockSignals(False)
+            
+            
+            self.comboBox_slice2.setCurrentIndex(0)
+        self.plot3d.refresh()
+            
+            
+
+
+        
 
     # def resize_model(self):
     #     self.TModel.resizeColumnToContents(0)

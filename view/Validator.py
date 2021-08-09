@@ -8,7 +8,7 @@ class Validator(QDoubleValidator):
     def __init__(self, fitItem, param, lineEdit):
         bottom = AppState.ranges[param][0]
         top = AppState.ranges[param][1]
-        super().__init__(bottom, top, 6)
+        super().__init__(bottom, top, 9)
         self.fitItem = fitItem
         self.param = param
         self.lineEdit = lineEdit
@@ -19,5 +19,9 @@ class Validator(QDoubleValidator):
         self.setLocale(l)
 
     def fixup(self, a0: str) -> str:
-        a0 = self.lineEdit.setText(str(self.fitItem.relaxations[0].current[self.param]))
+        try:
+            a0 = self.lineEdit.setText(str(self.fitItem.relaxations[0].current[self.param]))
+        except Exception:
+            a0 = self.lineEdit.setText(str(self.fitItem.current[self.param]))
+
         return a0

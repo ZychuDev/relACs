@@ -1,6 +1,8 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QFileDialog, QPushButton, QMenu, QTableView, QAbstractItemView, QInputDialog
+from PyQt5.QtWidgets import  QFileDialog, QPushButton, QMenu, QTableView, QAbstractItemView, QInputDialog
 from PyQt5.QtCore import  Qt, QSize, QRect, QFile
+
+import keyboard
 
 from PyQt5 import QtWidgets
 
@@ -84,19 +86,28 @@ class DataItem(StandardItem):
         
     def double_click(self):
         self.show()
-        if self.checkState() == Qt.Unchecked:
-            self.setCheckState(Qt.Checked)
-        else:
-            self.setCheckState(Qt.Unchecked)
+
 
         
     
     def click(self):
+        if keyboard.is_pressed('ctrl'):
+            if self.checkState() == Qt.Unchecked:
+                self.setCheckState(Qt.Checked)
+            else:
+                self.setCheckState(Qt.Unchecked)
+            return
+
         self.show()
 
+    
+
+
+
     def remove(self):
-        self.parent().removeRow(self.index().row()) 
         self.parent().names.remove(self.name)
+        self.parent().removeRow(self.index().row()) 
+        
 
     def rename(self):
         text, ok = QInputDialog.getText(self.ui.window, 'Renaming dataPoint', 'Enter new dataPoint name:')
@@ -113,7 +124,6 @@ class DataItem(StandardItem):
             self.setText(self.name)
 
     def make_fit(self, show=True):
-        print("Halo")
         fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency")
         fit.temp = self.temp
         fit.field = self.field
@@ -153,6 +163,7 @@ class DataCollectionItem(StandardItem):
         menu.addAction("Load from file", self.loadFromFile)
         menu.addAction("Make fits from all laded data", self.make_all_fits)
         menu.addAction("Make fits from checked data", self.make_fits_checked)
+        menu.addAction("Make 2-relaxations fits from checkeddata", self.make_fits_checked_2)
         menu.addSeparator()
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
@@ -316,6 +327,13 @@ class DataCollectionItem(StandardItem):
         for i in range(self.rowCount()):
             if self.child(i).checkState() == Qt.Checked:
                 self.child(i).make_fit(False)
+                if i == self.rowCount():
+                    self.child(i).show()
+
+    def make_fits_checked_2(self):
+        for i in range(self.rowCount()):
+            if self.child(i).checkState() == Qt.Checked:
+                self.child(i).make_fit_2(False)
                 if i == self.rowCount():
                     self.child(i).show()
         

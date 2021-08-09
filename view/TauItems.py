@@ -1,4 +1,5 @@
 from .StandardItem import StandardItem
+from PyQt5.QtCore import  Qt
 
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMenu, QInputDialog
@@ -8,13 +9,16 @@ from .Plot3D import *
 import pandas as pd
 import numpy as np
 
+import functools
+
 class FitTauItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
         self.name = txt
 
-        self.error = [0,0,0,0,0]
+        self.error = [0,0,0,0,0,0,0,0,0,0]
+        self.current_error = [0,0,0,0,0,0,0,0,0,0]
 
         self.previous = {'Adir': 1,
         'Ndir': 0,
@@ -48,11 +52,25 @@ class FitTauItem(StandardItem):
         self.ui.slice.refresh()
 
     def change(self):
-        self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
-
         self.ui.plot3d.change(self)
         self.ui.slice.change(self)
-        # self.ui.plotMain.change()
+        self.ui.slice_change_const()
+
+        self.ui.comboBox_slice.setCurrentIndex(0)
+        self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
+
+    def set_current_as_saved(self):
+        for param in self.current:
+            self.current[param] = self.previous[param]
+
+        for i in range(len(self.error)):
+            self.current_error[i] = self.error[i]
+
+        self.show()
+
+
+
+        
     
     def rename(self):
         text, ok = QInputDialog.getText(self.ui.window, 'Renaming dataPoint', 'Enter new dataPoint name:')
@@ -132,11 +150,6 @@ class FitTauItem(StandardItem):
         return pd.concat([df_param, df_experimental, df_model], axis=1)
 
 
-
-
-
-
-
     def double_click(self):
         self.show()
 
@@ -155,47 +168,47 @@ class FitTauCollectionItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        menu.addAction("Make new fit", self.makeNewFit)
-
+        menu.addAction("Make new fit", self.make_new_fit)
+        menu.addAction("Make new fit 2-relaxations", functools.partial(self.make_new_fit,2))
         menu.exec_(self.ui.window.mapToGlobal(position))
 
-    def makeNewFit(self):
+
+    def make_new_fit(self, nr_of_relax=1):
         self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
-        f_items = self.parent().child(1)
+        f_items = self.parent().child(nr_of_relax)
         points = []
-        i = 0
-        while(f_items.child(i) != None):
-            f_item = f_items.child(i) #frequency_item
-        
-            for r in f_item.relaxations:
-                params = r.previous
-                tau = np.power(10, params['tau'])
-                temp = round((f_item.df["Temperature"].max() + f_item.df["Temperature"].min())/2, 1)
-                field = round((f_item.df["MagneticField"].max() + f_item.df["MagneticField"].min())/2, 0)
-                point = (tau,temp,field)
-                points.append(point)
+       
+        for r in range(nr_of_relax):
+            i = 0
+            while(f_items.child(i) != None):
+                f_item = f_items.child(i) #frequency_item
+                if f_item.checkState() == Qt.Checked:
+                    params = f_item.relaxations[r].previous
+                    tau = np.power(10, params['tau'])
+                    temp = round((f_item.df["Temperature"].max() + f_item.df["Temperature"].min())/2, 1)
+                    field = round((f_item.df["MagneticField"].max() + f_item.df["MagneticField"].min())/2, 0)
+                    point = (tau,temp,field)
+                    points.append(point)
 
-            i += 1
+                i += 1
 
-        if i == 0:
-            return
-            
-        tau_item = FitTauItem(self.ui, txt='First')
-        tau_item.points = points
-        unzipped = pd.Series(list(zip(*points)))
-        tau_item.tau = pd.Series(list(unzipped[0]))
-        tau_item.temp = pd.Series(list(unzipped[1]))
-        tau_item.field = pd.Series(list(unzipped[2]))
+            if len(points) == 0:
+                return
 
-        print('#########')
-        print(points)
-        print(tau_item.tau)
-        print(tau_item.tau.tolist() )
-        print('#########')
+            if r == 0:
+                tau_item = FitTauItem(self.ui, txt='First_relax_1')
+            else:
+                tau_item = FitTauItem(self.ui, txt='First_relax_2')
 
-        if self.append(tau_item) == True:
-            self.append(tau_item)
-        tau_item.change()
+            tau_item.points = points
+            unzipped = pd.Series(list(zip(*points)))
+            tau_item.tau = pd.Series(list(unzipped[0]))
+            tau_item.temp = pd.Series(list(unzipped[1]))
+            tau_item.field = pd.Series(list(unzipped[2]))
+
+            if self.append(tau_item) == True:
+                self.append(tau_item)
+            tau_item.change()
 
     # def show(self):
     #     self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)

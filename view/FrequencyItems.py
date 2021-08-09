@@ -9,12 +9,16 @@ from PyQt5.QtCore import Qt
 import pandas as pd
 import numpy as np
 
+import keyboard
+
 class Relaxation():
     def __init__(self):
         self.previous = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 0.0, "chiS" : 0.0}
         self.current = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 0.0, "chiS" : 0.0}
 
+        
         self.error = [0,0,0,0,0]
+        self.current_error = [0,0,0,0,0]
 
 class FitFrequencyItem(StandardItem):
     def __init__(self, mainPage, df, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
@@ -42,6 +46,7 @@ class FitFrequencyItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
+        
         menu.addAction("Inspect fit", self.changePage)
         menu.addAction("Save to file", self.save_to_file)
         menu.addAction("Rename", self.rename)
@@ -91,7 +96,8 @@ class FitFrequencyItem(StandardItem):
                 for key in editFit2D:
                     editFit2D[key].setText(str(r.previous[key]))
 
-                self.ui.plotFr.value_edited()
+            for param in list(self.ui.editFit2D.keys()):
+                self.ui.plotFr.value_edited(param)
 
             i += 1
 
@@ -101,8 +107,16 @@ class FitFrequencyItem(StandardItem):
     def double_click(self):
         self.changePage()
         
-    def click(self):
+    def click(self):   
+        if keyboard.is_pressed('ctrl'):
+            if self.checkState() == Qt.Unchecked:
+                self.setCheckState(Qt.Checked)
+            else:
+                self.setCheckState(Qt.Unchecked)
+            return
+
         self.show()
+
 
     def remove(self):
         self.parent().names.remove(self.name)

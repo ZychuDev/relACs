@@ -1,6 +1,6 @@
 from numba.core.types.scalars import Float, Integer
 from view.AppStateBase import *
-
+from PyQt5.QtWidgets import QTableWidgetItem
 import numpy as np
 import pandas as pd
 
@@ -16,6 +16,8 @@ from scipy.interpolate import interp1d
 from scipy import linalg
 
 from .Validator import Validator
+
+from functools import partial
 
 class Curve():
     def __init__(self):
@@ -92,7 +94,7 @@ class plotFitChi(FigureCanvasQTAgg):
         self.fitItem.ui.lineEdit_ChiT.setValidator(v)
         v = Validator(self.fitItem, 'chiS', self.fitItem.ui.lineEdit_ChiS)
         self.fitItem.ui.lineEdit_ChiS.setValidator(v)
-        print("Nr of connections" + str(plotFitChi.nr_of_connections))
+
 
         ui = self.fitItem.ui
         ui.spinBoxRelaxation.setRange(1, len(self.fitItem.relaxations))
@@ -128,11 +130,11 @@ class plotFitChi(FigureCanvasQTAgg):
             except Exception: pass
 
         plotFitChi.nr_of_connections = plotFitChi.nr_of_connections + 1
-        ui.horizontalSlider_Alpha.valueChanged.connect(self.value_changed_alpha)
-        ui.horizontalSlider_Beta.valueChanged.connect(self.value_changed_beta)
-        ui.horizontalSlider_Tau.valueChanged.connect(self.value_changed_tau)
-        ui.horizontalSlider_ChiS.valueChanged.connect(self.value_changed_chiS)
-        ui.horizontalSlider_ChiT.valueChanged.connect(self.value_changed_chiT)
+        ui.horizontalSlider_Alpha.valueChanged.connect(partial(self.value_changed, 'alpha'))
+        ui.horizontalSlider_Beta.valueChanged.connect(partial(self.value_changed, 'beta'))
+        ui.horizontalSlider_Tau.valueChanged.connect(partial(self.value_changed, 'tau'))
+        ui.horizontalSlider_ChiS.valueChanged.connect(partial(self.value_changed, 'chiS'))
+        ui.horizontalSlider_ChiT.valueChanged.connect(partial(self.value_changed, 'chiT'))
 
         ui.pushButtonFit.clicked.connect(self.makeAutoFit)
         ui.pushButtonSave.clicked.connect(self.saveFit)
@@ -142,26 +144,29 @@ class plotFitChi(FigureCanvasQTAgg):
 
         
 
-        ui.lineEdit_Alpha.editingFinished.connect(self.value_edited)
-        ui.lineEdit_Beta.editingFinished.connect(self.value_edited)
-        ui.lineEdit_Tau.editingFinished.connect(self.value_edited)
-        ui.lineEdit_ChiT.editingFinished.connect(self.value_edited)
-        ui.lineEdit_ChiS.editingFinished.connect(self.value_edited)
+        ui.lineEdit_Alpha.editingFinished.connect(partial(self.value_edited, 'alpha'))
+        ui.lineEdit_Beta.editingFinished.connect(partial(self.value_edited, 'beta'))
+        ui.lineEdit_Tau.editingFinished.connect(partial(self.value_edited, 'tau'))
+        ui.lineEdit_ChiT.editingFinished.connect(partial(self.value_edited, 'chiS'))
+        ui.lineEdit_ChiS.editingFinished.connect(partial(self.value_edited, 'chiT'))
 
     def change_relaxation(self):
         ui = self.fitItem.ui 
-        print(" ### Spin box vchanged \n")
+        
         plotFitChi.nr_of_relaxation = ui.spinBoxRelaxation.value() - 1
 
         current = self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current
         for key, edit  in ui.editFit2D.items():
-            edit.setText(str(round(current[key],6)))
+            edit.setText(str(round(current[key],9)))
             self.edit_to_slider(ui.sliderFit2D[key], edit, key)
+
+        self.fitItem.ui.refreshFitFr()
+
 
 
 
     def refresh(self):
-        #plot points
+        print("Refresh")
         self.ax.cla()
         df = self.df
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
@@ -239,6 +244,15 @@ class plotFitChi(FigureCanvasQTAgg):
                 self.ax.plot(plotFitChi.curves_sum.real_saved, plotFitChi.curves_sum.img_saved, '-', c=mcolors.TABLEAU_COLORS["tab:cyan"])
 
         #self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),fancybox=True, shadow=True)
+        
+
+        for i in range(5):
+            self.fitItem.ui.tableWidget_error_frequency.setItem(1, i,
+             QTableWidgetItem(str(self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current_error[i])))
+
+            self.fitItem.ui.tableWidget_error_frequency.setItem(0, i,
+             QTableWidgetItem(str(self.fitItem.relaxations[plotFitChi.nr_of_relaxation].error[i])))
+
         self.draw()
 
     def onClick(self, event):
@@ -278,32 +292,21 @@ class plotFitChi(FigureCanvasQTAgg):
         v = float(m(v))
         return round(v)
 
-    def value_changed_alpha(self):
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_Alpha, self.fitItem.ui.lineEdit_Alpha, 'alpha')
+    def value_changed(self, param):
+        self.slider_to_edit(self.fitItem.ui.sliderFit2D[param], self.fitItem.ui.editFit2D[param], param)
+
+        for r in self.fitItem.relaxations:
+            for i in range(len(r.current_error)):
+                r.current_error[i] = 0
+
         self.refresh()
 
-    def value_changed_beta(self):
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_Beta, self.fitItem.ui.lineEdit_Beta, 'beta')
-        self.refresh()
+    def value_edited(self, param): 
+        self.edit_to_slider(self.fitItem.ui.sliderFit2D[param], self.fitItem.ui.editFit2D[param], param)
 
-    def value_changed_tau(self):
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_Tau, self.fitItem.ui.lineEdit_Tau, 'tau')
-        self.refresh()
-
-    def value_changed_chiT(self):
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiT, self.fitItem.ui.lineEdit_ChiT, 'chiT')
-        self.refresh()
-
-    def value_changed_chiS(self):
-        self.slider_to_edit(self.fitItem.ui.horizontalSlider_ChiS, self.fitItem.ui.lineEdit_ChiS, 'chiS')
-        self.refresh()
-
-    def value_edited(self): 
-        self.edit_to_slider(self.fitItem.ui.horizontalSlider_Alpha, self.fitItem.ui.lineEdit_Alpha, 'alpha')
-        self.edit_to_slider(self.fitItem.ui.horizontalSlider_Beta, self.fitItem.ui.lineEdit_Beta, 'beta')
-        self.edit_to_slider(self.fitItem.ui.horizontalSlider_Tau, self.fitItem.ui.lineEdit_Tau, 'tau')
-        self.edit_to_slider(self.fitItem.ui.horizontalSlider_ChiT, self.fitItem.ui.lineEdit_ChiT, 'chiT')
-        self.edit_to_slider(self.fitItem.ui.horizontalSlider_ChiS, self.fitItem.ui.lineEdit_ChiS, 'chiS')
+        for r in self.fitItem.relaxations:
+            for i in range(len(r.current_error)):
+                r.current_error[i] = 0
 
         self.fitItem.ui.refreshFitFr()
 
@@ -399,10 +402,10 @@ class plotFitChi(FigureCanvasQTAgg):
 
         current = self.fitItem.relaxations[self.nr_of_relaxation].current
         for key, edit  in ui.editFit2D.items():
-            edit.setText(str(round(current[key],6)))
+            edit.setText(str(round(current[key],9)))
             self.edit_to_slider(ui.sliderFit2D[key], edit, key)
 
-        self.fitItem.ui.refreshFitFr()
+        
 
 
         U, s, Vh = linalg.svd(res.jac, full_matrices=False)
@@ -414,15 +417,21 @@ class plotFitChi(FigureCanvasQTAgg):
         cov *= chi2dof
 
         perr = np.sqrt(np.diag(cov))     # 1sigma uncertainty on fitted parameters
-
+        print(f"Error{perr}")
         for i in range(len(self.fitItem.relaxations)):
-            self.fitItem.relaxations[i].error = perr[i*5:i*5+5]
+            print(perr[i*5:i*5+5])
+            self.fitItem.relaxations[i].current_error = perr[i*5:i*5+5]
+
+
+        self.fitItem.ui.refreshFitFr()
 
     def saveFit(self):
         self.fitItem.wasSaved = True
         for r in self.fitItem.relaxations:
             for key in self.fitItem.ui.editFit2D:
                 r.previous[key] = r.current[key]
+            for i in range(len(r.error)):
+                r.error[i] = r.current_error[i]
 
         self.fitItem.ui.refreshFitFr()
 
@@ -438,6 +447,9 @@ class plotFitChi(FigureCanvasQTAgg):
         for r in self.fitItem.relaxations:
             for key in r.current.keys():
                 r.current[key] = r.previous[key]
+            
+            for i in range(len(r.error)):
+                r.current_error[i] = r.error[i]
         self.refresh()
 
 
@@ -487,7 +499,7 @@ class plotFitChi1(plotFitChi):
         return
         #return super().valueChanged()
 
-    def value_edited(self):
+    def value_edited(self, param):
         return
         #return super().value_edited()
 
@@ -546,7 +558,7 @@ class plotFitChi2(plotFitChi):
         return
         #return super().valueChanged()
 
-    def value_edited(self):
+    def value_edited(self, param):
         return
         #return super().value_edited()
 

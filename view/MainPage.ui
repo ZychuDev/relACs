@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1808</width>
-    <height>939</height>
+    <width>1645</width>
+    <height>930</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,6 +27,9 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <property name="bottomMargin">
+     <number>2</number>
+    </property>
     <item>
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -125,7 +128,7 @@
         </font>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="fit2Dpage">
         <property name="sizePolicy">
@@ -134,7 +137,7 @@
           <verstretch>1</verstretch>
          </sizepolicy>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout" stretch="3,4,4,4,0,2">
          <item>
           <widget class="QLabel" name="actualFitLabel">
            <property name="maximumSize">
@@ -195,9 +198,6 @@
           </spacer>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_2"/>
-         </item>
-         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
            <property name="sizeConstraint">
             <enum>QLayout::SetDefaultConstraint</enum>
@@ -206,7 +206,7 @@
             <number>0</number>
            </property>
            <item>
-            <layout class="QVBoxLayout" name="parameters">
+            <layout class="QVBoxLayout" name="parameters" stretch="1,1,1,1,1,1,0">
              <property name="sizeConstraint">
               <enum>QLayout::SetMaximumSize</enum>
              </property>
@@ -229,7 +229,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>Select relaxation process</string>
+                  <string>Select relaxation process:</string>
                  </property>
                 </widget>
                </item>
@@ -432,6 +432,9 @@
                  </property>
                  <property name="text">
                   <string>0.0</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -738,6 +741,130 @@
                </item>
               </layout>
              </item>
+             <item>
+              <widget class="QTableWidget" name="tableWidget_error_frequency">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>100</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>100</height>
+                </size>
+               </property>
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="Base">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>244</green>
+                     <blue>244</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="Base">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>244</green>
+                     <blue>244</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="Base">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>240</red>
+                     <green>240</green>
+                     <blue>240</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
+               </property>
+               <property name="verticalScrollBarPolicy">
+                <enum>Qt::ScrollBarAsNeeded</enum>
+               </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAsNeeded</enum>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustToContents</enum>
+               </property>
+               <property name="dragEnabled">
+                <bool>false</bool>
+               </property>
+               <property name="alternatingRowColors">
+                <bool>false</bool>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::NoSelection</enum>
+               </property>
+               <attribute name="horizontalHeaderCascadingSectionResizes">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="horizontalHeaderDefaultSectionSize">
+                <number>160</number>
+               </attribute>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderVisible">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderDefaultSectionSize">
+                <number>25</number>
+               </attribute>
+               <attribute name="verticalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <row>
+                <property name="text">
+                 <string>Saved</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>Current</string>
+                </property>
+               </row>
+               <column>
+                <property name="text">
+                 <string>alfa</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>beta</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>tau</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Xs</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Xs-Xt</string>
+                </property>
+               </column>
+              </widget>
+             </item>
             </layout>
            </item>
            <item>
@@ -919,8 +1046,14 @@
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <layout class="QHBoxLayout" name="PanelContainer" stretch="1,1">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item>
-            <layout class="QVBoxLayout" name="LeftPanel" stretch="1,1,1,1,1,1,1,1,1,1,0">
+            <layout class="QVBoxLayout" name="LeftPanel" stretch="1,1,1,1,1,1,1,1,1,1,1,0">
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_27">
                <item>
@@ -1543,7 +1676,7 @@
                 </layout>
                </item>
                <item>
-                <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
+                <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0">
                  <property name="spacing">
                   <number>0</number>
                  </property>
@@ -1591,6 +1724,13 @@
                    </property>
                   </widget>
                  </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton_set_current_3d">
+                   <property name="text">
+                    <string>Set current as saved</string>
+                   </property>
+                  </widget>
+                 </item>
                 </layout>
                </item>
                <item>
@@ -1613,6 +1753,9 @@
                  </item>
                  <item>
                   <widget class="QComboBox" name="comboBox_slice">
+                   <property name="currentText">
+                    <string>Field</string>
+                   </property>
                    <item>
                     <property name="text">
                      <string>Field</string>
@@ -1620,8 +1763,7 @@
                    </item>
                    <item>
                     <property name="text">
-                     <string>
-Temperature</string>
+                     <string>Temperature</string>
                     </property>
                    </item>
                   </widget>
@@ -1629,7 +1771,7 @@ Temperature</string>
                  <item>
                   <layout class="QHBoxLayout" name="horizontalLayout_10">
                    <item>
-                    <widget class="QLabel" name="label_2">
+                    <widget class="QLabel" name="label_slice_const">
                      <property name="maximumSize">
                       <size>
                        <width>45</width>
@@ -1652,6 +1794,151 @@ Temperature</string>
                 </layout>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QTableWidget" name="tableWidget_error_3d">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>110</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>110</height>
+                </size>
+               </property>
+               <property name="palette">
+                <palette>
+                 <active>
+                  <colorrole role="Base">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>244</green>
+                     <blue>244</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </active>
+                 <inactive>
+                  <colorrole role="Base">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>255</red>
+                     <green>244</green>
+                     <blue>244</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </inactive>
+                 <disabled>
+                  <colorrole role="Base">
+                   <brush brushstyle="SolidPattern">
+                    <color alpha="255">
+                     <red>240</red>
+                     <green>240</green>
+                     <blue>240</blue>
+                    </color>
+                   </brush>
+                  </colorrole>
+                 </disabled>
+                </palette>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustToContents</enum>
+               </property>
+               <property name="showGrid">
+                <bool>true</bool>
+               </property>
+               <attribute name="horizontalHeaderCascadingSectionResizes">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="horizontalHeaderDefaultSectionSize">
+                <number>160</number>
+               </attribute>
+               <attribute name="horizontalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderCascadingSectionResizes">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderMinimumSectionSize">
+                <number>20</number>
+               </attribute>
+               <attribute name="verticalHeaderDefaultSectionSize">
+                <number>23</number>
+               </attribute>
+               <attribute name="verticalHeaderStretchLastSection">
+                <bool>true</bool>
+               </attribute>
+               <row>
+                <property name="text">
+                 <string>Saved</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>Current</string>
+                </property>
+               </row>
+               <column>
+                <property name="text">
+                 <string>A dir</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>N dir</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>B 1</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>B 2</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>B 3</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>C Raman</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>N Raman</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>NH Raman</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Tau 0</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>Delata E</string>
+                </property>
+               </column>
+               <item row="0" column="0">
+                <property name="text">
+                 <string/>
+                </property>
+               </item>
+              </widget>
              </item>
             </layout>
            </item>
@@ -1683,7 +1970,7 @@ Temperature</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1808</width>
+     <width>1645</width>
      <height>21</height>
     </rect>
    </property>
