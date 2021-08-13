@@ -11,13 +11,7 @@ from .PlotsFit import *
 from .Plot3D import *
 
 from PyQt5.QtGui import QStandardItemModel
-from PyQt5.QtWidgets import QHeaderView
-from model.dataFrameModel import pandasModel
-import sys
-import os
-
-import pandas as pd
-import numpy as np
+from PyQt5.QtWidgets import QHeaderView, QTableView
 
 
 class MainPage(Ui_MainWindow):
@@ -151,6 +145,13 @@ class MainPage(Ui_MainWindow):
          "chiS" : self.horizontalSlider_ChiS
         }
 
+        self.checkFit2D = { "alpha": self.checkBox_Alpha,
+         "beta": self.checkBox_Beta,
+         "tau" : self.checkBox_Tau,
+         "chiT" : self.checkBox_ChiT,
+         "chiS" : self.checkBox_ChiS
+        }
+
         """dataInspect"""
         self.pointPlotChi1 = PlotChi1()
         self.pointPlotChi2 = PlotChi2()
@@ -166,9 +167,9 @@ class MainPage(Ui_MainWindow):
         # self.table.setMaximumWidth(AppState.screen_size[0]*0.4)
         # self.table.setMaximumHeight(AppState.screen_size[1]*0.5)
 
-        self.inspectPlots.addWidget(self.pointPlotChi1, 0, 0)
-        self.inspectPlots.addWidget(self.pointPlotChi2, 1 ,0)
-        self.inspectPlots.addWidget(self.pointPlotChi, 0, 1)
+        self.inspectPlots.addWidget(self.pointPlotChi1, 0, 1)
+        self.inspectPlots.addWidget(self.pointPlotChi2, 0 ,0)
+        self.inspectPlots.addWidget(self.pointPlotChi, 1, 0)
         self.inspectPlots.addWidget(self.table, 1, 1)
 
         self.inspectPlots.setRowStretch(0,1)
@@ -226,7 +227,7 @@ class MainPage(Ui_MainWindow):
             self.comboBox_slice2.blockSignals(True)
             self.comboBox_slice2.clear()
             self.slice.intervals = set()
-            for value in self.slice.const_ax:
+            for value in self.slice.const_ax.sort_values():
                 if value not in self.slice.intervals:
                     self.slice.intervals.add(value)
                     self.comboBox_slice2.addItem(f"{value} {self.slice.unit}")

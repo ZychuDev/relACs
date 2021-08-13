@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from numpy.core.records import get_remaining_size
 import pandas as pd
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from mpl_toolkits.mplot3d import Axes3D
 
 from .Validator import Validator
 
@@ -35,14 +34,14 @@ class Plot3D(FigureCanvasQTAgg):
     def refresh(self): # Fun for Graph plotting
         self.axes.clear()
         # self.axes.plot_surface(x, y, z) # plots the 3D surface plot
-        x = np.linspace(self.tau_item.temp.min(),self.tau_item.temp.max(),60)
-        y = np.linspace(0,5000, 60)
+        x = np.linspace(self.tau_item.temp.min(), self.tau_item.temp.max(), 60)
+        y = np.linspace(self.tau_item.field.min(), self.tau_item.field.max(), 60)
         X, Y = np.meshgrid(x,y)
 
         a = list(self.tau_item.current.values())
         p = list(self.tau_item.previous.values())
-        Z = -np.log10(self.model(X,Y,a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9]))
-        P = -np.log10(self.model(X,Y,p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]))
+        Z = -np.log(self.model(X,Y,a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9]))
+        P = -np.log(self.model(X,Y,p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]))
 
         x = [1/t for t in x]
         X, Y = np.meshgrid(x,y)
@@ -50,11 +49,11 @@ class Plot3D(FigureCanvasQTAgg):
         self.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1, label='current', linestyles=':', color='g')
         
         t_invert = [1/t for t in self.tau_item.temp]
-        value_3d = np.log10(self.tau_item.tau.tolist())
+        value_3d = np.log(self.tau_item.tau.tolist())
         self.axes.scatter(t_invert, self.tau_item.field, value_3d , marker='o', color='r', label='points from fits')
 
-        xs = np.linspace(min(np.amin(Z), min(value_3d)), min(np.amax(Z), max(value_3d) ), 25)
-        zs = np.linspace(min(np.amin(Z), min(value_3d)), max(np.amax(Z), max(value_3d) ), 25)
+        #xs = np.linspace(min(np.amin(Z), min(value_3d)), min(np.amax(Z), max(value_3d) ), 25)
+        #zs = np.linspace(min(np.amin(Z), min(value_3d)), max(np.amax(Z), max(value_3d) ), 25)
 
         if self.tau_item.ui.slice.xStr =='temp':
             xx, zz = np.meshgrid(self.axes.get_xlim(), self.axes.get_zlim())
@@ -71,7 +70,7 @@ class Plot3D(FigureCanvasQTAgg):
 
         self.axes.set_xlabel(r'$\frac{1}{T}$', rotation = 0, fontsize=15)
         self.axes.set_ylabel(r'$\frac{H}{Oe}$', rotation = 0, fontsize=15)
-        self.axes.set_zlabel(r'$\tau^{-1}$', rotation = 0, fontsize=15)
+        self.axes.set_zlabel(r'$\ln{\frac{\tau}{s}}$', rotation = 0, fontsize=15)
 
         self.axes.xaxis.set_rotate_label(False) 
         self.axes.yaxis.set_rotate_label(False) 
@@ -79,7 +78,7 @@ class Plot3D(FigureCanvasQTAgg):
         self.axes.legend()
         self.draw()
 
-        for i in range(10):
+        for i in range(11):
             self.tau_item.ui.tableWidget_error_3d.setItem(1, i,
                 QTableWidgetItem(str(self.tau_item.current_error[i])))
 
@@ -103,7 +102,7 @@ class Plot3D(FigureCanvasQTAgg):
 
         return Adir*temp*(field**Ndir) \
         + B1*(1+B3*field*field)/(1+B2*field*field) \
-        + CRaman*np.power(field if field.all() != 0 else 1, NHRaman ) * np.power(temp, NRaman) \
+        + CRaman*np.power(1 if np.all(field == 0.0) else field, NHRaman ) * np.power(temp, NRaman) \
         + Tau0 *np.exp(-DeltaE/(temp))
 
     def cost_function(self, p, slice=False):
@@ -111,7 +110,7 @@ class Plot3D(FigureCanvasQTAgg):
             slice = self.tau_item.ui.slice
             a = pd.Series(slice.x_ax)
             b = pd.Series(np.ones(len(a)) * slice.const)
-            tau = pd.Series(np.power(10, slice.y_ax))
+            tau = pd.Series(np.exp(slice.y_ax))
             if slice.xStr == 'field':
                 a,b = b,a
 
@@ -148,20 +147,21 @@ class Plot3D(FigureCanvasQTAgg):
                 self.tau_item.current[k] = b[1][i]
             i += 1
         
-        #eps = 0.000000001 
-        fraction = 100000000  
 
+        
         i = 0
         for k in self.tau_item.ui.check3D:
             if self.tau_item.ui.check3D[k].isChecked():
+                fraction =  1e16
                 b[0][i] = max(self.tau_item.current[k] - self.tau_item.current[k]/fraction, b[0][i])
                 b[1][i] = min(self.tau_item.current[k] + self.tau_item.current[k]/fraction, b[1][i])
+                self.tau_item.current[k] = b[1][i] - self.tau_item.current[k]/fraction
             i += 1
 
         i = 0
         for k in self.tau_item.ui.check3D_2:
             if self.tau_item.ui.check3D_2[k].isChecked():
-                self.tau_item.current[k] = 0
+                self.tau_item.current[k] = 1e-65
                 b[0][i] = 0
                 b[1][i] = 1e-64
             i += 1
@@ -169,38 +169,49 @@ class Plot3D(FigureCanvasQTAgg):
         
         cost_f = partial(self.cost_function, slice=slice_flag)
  
-        res = least_squares(cost_f, tuple(self.tau_item.current.values()), bounds = b)
-        J = res.jac
-        i = 0
-        for key in self.tau_item.current:
-            self.tau_item.current[key] = res.x[i]
-            i += 1
+        try:
+            res = least_squares(cost_f, tuple(self.tau_item.current.values()), bounds = b)
+            J = res.jac
+            i = 0
+            for key in self.tau_item.current:
+                self.tau_item.current[key] = res.x[i]
+                i += 1
 
-        for key in ui.edit3D:
-            if key in AppState.log_params:
-                ui.edit3D[key].setText(str(round(np.log10(self.tau_item.current[key]), 9)))
+            for key in ui.edit3D:
+                if key in AppState.log_params:
+                    ui.edit3D[key].setText(str(round(np.log10(self.tau_item.current[key]), 9)))
 
-            else:
-                ui.edit3D[key].setText(str(round(self.tau_item.current[key], 9)))
+                else:
+                    ui.edit3D[key].setText(str(round(self.tau_item.current[key], 9)))
 
-        U, s, Vh = linalg.svd(res.jac, full_matrices=False)
-        tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
-        w = s > tol
-        cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
+            U, s, Vh = linalg.svd(res.jac, full_matrices=False)
+            tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
+            w = s > tol
+            cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
 
-        chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
-        cov *= chi2dof
-        
-        perr = np.sqrt(np.diag(cov))
+            chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
+            cov *= chi2dof
+            
+            perr = np.sqrt(np.diag(cov))
 
-        print(perr)
+            print(perr)
 
-        for i in range(10):
-            self.tau_item.current_error[i] = perr[i]
+            for i in range(len(self.tau_item.current_error)-1):
+                self.tau_item.current_error[i] = perr[i]
+            self.tau_item.current_error[-1] = res.cost
 
-        for k in ui.edit3D:
-            # if ui.blockedOnZero[k].isChecked() == False:
-            self.value_edited(k, True)
+            for k in ui.edit3D:
+                # if ui.blockedOnZero[k].isChecked() == False:
+                self.value_edited(k, True)
+
+            print("bounds", b)
+            print("current:",list(self.tau_item.current.values()))
+        except Exception as e:
+            print(e)
+            self.tau_item.set_current_as_saved()
+            print("bounds", b)
+            print("current:",list(self.tau_item.current.values()))
+
 
 
 
@@ -211,7 +222,7 @@ class Plot3D(FigureCanvasQTAgg):
         self.edit_to_slider(sliders[k], edits[k], k)
 
         if not auto:
-            for i in range(10):
+            for i in range(len(self.tau_item.current_error)):
                 self.tau_item.current_error[i] = 0
 
         self.tau_item.show()
@@ -296,6 +307,7 @@ class Plot3D(FigureCanvasQTAgg):
             f = partial (self.value_edited, k)
             item.ui.edit3D[k].editingFinished.connect(f)
 
+        item.ui.comboBox_slice2.clear()
         item.ui.comboBox_slice2.currentIndexChanged.connect(item.ui.slice.change_const)
         item.ui.pushButton_set_current_3d.clicked.connect(self.tau_item.set_current_as_saved)
         item.ui.pushButton_fitSlice.clicked.connect(partial(self.make_auto_fit, slice_flag=True))
@@ -313,7 +325,7 @@ class Plot3D(FigureCanvasQTAgg):
         for param in self.tau_item.current:
             self.tau_item.previous[param] = self.tau_item.current[param]
 
-        for i in range(10):
+        for i in range(len(self.tau_item.current_error)):
             self.tau_item.error[i] = self.tau_item.current_error[i]
         self.tau_item.show()
 
@@ -345,7 +357,7 @@ class Slice(FigureCanvasQTAgg):
 
                 if p[2] == self.const:
                     self.x_ax.append(p[1])
-                    self.y_ax.append(np.log10(p[0]))
+                    self.y_ax.append(np.log(p[0]))
             #self.x_ax =  [1/x for x in self.tau_item.temp]
 
         if x == 'field':
@@ -353,11 +365,11 @@ class Slice(FigureCanvasQTAgg):
 
                 if p[1] == self.const:
                     self.x_ax.append(p[2])
-                    self.y_ax.append(np.log10(p[0]))
+                    self.y_ax.append(np.log(p[0]))
             #self.x_ax = self.tau_item.field
         if len(self.x_ax) == 0:
-            self.x_ax = [0]
-            self.y_ax = [0]
+            self.x_ax = [0.1]
+            self.y_ax = [0.1]
         self.xStr = x
     
     def change_slice_x_ax(self):
@@ -404,10 +416,10 @@ class Slice(FigureCanvasQTAgg):
             return
 
         self.ax.cla()
-        x_label = r"$\log_{10}{\frac{K}{T}}$"
+        x_label = r"$\frac{K}{T}$"
         if self.xStr == "field":
             x_label = r"$\frac{H}{Oe}$"
-        self.ax.set(xlabel=x_label, ylabel=r"$\log_{10}{\tau}$",
+        self.ax.set(xlabel=x_label, ylabel=r"$\ln{\frac{\tau}{s}}$",
          title=r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman}H^{NH_{Raman}}T^{N_{Raman}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}}$")
         self.ax.grid()
 
@@ -420,54 +432,60 @@ class Slice(FigureCanvasQTAgg):
             a,b = b,a
 
         r1 = self.direct(a, b, self.tau_item.current['Adir'], self.tau_item.current['Ndir'])
-        direct_y = -np.log10(r1)
+        direct_y = -np.log(r1)
         if np.isinf(sum(direct_y)):
             direct_y = np.zeros(len(direct_y))
         try:
             len(direct_y)
         except TypeError:
+            
             direct_y = np.ones(len(a)) * direct_y
         
 
         r2 = self.QTM(a, b, self.tau_item.current['B1'], self.tau_item.current['B2'], self.tau_item.current['B3'])
-        QTM_y = -np.log10(r2)
+        QTM_y = -np.log(r2)
         try:
             len(QTM_y)
         except TypeError:
+            
             QTM_y = np.ones(len(a)) * QTM_y
 
         r3 = self.Raman(a, b, self.tau_item.current['CRaman'], self.tau_item.current['NHRaman'], self.tau_item.current['NRaman'])
-        Raman_y = -np.log10(r3)
+        Raman_y = -np.log(r3)
         try:
             len(Raman_y )
         except TypeError:
+            
             Raman_y  = np.ones(len(a)) * Raman_y 
 
         r4 = self.Orbach(a, b, self.tau_item.current['Tau0'], self.tau_item.current['DeltaE'])
-        Orbach_y = -np.log10(r4)
+        Orbach_y = -np.log(r4)
         try:
             len(Orbach_y )
         except TypeError:
             Orbach_y  = np.ones(len(a)) * Orbach_y 
 
+        c = list(self.tau_item.current.values())
+        yy_current = -np.log(self.model(pd.Series(a), pd.Series(b),*c))
+        yy_saved = -np.log(self.model(pd.Series(a), pd.Series(b),**self.tau_item.previous))
+
         if self.xStr == 'field':
             a,b = b,a
 
-        yy = -np.log10(self.model(pd.Series(a), pd.Series(b),self.tau_item.current['Adir'], self.tau_item.current['Ndir'],
-         self.tau_item.current['B1'], self.tau_item.current['B2'], self.tau_item.current['B3'],
-         self.tau_item.current['CRaman'], self.tau_item.current['NRaman'], self.tau_item.current['NHRaman'],
-         self.tau_item.current['Tau0'], self.tau_item.current['DeltaE']))
-         
+
+        xx = self.x_ax
+
+        if self.xStr == 'temp':
+            xx = [1/x for x in self.x_ax]
+
+
+        self.ax.plot(xx, self.y_ax, 'o')
 
         
-        #xx = [1/x for x in self.x_ax]
-        self.ax.plot(self.x_ax, self.y_ax, 'o')
-
-        #a = [1/t for t in a]
-
-        self.ax.plot(a, yy, 'b-', label='current sum')
-        yy = -np.log10(self.model(pd.Series(a), pd.Series(b),**self.tau_item.previous))
-        self.ax.plot(a, yy, 'k-', label='saved sum')
+        if self.xStr == "temp":
+            a = 1/a
+        self.ax.plot(a, yy_saved, 'k-', label='saved sum')
+        self.ax.plot(a, yy_current, 'b-', label='current sum')
 
         if self.tau_item.ui.checkBox_Adir_2.isChecked() == False:
             self.ax.plot(a, direct_y, 'y--', label ='Direct process')
@@ -483,7 +501,11 @@ class Slice(FigureCanvasQTAgg):
         
         
 
-        self.ax.legend()
+        leg = self.ax.legend()
+        
+        if leg:
+            leg.set_draggable(True)
+
         self.draw()
 
 
@@ -494,15 +516,16 @@ class Slice(FigureCanvasQTAgg):
         return B1*(1+B3*field*field)/(1+B2*field*field)
 
     def Raman(self, temp, field, CRaman, NHRaman, Nraman):
-        return CRaman*np.power(field if field.all() != 0 else 1, NHRaman) * np.power(temp, Nraman)
+        return CRaman*np.power(1 if np.all(field == 0.0) else 0, NHRaman) * np.power(temp, Nraman)
 
     def Orbach(self, temp, field, Tau0, DeltaE):
         return Tau0 *np.exp(-DeltaE/temp)
 
     def model(self, temp, field, Adir, Ndir, B1, B2, B3, CRaman, NRaman, NHRaman, Tau0, DeltaE):
+
         return Adir*temp*(field**Ndir) \
         + B1*(1+B3*field*field)/(1+B2*field*field) \
-        + CRaman*np.power(field if field.all() != 0 else 1, NHRaman ) * np.power(temp, NRaman) \
+        + CRaman*np.power(1 if np.all(field == 0.0) else field, NHRaman ) * np.power(temp, NRaman) \
         + Tau0 *np.exp(-DeltaE/(temp))
 
 

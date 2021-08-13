@@ -1,11 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from mpl_toolkits.mplot3d import Axes3D
-
-
-
 
 class Plot(FigureCanvasQTAgg):
     def __init__(self, caption):
@@ -60,11 +55,11 @@ class PlotChi(FigureCanvasQTAgg):
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
         self.ax.set(xlabel="Chi'", ylabel='Chi''', title="Chi' against Chi''")
         self.ax.grid()
-        self.ax.set(title="Ch1 vs logarithm of frequency")
+        self.ax.set(title=r"Cole-Cole", xlabel=r"$\chi^{\prime} /cm^3*mol^{-1}$", ylabel=r"$\chi^{\prime \prime} / cm^3*mol^{-1}$")
         selected = df.loc[df["Selected"] == True]
         rest = df.loc[df["Selected"] == False]
         self.ax.plot(rest["ChiPrimeMol"].values, rest["ChiBisMol"], "o", picker=15 )
-        self.ax.plot(selected["ChiPrimeMol"].values, selected["ChiBisMol"], "o", picker=15 )
+        self.ax.plot(selected["ChiPrimeMol"].values, selected["ChiBisMol"], "o", picker=15)
         
         self.draw()
 
@@ -98,7 +93,8 @@ class PlotChi1(PlotChi):
         df = self.df
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
         self.ax.grid()
-        self.ax.set(title="Ch2 vs logarithm of frequency")
+        
+        self.ax.set(title=r"$\chi^{\prime}$", xlabel=r"$\log {\frac{v}{Hz}}$", ylabel=r"$\chi^{\prime} /cm^3*mol^{-1}$")
         selected = df.loc[df["Selected"] == True]
         rest = df.loc[df["Selected"] == False]
         self.ax.plot(rest["FrequencyLog"].values, rest["ChiPrimeMol"], "o", picker=15 )
@@ -120,7 +116,7 @@ class PlotChi2(PlotChi):
         self.fig.canvas.mpl_connect('pick_event', self.onClick)
 
         self.ax.grid()
-        self.ax.set(title="Chi' against Chi''")
+        self.ax.set(title=r"$\chi^{\prime \prime}$", xlabel=r"$\log {\frac{v}{Hz}}$", ylabel=r"$\chi^{\prime \prime} /cm^3*mol^{-1}$")
         selected = df.loc[df["Selected"] == True]
         rest = df.loc[df["Selected"] == False]
         self.ax.plot(rest["FrequencyLog"].values, rest["ChiBisMol"], "o", picker=15 )

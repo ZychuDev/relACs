@@ -23,19 +23,29 @@ class CompoundCollectionItem(StandardItem):
     def add(self):
         #name, status = QtWidgets.QInputDialog.getText(self.ui.window, "Compund Creation",
         #"Enter name for new compound:")
-        name = "AAA"
-        status =True
-        if status == True:
+        name, ok = QInputDialog.getText(self.ui.window, 'Creating new compund', 'Enter name of compound:')
+        if ok:
             if name in self.container:
                 #TO DO: Ui information
                 print("Compound already exists choose other name or delete old one!")
                 return False #To DO throw exception
         #molar_mass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Compund Creation', 'Enter molar mass:', decimals=6, min = 0.0)
-        #if status == True:
-        new = CompoundItem(self.ui, name, molarMass= 1000) # molar_mass)
-        self.appendRow(new)
-        self.ui.TModel.expandAll()
-        self.container[name] = new
+        dialog = QInputDialog()
+        dialog.setInputMode(QInputDialog.DoubleInput)
+        dialog.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        dialog.setLabelText('Enter molar mass:')
+        dialog.setDoubleMinimum(0.0)
+        dialog.setDoubleMaximum(1000000.0)
+        dialog.setDoubleDecimals(6)
+        dialog.setWindowTitle('Compound Creation')
+        status = dialog.exec_()
+        # molar_mass = 1000
+        if status == True:
+            molar_mass = dialog.doubleValue()
+            new = CompoundItem(self.ui, name, molar_mass= molar_mass)
+            self.appendRow(new)
+            self.ui.TModel.expandAll()
+            self.container[name] = new
 
     def append(self, compound):
         if compound.name in self.container:
@@ -50,12 +60,12 @@ class CompoundCollectionItem(StandardItem):
 
 class CompoundItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0),
-    molarMass = 2000):
+    molar_mass = 2000):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
 
         self.name = txt
-        self.molarMass = molarMass #TO DO: implement dialog box option for it
+        self.molar_mass = molar_mass #TO DO: implement dialog box option for it
 
         self.data = DataCollectionItem(self.ui, 'Data')
         self.FrequencyFits = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Single Relaxation')

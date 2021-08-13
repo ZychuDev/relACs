@@ -15,10 +15,12 @@ class Relaxation():
     def __init__(self):
         self.previous = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 0.0, "chiS" : 0.0}
         self.current = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 0.0, "chiS" : 0.0}
+        self.is_blocked = {"alpha": False, "beta": False, "tau" : False, "chiT" : False, "chiS" : False}
 
         
-        self.error = [0,0,0,0,0]
-        self.current_error = [0,0,0,0,0]
+        self.error = [0,0,0,0,0,0]
+        self.current_error = [0,0,0,0,0,0]
+
 
 class FitFrequencyItem(StandardItem):
     def __init__(self, mainPage, df, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
@@ -56,6 +58,7 @@ class FitFrequencyItem(StandardItem):
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def show(self):
+
         i = 0
         for r in self.relaxations:
             self.ui.spinBoxRelaxation.setValue(i + 1)
@@ -85,23 +88,22 @@ class FitFrequencyItem(StandardItem):
         editFit2D = self.ui.editFit2D
         i = 0
         for r in self.relaxations:
+            if not self.ui.checkBoxRemember.isChecked():
+                for key in self.ui.editFit2D:
+                    self.ui.editFit2D[key].setText(str(r.previous[key]))
+                    self.ui.plotFr.value_edited(key, True)
+                    
             self.ui.spinBoxRelaxation.setValue(i + 1)
-            if self.ui.checkBoxRemember.checkState() and old is not None:
+            if self.ui.checkBoxRemember.isChecked() and old is not None:
                 
                 for key in editFit2D:
                     editFit2D[key].setText(str(old.relaxations[i].current[key]))
-                    self.relaxations[i].current[key] = old.relaxations[i].current[key]
+                    self.ui.plotFr.value_edited(key, True)
 
-            if not self.ui.checkBoxRemember.checkState():
-                for key in editFit2D:
-                    editFit2D[key].setText(str(r.previous[key]))
-
-            for param in list(self.ui.editFit2D.keys()):
-                self.ui.plotFr.value_edited(param)
-
+                
             i += 1
 
-        self.show()
+            self.show()
          
         
     def double_click(self):
@@ -187,13 +189,33 @@ class FitFrequencyCollectionItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        menu.addAction("Make fit", self.make_fit)
+        menu.addAction("Make fit from all checked", self.make_fit)
         menu.addAction("Save all to file", self.save_to_file)
+        menu.addAction("Make all fits", self.make_fits_for_all)
+        menu.addSeparator()
+        menu.addAction("Check all", self.check_all)
+        menu.addAction("Uncheck all", self.uncheck_all)
+        menu.addSeparator()
+        menu.addAction("Remove selected", self.remove_selected)
 
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def make_fit(self):
-        self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
+        if self.child(0) is not None:
+            self.parent().child(3).make_new_fit(len(self.child(0).relaxations))
+        
+
+    def remove_selected(self):
+        i = 0
+        nr_of_rows = self.rowCount()
+        while i < nr_of_rows:
+            child = self.child(i)
+            if child.checkState() == Qt.Checked:
+                self.names.remove(child.name)
+                self.removeRow(i)
+                nr_of_rows -= 1
+                i -= 1
+            i += 1
 
     def append(self, item):
         if item.name in self.names:
@@ -216,3 +238,19 @@ class FitFrequencyCollectionItem(StandardItem):
         except Exception as e:
             print(e)
             return
+    def make_fits_for_all(self):
+        i = 0
+        while(self.child(i) != None):
+            child = self.child(i)
+            child.show()
+            child.ui.plotFr.make_auto_fit()
+            child.ui.plotFr.saveFit()
+            i += 1
+
+    def check_all(self):
+        for i in range(self.rowCount()):
+            self.child(i).setCheckState(Qt.Checked)
+
+    def uncheck_all(self):
+        for i in range(self.rowCount()):
+            self.child(i).setCheckState(Qt.Unchecked)

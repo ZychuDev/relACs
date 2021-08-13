@@ -17,8 +17,8 @@ class FitTauItem(StandardItem):
         self.ui = mainPage
         self.name = txt
 
-        self.error = [0,0,0,0,0,0,0,0,0,0]
-        self.current_error = [0,0,0,0,0,0,0,0,0,0]
+        self.error = [0,0,0,0,0,0,0,0,0,0,0]
+        self.current_error = [0,0,0,0,0,0,0,0,0,0,0]
 
         self.previous = {'Adir': 1,
         'Ndir': 0,
@@ -66,12 +66,20 @@ class FitTauItem(StandardItem):
         for i in range(len(self.error)):
             self.current_error[i] = self.error[i]
 
+
+        
+        for key in self.ui.edit3D:
+            if key in AppState.log_params:
+                self.ui.edit3D[key].setText(str(round(np.log10(self.current[key]), 9)))
+
+            else:
+                self.ui.edit3D[key].setText(str(round(self.current[key], 9)))
+
+            self.ui.plot3d.value_edited(key, True)
         self.show()
 
 
 
-        
-    
     def rename(self):
         text, ok = QInputDialog.getText(self.ui.window, 'Renaming dataPoint', 'Enter new dataPoint name:')
         names = self.parent().container
@@ -92,7 +100,7 @@ class FitTauItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        menu.addAction("Inspect", self.show)
+        menu.addAction("Inspect", self.change)
         menu.addAction("Rename", self.rename)
         menu.addAction("Save to file", self.save_to_file)
 
@@ -151,10 +159,10 @@ class FitTauItem(StandardItem):
 
 
     def double_click(self):
-        self.show()
+        self.change()
 
     def click(self):
-        self.show()
+        self.change()
 
 
 class FitTauCollectionItem(StandardItem):
@@ -168,18 +176,31 @@ class FitTauCollectionItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        menu.addAction("Make new fit", self.make_new_fit)
-        menu.addAction("Make new fit 2-relaxations", functools.partial(self.make_new_fit,2))
+        menu.addAction("Save all to file", self.save_to_file)
         menu.exec_(self.ui.window.mapToGlobal(position))
 
+    def save_to_file(self):
+        df = pd.DataFrame()
+        i = 0
+        while(self.child(i) != None):
+            df = pd.concat([df, self.child(i).result()], axis=1)
+            i += 1
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+        try:
+            with  open(name[0] + '.csv', 'w') as f:
+                df.to_csv(f.name, index=False, sep= AppState.separator)
+        except Exception as e:
+            print(e)
+            return
 
     def make_new_fit(self, nr_of_relax=1):
-        self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
+        
         f_items = self.parent().child(nr_of_relax)
-        points = []
+        
        
         for r in range(nr_of_relax):
             i = 0
+            points = []
             while(f_items.child(i) != None):
                 f_item = f_items.child(i) #frequency_item
                 if f_item.checkState() == Qt.Checked:
@@ -194,27 +215,29 @@ class FitTauCollectionItem(StandardItem):
 
             if len(points) == 0:
                 return
+            name, ok = QInputDialog.getText(self.ui.window, 'Creating tau fit', 'Enter name of fit:')
+            if ok:
+                if r == 0:
+                    tau_item = FitTauItem(self.ui, txt= name +'_relax_1')
+                else:
+                    tau_item = FitTauItem(self.ui, txt= name+ '_relax_2')
 
-            if r == 0:
-                tau_item = FitTauItem(self.ui, txt='First_relax_1')
-            else:
-                tau_item = FitTauItem(self.ui, txt='First_relax_2')
+                tau_item.points = points
+                unzipped = pd.Series(list(zip(*points)))
+                tau_item.tau = pd.Series(list(unzipped[0]))
+                tau_item.temp = pd.Series(list(unzipped[1]))
+                tau_item.field = pd.Series(list(unzipped[2]))
 
-            tau_item.points = points
-            unzipped = pd.Series(list(zip(*points)))
-            tau_item.tau = pd.Series(list(unzipped[0]))
-            tau_item.temp = pd.Series(list(unzipped[1]))
-            tau_item.field = pd.Series(list(unzipped[2]))
+                if self.append(tau_item) == True:
+                    self.append(tau_item)
+                tau_item.change()
 
-            if self.append(tau_item) == True:
-                self.append(tau_item)
-            tau_item.change()
+            self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
 
     # def show(self):
     #     self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
 
     #     self.ui.plot3d.change(self)
-
 
 
     def append(self, item):

@@ -1,18 +1,17 @@
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import  QFileDialog, QPushButton, QMenu, QTableView, QAbstractItemView, QInputDialog
-from PyQt5.QtCore import  Qt, QSize, QRect, QFile
+from PyQt5.QtWidgets import  QFileDialog, QMenu, QInputDialog
+from PyQt5.QtCore import  Qt, QLocale
+
 
 import keyboard
 
 from PyQt5 import QtWidgets
 
-import sys
 import os
 
 import pandas as pd
 import numpy as np
 
-import json
 
 from .Plots import *
 from .StandardItem import StandardItem
@@ -131,14 +130,15 @@ class DataItem(StandardItem):
         if show:
             fit.show()
 
-    def make_fit_2(self):
+    def make_fit_2(self, show=True):
         fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency2Relaxations")
         fit.add_relaxation()
 
         fit.temp = self.temp
         fit.field = self.field
         self.parent().parent().child(2).append(fit)
-        fit.show()
+        if show:
+            fit.show()
 
     def to_json(self):
         pass
@@ -163,7 +163,7 @@ class DataCollectionItem(StandardItem):
         menu.addAction("Load from file", self.loadFromFile)
         menu.addAction("Make fits from all laded data", self.make_all_fits)
         menu.addAction("Make fits from checked data", self.make_fits_checked)
-        menu.addAction("Make 2-relaxations fits from checkeddata", self.make_fits_checked_2)
+        menu.addAction("Make 2-relaxations fits from checked data", self.make_fits_checked_2)
         menu.addSeparator()
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
@@ -177,18 +177,18 @@ class DataCollectionItem(StandardItem):
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file
-        #dlg = QtWidgets.QFileDialog()
-        #dlg.setFileMode(QFileDialog.AnyFile) #TMP
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QFileDialog.AnyFile) #TMP
 
-        #if dlg.exec_():
-        #    filenames = dlg.selectedFiles()
-        #else:
-        #    return
+        if dlg.exec_():
+           filenames = dlg.selectedFiles()
+        else:
+           return
 
-        #if len(filenames) != 1 :
-        #     return 
+        if len(filenames) != 1 :
+            return 
 
-        filepath = "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat"  #filenames[0]  #TMP
+        filepath = filenames[0]  #TMP "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat"  #
         if not os.path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return
@@ -215,15 +215,26 @@ class DataCollectionItem(StandardItem):
         data = data.rename(columns=translateExternalToInternal)
         data = data[DataItem.columnsHeadersInternal]
 
-        molarMass = self.parent().molarMass
-        #probeMass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:', decimals=8, min=0.0)
-        #if status != True:
-         #   return
-        probeMass = 0.01 # TO DO:: value form dialog window
-
-        data["ChiPrimeMol"] = data["ChiPrime"] * molarMass/probeMass
-        data["ChiBisMol"] = data["ChiBis"] * molarMass/probeMass
+        molar_mass = self.parent().molar_mass
+        #probe_mass, status = QtWidgets.QInputDialog.getDouble(self.ui.window, 'Loading data', 'Enter sample mass:', decimals=8, min=0.0)
+        dialog = QInputDialog()
+        dialog.setInputMode(QInputDialog.DoubleInput)
+        dialog.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+        dialog.setLabelText('Enter sample mass:')
+        dialog.setDoubleMinimum(0.0)
+        dialog.setDoubleMaximum(1000000.0)
+        dialog.setDoubleDecimals(8)
+        dialog.setWindowTitle('Loading data')
+        status = dialog.exec_()
+    
+        if status != True:
+           return
+        #probe_mass = 0.01 # TO DO:: value form dialog window
+        probe_mass = dialog.doubleValue()
+        data["ChiPrimeMol"] = data["ChiPrime"] * molar_mass/probe_mass
+        data["ChiBisMol"] = data["ChiBis"] * molar_mass/probe_mass
         data["Omega"] = 2 * data["Frequency"] * np.pi
+        data["OmegaLog"] = np.log10(data["Omega"])
         data["FrequencyLog"] = np.log10(data["Frequency"])
         sLength = len(data["Frequency"])
 
@@ -239,7 +250,7 @@ class DataCollectionItem(StandardItem):
                 self.append(DataItem.dfToDataItem(self.ui, y, sufix))
 
         self.ui.TModel.resizeColumnToContents(0)
-        self.make_all_fits()# TMP
+        #self.make_all_fits()# TMP
 
         
 
@@ -284,7 +295,8 @@ class DataCollectionItem(StandardItem):
         while(self.child(i) != None):
             self.child(i).make_fit(False)
             i += 1
-        self.child(i-1).show()
+        if self.child(i-1) is not None:
+            self.child(i-1).show()
 
         self.ui.TModel.expandAll()
     
