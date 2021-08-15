@@ -1061,7 +1061,7 @@
             <number>0</number>
            </property>
            <item>
-            <layout class="QVBoxLayout" name="LeftPanel" stretch="1,1,1,1,1,1,1,1,1,1,1,0">
+            <layout class="QVBoxLayout" name="LeftPanel" stretch="1,1,1,1,1,1,1,1,1,1,0">
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_27">
                <item>
@@ -1476,65 +1476,6 @@
               </layout>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_19">
-               <item>
-                <widget class="QLabel" name="label_NHraman">
-                 <property name="minimumSize">
-                  <size>
-                   <width>60</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="font">
-                  <font>
-                   <pointsize>12</pointsize>
-                  </font>
-                 </property>
-                 <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;NH&lt;span style=&quot; vertical-align:sub;&quot;&gt;raman&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QSlider" name="horizontalSlider_NHraman">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="tickPosition">
-                  <enum>QSlider::TicksBelow</enum>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QLineEdit" name="lineEdit_NHraman">
-                 <property name="maximumSize">
-                  <size>
-                   <width>100</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_NHraman">
-                 <property name="text">
-                  <string>Block</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QCheckBox" name="checkBox_NHraman_2">
-                 <property name="text">
-                  <string>Block on 0</string>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </item>
-             <item>
               <layout class="QHBoxLayout" name="horizontalLayout_6">
                <item>
                 <widget class="QLabel" name="label_Tau0">
@@ -1924,11 +1865,6 @@
                <column>
                 <property name="text">
                  <string>N Raman</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>NH Raman</string>
                 </property>
                </column>
                <column>

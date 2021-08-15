@@ -1,6 +1,6 @@
 from numba.core.types.scalars import Float, Integer
 from view.AppStateBase import *
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidgetItem, QApplication
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -377,7 +377,11 @@ class plotFitChi(FigureCanvasQTAgg):
         return  dif_real + dif_img
 
 
-    def make_auto_fit(self):
+    def make_auto_fit(self, auto=False):
+        if not auto:
+            QApplication.restoreOverrideCursor()
+            QApplication.processEvents()
+            
         l = len(self.fitItem.relaxations)
         r = AppState.ranges 
         b = ([r['alpha'][0], r['beta'][0], r['tau'][0], r['chiT'][0], r['chiS'][0]], [r['alpha'][1], r['beta'][1], r['tau'][1], r['chiT'][1], r['chiS'][1]])
@@ -449,6 +453,9 @@ class plotFitChi(FigureCanvasQTAgg):
 
 
         self.fitItem.ui.refreshFitFr()
+        if not auto:
+            QApplication.restoreOverrideCursor()
+            QApplication.processEvents()
 
     def saveFit(self):
         self.fitItem.wasSaved = True

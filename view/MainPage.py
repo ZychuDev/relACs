@@ -80,7 +80,6 @@ class MainPage(Ui_MainWindow):
         'B3': self.horizontalSlider_B3,
         'CRaman': self.horizontalSlider_Craman,
         'NRaman': self.horizontalSlider_Nraman,
-        'NHRaman': self.horizontalSlider_NHraman,
         'Tau0': self.horizontalSlider_Tau0,
         'DeltaE': self.horizontalSlider_DeltaE
         }
@@ -92,7 +91,6 @@ class MainPage(Ui_MainWindow):
         'B3': self.lineEdit_B3,
         'CRaman': self.lineEdit_Craman,
         'NRaman': self.lineEdit_Nraman,
-        'NHRaman': self.lineEdit_NHraman,
         'Tau0': self.lineEdit_Tau0,
         'DeltaE': self.lineEdit_DeltaE
         }
@@ -104,7 +102,6 @@ class MainPage(Ui_MainWindow):
         'B3': self.checkBox_B3,
         'CRaman': self.checkBox_Craman,
         'NRaman': self.checkBox_Nraman,
-        'NHRaman': self.checkBox_NHraman,
         'Tau0': self.checkBox_Tau0,
         'DeltaE': self.checkBox_DeltaE
         }
@@ -116,7 +113,6 @@ class MainPage(Ui_MainWindow):
         'B3': self.checkBox_B3_2,
         'CRaman': self.checkBox_Craman_2,
         'NRaman': self.checkBox_Nraman_2,
-        'NHRaman': self.checkBox_NHraman_2,
         'Tau0': self.checkBox_Tau0_2,
         'DeltaE': self.checkBox_DeltaE_2
         }

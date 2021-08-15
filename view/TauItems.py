@@ -17,8 +17,8 @@ class FitTauItem(StandardItem):
         self.ui = mainPage
         self.name = txt
 
-        self.error = [0,0,0,0,0,0,0,0,0,0,0]
-        self.current_error = [0,0,0,0,0,0,0,0,0,0,0]
+        self.error = [0,0,0,0,0,0,0,0,0,0]
+        self.current_error = [0,0,0,0,0,0,0,0,0,0]
 
         self.previous = {'Adir': 1,
         'Ndir': 0,
@@ -27,7 +27,6 @@ class FitTauItem(StandardItem):
         'B3': 1,
         'CRaman': 0,
         'NRaman': 0,
-        'NHRaman': 0,
         'Tau0': 1,
         'DeltaE': 0
         }
@@ -39,7 +38,6 @@ class FitTauItem(StandardItem):
         'B3': 1,
         'CRaman': 0,
         'NRaman': 0,
-        'NHRaman': 0,
         'Tau0': 0.1,
         'DeltaE': 0
         }

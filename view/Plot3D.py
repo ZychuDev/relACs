@@ -1,6 +1,6 @@
 from math import inf
-from PyQt5.QtCore import QLocale
-from PyQt5.QtWidgets import QTableWidgetItem
+from PyQt5.QtCore import QLocale, Qt
+from PyQt5.QtWidgets import QTableWidgetItem, QApplication
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,8 +40,8 @@ class Plot3D(FigureCanvasQTAgg):
 
         a = list(self.tau_item.current.values())
         p = list(self.tau_item.previous.values())
-        Z = -np.log(self.model(X,Y,a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9]))
-        P = -np.log(self.model(X,Y,p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9]))
+        Z = -np.log(self.model(X,Y,a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8]))
+        P = -np.log(self.model(X,Y,p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8]))
 
         x = [1/t for t in x]
         X, Y = np.meshgrid(x,y)
@@ -78,7 +78,7 @@ class Plot3D(FigureCanvasQTAgg):
         self.axes.legend()
         self.draw()
 
-        for i in range(11):
+        for i in range(len(self.tau_item.current_error)):
             self.tau_item.ui.tableWidget_error_3d.setItem(1, i,
                 QTableWidgetItem(str(self.tau_item.current_error[i])))
 
@@ -98,11 +98,11 @@ class Plot3D(FigureCanvasQTAgg):
 
             
 
-    def model(self, temp, field, Adir, Ndir, B1, B2, B3, CRaman, NRaman, NHRaman, Tau0, DeltaE):
+    def model(self, temp, field, Adir, Ndir, B1, B2, B3, CRaman, NRaman, Tau0, DeltaE):
 
         return Adir*temp*(field**Ndir) \
         + B1*(1+B3*field*field)/(1+B2*field*field) \
-        + CRaman*np.power(1 if np.all(field == 0.0) else field, NHRaman ) * np.power(temp, NRaman) \
+        + CRaman * np.power(temp, NRaman) \
         + Tau0 *np.exp(-DeltaE/(temp))
 
     def cost_function(self, p, slice=False):
@@ -115,18 +115,19 @@ class Plot3D(FigureCanvasQTAgg):
                 a,b = b,a
 
             return np.power(self.model(a, b,
-                p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]) - (1/tau), 2)
+                p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]) - (1/tau), 2)
 
         return np.power(self.model(self.tau_item.temp, self.tau_item.field,
-            p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9]) - (1/self.tau_item.tau), 2)
+            p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]) - (1/self.tau_item.tau), 2)
 
     def make_auto_fit(self, slice_flag=False):
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.processEvents()
         np.seterr(divide = 'ignore') 
         r = AppState.ranges
         ui = self.tau_item.ui
         params = ui.slider3D.keys() 
-        # lower_bound = [0,0,0,0,0,0,0,0,0,0]
-        # upper_bound = [1e-31,1e-31,1e-31,1e-31,1e-31,1e-31,1e-31,1e-31,1e-31,1e-31]
+
         lower_bound = []
         upper_bound = []
         for p in self.tau_item.current:
@@ -169,49 +170,51 @@ class Plot3D(FigureCanvasQTAgg):
         
         cost_f = partial(self.cost_function, slice=slice_flag)
  
-        try:
-            res = least_squares(cost_f, tuple(self.tau_item.current.values()), bounds = b)
-            J = res.jac
-            i = 0
-            for key in self.tau_item.current:
-                self.tau_item.current[key] = res.x[i]
-                i += 1
+    # try:
+        res = least_squares(cost_f, tuple(self.tau_item.current.values()), bounds = b)
+        J = res.jac
+        i = 0
+        for key in self.tau_item.current:
+            self.tau_item.current[key] = res.x[i]
+            i += 1
 
-            for key in ui.edit3D:
-                if key in AppState.log_params:
-                    ui.edit3D[key].setText(str(round(np.log10(self.tau_item.current[key]), 9)))
+        for key in ui.edit3D:
+            if key in AppState.log_params:
+                ui.edit3D[key].setText(str(round(np.log10(self.tau_item.current[key]), 9)))
 
-                else:
-                    ui.edit3D[key].setText(str(round(self.tau_item.current[key], 9)))
+            else:
+                ui.edit3D[key].setText(str(round(self.tau_item.current[key], 9)))
 
-            U, s, Vh = linalg.svd(res.jac, full_matrices=False)
-            tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
-            w = s > tol
-            cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
+        U, s, Vh = linalg.svd(res.jac, full_matrices=False)
+        tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
+        w = s > tol
+        cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
 
-            chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
-            cov *= chi2dof
-            
-            perr = np.sqrt(np.diag(cov))
+        chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
+        cov *= chi2dof
+        
+        perr = np.sqrt(np.diag(cov))
 
-            print(perr)
+        print(perr)
 
-            for i in range(len(self.tau_item.current_error)-1):
-                self.tau_item.current_error[i] = perr[i]
-            self.tau_item.current_error[-1] = res.cost
+        for i in range(len(self.tau_item.current_error)-1):
+            self.tau_item.current_error[i] = perr[i]
+        self.tau_item.current_error[-1] = res.cost
 
-            for k in ui.edit3D:
-                # if ui.blockedOnZero[k].isChecked() == False:
-                self.value_edited(k, True)
+        for k in ui.edit3D:
+            # if ui.blockedOnZero[k].isChecked() == False:
+            self.value_edited(k, True)
 
-            print("bounds", b)
-            print("current:",list(self.tau_item.current.values()))
-        except Exception as e:
-            print(e)
-            self.tau_item.set_current_as_saved()
-            print("bounds", b)
-            print("current:",list(self.tau_item.current.values()))
+        print("bounds", b)
+        print("current:",list(self.tau_item.current.values()))
+    # except Exception as e:
+    #     print(e)
+    #     self.tau_item.set_current_as_saved()
+    #     print("bounds", b)
+    #     print("current:",list(self.tau_item.current.values()))
 
+        QApplication.restoreOverrideCursor()
+        QApplication.processEvents()
 
 
 
@@ -316,7 +319,7 @@ class Plot3D(FigureCanvasQTAgg):
     def value_changed(self, k):
         self.slider_to_edit(self.tau_item.ui.slider3D[k], self.tau_item.ui.edit3D[k], k)
 
-        for i in range(10):
+        for i in range(len(self.tau_item.current_error)):
             self.tau_item.current_error[i] = 0
 
         self.tau_item.show()
@@ -420,7 +423,7 @@ class Slice(FigureCanvasQTAgg):
         if self.xStr == "field":
             x_label = r"$\frac{H}{Oe}$"
         self.ax.set(xlabel=x_label, ylabel=r"$\ln{\frac{\tau}{s}}$",
-         title=r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman}H^{NH_{Raman}}T^{N_{Raman}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}}$")
+         title=r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman}T^{N_{Raman}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}}$")
         self.ax.grid()
 
        
@@ -450,7 +453,7 @@ class Slice(FigureCanvasQTAgg):
             
             QTM_y = np.ones(len(a)) * QTM_y
 
-        r3 = self.Raman(a, b, self.tau_item.current['CRaman'], self.tau_item.current['NHRaman'], self.tau_item.current['NRaman'])
+        r3 = self.Raman(a, b, self.tau_item.current['CRaman'], self.tau_item.current['NRaman'])
         Raman_y = -np.log(r3)
         try:
             len(Raman_y )
@@ -499,7 +502,7 @@ class Slice(FigureCanvasQTAgg):
         if self.tau_item.ui.checkBox_Tau0_2.isChecked() == False:
             self.ax.plot(a, Orbach_y, 'm--', label='Orbach')
         
-        
+        self.ax.set_ylim(min(self.y_ax) - 1, 3 + max(self.y_ax))
 
         leg = self.ax.legend()
         
@@ -515,17 +518,17 @@ class Slice(FigureCanvasQTAgg):
     def QTM(self, temp, field, B1, B2, B3):
         return B1*(1+B3*field*field)/(1+B2*field*field)
 
-    def Raman(self, temp, field, CRaman, NHRaman, Nraman):
-        return CRaman*np.power(1 if np.all(field == 0.0) else 0, NHRaman) * np.power(temp, Nraman)
+    def Raman(self, temp, field, CRaman, Nraman):
+        return CRaman* np.power(temp, Nraman)
 
     def Orbach(self, temp, field, Tau0, DeltaE):
         return Tau0 *np.exp(-DeltaE/temp)
 
-    def model(self, temp, field, Adir, Ndir, B1, B2, B3, CRaman, NRaman, NHRaman, Tau0, DeltaE):
+    def model(self, temp, field, Adir, Ndir, B1, B2, B3, CRaman, NRaman, Tau0, DeltaE):
 
         return Adir*temp*(field**Ndir) \
         + B1*(1+B3*field*field)/(1+B2*field*field) \
-        + CRaman*np.power(1 if np.all(field == 0.0) else field, NHRaman ) * np.power(temp, NRaman) \
+        + CRaman * np.power(temp, NRaman) \
         + Tau0 *np.exp(-DeltaE/(temp))
 
 

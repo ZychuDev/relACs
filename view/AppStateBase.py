@@ -13,7 +13,6 @@ class AppStateBase:
         'B3': (-9,1),
         'CRaman': (0,100),
         'NRaman': (0,15),
-        'NHRaman': (0,6),
         'Tau0': (0,12),
         'DeltaE': (0,3000)
         }

@@ -1,5 +1,4 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
 
 import view.AppStateBase
 from view.MainPage import *

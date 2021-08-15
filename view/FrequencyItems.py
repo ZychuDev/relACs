@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from .StandardItem import StandardItem
 
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMenu
+from PyQt5.QtWidgets import QMenu, QApplication
 
 from PyQt5.QtCore import Qt
 
@@ -64,6 +64,11 @@ class FitFrequencyItem(StandardItem):
             self.ui.spinBoxRelaxation.setValue(i + 1)
             for key in self.ui.editFit2D:
                 r.current[key] = float(self.ui.editFit2D[key].text())
+
+            for key in self.ui.checkFit2D:
+                print(r.is_blocked[key])
+                self.ui.checkFit2D[key].setChecked( r.is_blocked[key]) 
+
             i += 1
 
         
@@ -203,6 +208,7 @@ class FitFrequencyCollectionItem(StandardItem):
     def make_fit(self):
         if self.child(0) is not None:
             self.parent().child(3).make_new_fit(len(self.child(0).relaxations))
+
         
 
     def remove_selected(self):
@@ -239,13 +245,17 @@ class FitFrequencyCollectionItem(StandardItem):
             print(e)
             return
     def make_fits_for_all(self):
+        QApplication.setOverrideCursor(Qt.WaitCursor)
+        QApplication.processEvents()
         i = 0
         while(self.child(i) != None):
             child = self.child(i)
             child.show()
-            child.ui.plotFr.make_auto_fit()
+            child.ui.plotFr.make_auto_fit(auto=True)
             child.ui.plotFr.saveFit()
             i += 1
+        QApplication.restoreOverrideCursor()
+        QApplication.processEvents()
 
     def check_all(self):
         for i in range(self.rowCount()):
