@@ -172,48 +172,48 @@ class Plot3D(FigureCanvasQTAgg):
         
         cost_f = partial(self.cost_function, slice=slice_flag)
  
-    try:
-        res = least_squares(cost_f, tuple(self.tau_item.current.values()), bounds = b)
-        J = res.jac
-        i = 0
-        for key in self.tau_item.current:
-            self.tau_item.current[key] = res.x[i]
-            i += 1
+        try:
+            res = least_squares(cost_f, tuple(self.tau_item.current.values()), bounds = b)
+            J = res.jac
+            i = 0
+            for key in self.tau_item.current:
+                self.tau_item.current[key] = res.x[i]
+                i += 1
 
-        for key in ui.edit3D:
-            if key in AppState.log_params:
-                ui.edit3D[key].setText(str(round(np.log10(self.tau_item.current[key]), 9)))
+            for key in ui.edit3D:
+                if key in AppState.log_params:
+                    ui.edit3D[key].setText(str(round(np.log10(self.tau_item.current[key]), 9)))
 
-            else:
-                ui.edit3D[key].setText(str(round(self.tau_item.current[key], 9)))
+                else:
+                    ui.edit3D[key].setText(str(round(self.tau_item.current[key], 9)))
 
-        U, s, Vh = linalg.svd(res.jac, full_matrices=False)
-        tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
-        w = s > tol
-        cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
+            U, s, Vh = linalg.svd(res.jac, full_matrices=False)
+            tol = np.finfo(float).eps*s[0]*max(res.jac.shape)
+            w = s > tol
+            cov = (Vh[w].T/s[w]**2) @ Vh[w]  # robust covariance matrix
 
-        chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
-        cov *= chi2dof
-        
-        perr = np.sqrt(np.diag(cov))
+            chi2dof = np.sum(res.fun**2)/(res.fun.size - res.x.size)
+            cov *= chi2dof
+            
+            perr = np.sqrt(np.diag(cov))
 
-        print(perr)
+            print(perr)
 
-        for i in range(len(self.tau_item.current_error)-1):
-            self.tau_item.current_error[i] = perr[i]
-        self.tau_item.current_error[-1] = res.cost
+            for i in range(len(self.tau_item.current_error)-1):
+                self.tau_item.current_error[i] = perr[i]
+            self.tau_item.current_error[-1] = res.cost
 
-        for k in ui.edit3D:
-            # if ui.blockedOnZero[k].isChecked() == False:
-            self.value_edited(k, True)
+            for k in ui.edit3D:
+                # if ui.blockedOnZero[k].isChecked() == False:
+                self.value_edited(k, True)
 
-        print("bounds", b)
-        print("current:",list(self.tau_item.current.values()))
-    except Exception as e:
-        print(e)
-        self.tau_item.set_current_as_saved()
-        print("bounds", b)
-        print("current:",list(self.tau_item.current.values()))
+            print("bounds", b)
+            print("current:",list(self.tau_item.current.values()))
+        except Exception as e:
+            print(e)
+            self.tau_item.set_current_as_saved()
+            print("bounds", b)
+            print("current:",list(self.tau_item.current.values()))
 
         QApplication.restoreOverrideCursor()
         QApplication.processEvents()
