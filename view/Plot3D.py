@@ -170,7 +170,7 @@ class Plot3D(FigureCanvasQTAgg):
         
         cost_f = partial(self.cost_function, slice=slice_flag)
  
-    # try:
+    try:
         res = least_squares(cost_f, tuple(self.tau_item.current.values()), bounds = b)
         J = res.jac
         i = 0
@@ -207,11 +207,11 @@ class Plot3D(FigureCanvasQTAgg):
 
         print("bounds", b)
         print("current:",list(self.tau_item.current.values()))
-    # except Exception as e:
-    #     print(e)
-    #     self.tau_item.set_current_as_saved()
-    #     print("bounds", b)
-    #     print("current:",list(self.tau_item.current.values()))
+    except Exception as e:
+        print(e)
+        self.tau_item.set_current_as_saved()
+        print("bounds", b)
+        print("current:",list(self.tau_item.current.values()))
 
         QApplication.restoreOverrideCursor()
         QApplication.processEvents()

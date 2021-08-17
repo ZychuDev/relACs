@@ -13,7 +13,7 @@ class AppStateBase:
         'B3': (-9,1),
         'CRaman': (0,100),
         'NRaman': (0,15),
-        'Tau0': (0,12),
+        'Tau0': (0,18),
         'DeltaE': (0,3000)
         }
         self.log_params = ('Adir', 'B1', 'B2', 'B3', 'Tau0')
