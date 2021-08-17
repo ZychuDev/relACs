@@ -153,6 +153,8 @@ class Plot3D(FigureCanvasQTAgg):
         i = 0
         for k in self.tau_item.ui.check3D:
             if self.tau_item.ui.check3D[k].isChecked():
+                if self.tau_item.current[k] == 0:
+                    continue
                 fraction =  1e16
                 b[0][i] = max(self.tau_item.current[k] - self.tau_item.current[k]/fraction, b[0][i])
                 b[1][i] = min(self.tau_item.current[k] + self.tau_item.current[k]/fraction, b[1][i])
