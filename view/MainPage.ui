@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1645</width>
+    <width>1637</width>
     <height>930</height>
    </rect>
   </property>
@@ -85,7 +85,7 @@
         <number>10</number>
        </property>
        <property name="sortingEnabled">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="allColumnsShowFocus">
         <bool>false</bool>
@@ -149,6 +149,8 @@
            <property name="font">
             <font>
              <pointsize>18</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
             </font>
            </property>
            <property name="text">
@@ -293,7 +295,7 @@
                   </font>
                  </property>
                  <property name="text">
-                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;chi;&lt;span style=&quot; vertical-align:sub;&quot;&gt;s&lt;/span&gt;-&amp;chi;&lt;span style=&quot; vertical-align:sub;&quot;&gt;t&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;chi;&lt;span style=&quot; vertical-align:sub;&quot;&gt;t&lt;/span&gt;-&amp;chi;&lt;span style=&quot; vertical-align:sub;&quot;&gt;s&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -801,6 +803,9 @@
                <property name="sizeAdjustPolicy">
                 <enum>QAbstractScrollArea::AdjustToContents</enum>
                </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
                <property name="dragEnabled">
                 <bool>false</bool>
                </property>
@@ -814,7 +819,7 @@
                 <bool>true</bool>
                </attribute>
                <attribute name="horizontalHeaderDefaultSectionSize">
-                <number>160</number>
+                <number>210</number>
                </attribute>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -858,12 +863,12 @@
                </column>
                <column>
                 <property name="text">
-                 <string>Xs</string>
+                 <string>Xs-Xt</string>
                 </property>
                </column>
                <column>
                 <property name="text">
-                 <string>Xs-Xt</string>
+                 <string>Xs</string>
                 </property>
                </column>
                <column>
@@ -876,7 +881,7 @@
             </layout>
            </item>
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,1,1,0,1,1">
+            <layout class="QVBoxLayout" name="verticalLayout_3" stretch="1,1,1,0,0,1,1">
              <item>
               <widget class="QPushButton" name="pushButtonFit">
                <property name="minimumSize">
@@ -974,6 +979,13 @@
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="pushButton_copyParameters2D">
+               <property name="text">
+                <string>Copy parameters</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <layout class="QHBoxLayout" name="horizontalLayout_12">
                <item>
                 <widget class="QCheckBox" name="checkBoxRemember">
@@ -1061,7 +1073,39 @@
             <number>0</number>
            </property>
            <item>
-            <layout class="QVBoxLayout" name="LeftPanel" stretch="1,1,1,1,1,1,1,1,1,1,0">
+            <layout class="QVBoxLayout" name="LeftPanel" stretch="0,1,1,1,1,1,1,1,1,1,1,0">
+             <item>
+              <widget class="QLabel" name="actualFit3DLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>45</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>18</pointsize>
+                 <weight>75</weight>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="lineWidth">
+                <number>1</number>
+               </property>
+               <property name="text">
+                <string>Fit Name</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_27">
                <item>
@@ -1596,7 +1640,7 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,0,0">
                <item>
-                <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0">
+                <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0">
                  <property name="sizeConstraint">
                   <enum>QLayout::SetMaximumSize</enum>
                  </property>
@@ -1618,7 +1662,14 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Change ranges</string>
+                    <string>Adjust ranges</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="pushButton_copyParameters3D">
+                   <property name="text">
+                    <string>Copy parameters</string>
                    </property>
                   </widget>
                  </item>
@@ -1798,6 +1849,9 @@
                <property name="sizeAdjustPolicy">
                 <enum>QAbstractScrollArea::AdjustToContents</enum>
                </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
                <property name="showGrid">
                 <bool>true</bool>
                </property>
@@ -1805,7 +1859,7 @@
                 <bool>true</bool>
                </attribute>
                <attribute name="horizontalHeaderDefaultSectionSize">
-                <number>160</number>
+                <number>210</number>
                </attribute>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -1909,6 +1963,32 @@
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="homePage">
+        <widget class="QWidget" name="verticalLayoutWidget">
+         <property name="geometry">
+          <rect>
+           <x>650</x>
+           <y>280</y>
+           <width>306</width>
+           <height>83</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="font">
+             <font>
+              <pointsize>50</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Main Page</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
       </widget>
      </widget>
     </item>
@@ -1919,7 +1999,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1645</width>
+     <width>1637</width>
      <height>21</height>
     </rect>
    </property>
@@ -1953,6 +2033,11 @@
   <action name="actionImport">
    <property name="text">
     <string>Import</string>
+   </property>
+  </action>
+  <action name="actionDefault_Settings">
+   <property name="text">
+    <string>Default Settings</string>
    </property>
   </action>
  </widget>

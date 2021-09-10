@@ -17,3 +17,4 @@ class StandardItem(QStandardItem):
 
     def click(self):
         print("No provided action for single click")
+

@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from .StandardItem import StandardItem
 
 from PyQt5.QtGui import QColor
-from PyQt5.QtWidgets import QMenu, QApplication
+from PyQt5.QtWidgets import QStyle, QMenu, QApplication, QMessageBox
 
 from PyQt5.QtCore import Qt
 
@@ -11,24 +11,34 @@ import numpy as np
 
 import keyboard
 
+from functools import partial
+from .SortModes import SortModes
+
 class Relaxation():
-    def __init__(self):
-        self.previous = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 0.0, "chiS" : 0.0}
-        self.current = {"alpha": 0.1, "beta": 0.1, "tau" : -1.0, "chiT" : 0.0, "chiS" : 0.0}
+    def __init__(self, compound):
+        names = ["alpha", "beta", "tau", "chiT", "chiS"]
+        self.previous = {}
+        self.current = {}
+        for p in names:
+            self.current[p] = (compound.ranges[p][0] + compound.ranges[p][1])/2
+            self.previous[p] = (compound.ranges[p][0] + compound.ranges[p][1])/2
         self.is_blocked = {"alpha": False, "beta": False, "tau" : False, "chiT" : False, "chiS" : False}
 
         
-        self.error = [0,0,0,0,0,0]
-        self.current_error = [0,0,0,0,0,0]
+        self.error = [0.0,0.0,0.0,0.0,0.0]
+        self.current_error = [0.0,0.0,0.0,0.0,0.0]
+        self.residual_error = 0.0
+        self.current_residual_error = 0.0
 
 
 class FitFrequencyItem(StandardItem):
-    def __init__(self, mainPage, df, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
+    def __init__(self, mainPage, df, compound, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
 
         self.wasSaved = False
-        self.relaxations = [Relaxation()]
+        self.compound = compound
+        self.relaxations = [Relaxation(self.compound)]
 
         
         self.name = txt
@@ -43,13 +53,23 @@ class FitFrequencyItem(StandardItem):
         self.setUserTristate(True)
         self.setCheckState(Qt.Unchecked)
 
+        def __lt__(self, other): 
+            if self.sort_mode == SortModes.TEMP:
+                if self.temp == other.temp:
+                    return self.field < other.field
+                return self.temp < other.temp
+
+            if self.sort_mode == SortModes.FIELD:
+                if self.field == other.field:
+                    return self.temp < other.temp
+                return self.field < other.field
+
     def add_relaxation(self):
-        self.relaxations.append(Relaxation())
+        self.relaxations.append(Relaxation(self.compound))
 
     def showMenu(self, position):
         menu = QMenu()
         
-        menu.addAction("Inspect fit", self.changePage)
         menu.addAction("Save to file", self.save_to_file)
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
@@ -64,10 +84,13 @@ class FitFrequencyItem(StandardItem):
             self.ui.spinBoxRelaxation.setValue(i + 1)
             for key in self.ui.editFit2D:
                 r.current[key] = float(self.ui.editFit2D[key].text())
+                pass
+
 
             for key in self.ui.checkFit2D:
-                print(r.is_blocked[key])
+                self.ui.checkFit2D[key].blockSignals(True)
                 self.ui.checkFit2D[key].setChecked( r.is_blocked[key]) 
+                self.ui.checkFit2D[key].blockSignals(False)
 
             i += 1
 
@@ -90,19 +113,28 @@ class FitFrequencyItem(StandardItem):
 
         
     def changePage(self, old = None):
+        self.ui.plotFr.change(self)
+        self.ui.plotChi.change(self)
+        self.ui.plotMain.change(self)
+
         editFit2D = self.ui.editFit2D
         i = 0
-        for r in self.relaxations:
-            if not self.ui.checkBoxRemember.isChecked():
+        for r in self.relaxations:      
+            self.ui.spinBoxRelaxation.setValue(i + 1)
+
+            if not self.ui.checkBoxRemember.isChecked() or old is None:
                 for key in self.ui.editFit2D:
                     self.ui.editFit2D[key].setText(str(r.previous[key]))
                     self.ui.plotFr.value_edited(key, True)
-                    
-            self.ui.spinBoxRelaxation.setValue(i + 1)
+
             if self.ui.checkBoxRemember.isChecked() and old is not None:
                 
                 for key in editFit2D:
                     editFit2D[key].setText(str(old.relaxations[i].current[key]))
+                    r.current[key] = old.relaxations[i].current[key]
+                    self.ui.checkFit2D[key].blockSignals(True)
+                    r.is_blocked[key] = old.relaxations[i].is_blocked[key]
+                    self.ui.checkFit2D[key].blockSignals(False)
                     self.ui.plotFr.value_edited(key, True)
 
                 
@@ -112,7 +144,7 @@ class FitFrequencyItem(StandardItem):
          
         
     def double_click(self):
-        self.changePage()
+        self.click()
         
     def click(self):   
         if keyboard.is_pressed('ctrl'):
@@ -122,7 +154,7 @@ class FitFrequencyItem(StandardItem):
                 self.setCheckState(Qt.Unchecked)
             return
 
-        self.show()
+        self.changePage()
 
 
     def remove(self):
@@ -131,12 +163,17 @@ class FitFrequencyItem(StandardItem):
         
 
     def save_to_file(self):
-        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file', filter="*.csv")
         try:
-            with  open(name[0] + '.csv', 'w') as f:
+            with  open(name[0], 'w') as f:
                 self.result().to_csv(f.name, index=False, sep=AppState.separator)
-        except Exception as e:
-            print(e)
+        except OSError as e:
+            message = str(e)
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Warning)
+            msg.setText(message)
+            msg.setWindowTitle("Error when saving to file")
+            msg.exec_()
             return
 
     def result(self):
@@ -146,17 +183,24 @@ class FitFrequencyItem(StandardItem):
             r = self.relaxations[nr_of_relax]
             i = 0
             for name in r.previous:
-                row = {'Name': name + str(nr_of_relax + 1), 'Value': r.previous[name], 'Error': r.error[i]}
+                row = {'Name': (name if name != "tau" else 'log10 '+ name)+ str(nr_of_relax + 1),
+                 'Value': (r.previous[name] if name != 'chiT' else r.previous[name] + r.previous['chiS']),
+                 'Error': r.error[i]}
                 i += 1
                 df_param = df_param.append(row, ignore_index=True)
 
 
-            df_experimental = self.df[["Frequency", "ChiPrimeMol", "ChiBisMol"]]
+            df_experimental = self.df[["Frequency", "ChiPrimeMol","ChiBisMol"]].loc[self.df["Show"]== True]
+            df_experimental.columns = [f"Frequency T={self.temp} H={self.field}", f"ChiPrimeMol T={self.temp} H={self.field}",
+             f"ChiBisMol T={self.temp} H={self.field}"]
             df_experimental.reset_index(drop=True, inplace=True)
 
-            columns=["FrequencyModel", "ChiPrimeModel", "ChiBisModel"]
+            columns=[f"FrequencyModel T={self.temp} H={self.field}", f"ChiPrimeModelT={self.temp} H={self.field}",
+             f"ChiBisModel T={self.temp} H={self.field}"]
             df_model = pd.DataFrame(columns=columns)
-            xx = np.logspace(np.log10(self.df["Frequency"].min()),np.log10(self.df["Frequency"].max()), AppState.resolution)
+
+            shown = self.df.loc[self.df["Show"]== True] 
+            xx = np.logspace(np.log10(shown["Frequency"].min()),np.log10(shown["Frequency"].max()), AppState.resolution)
 
             df_model[columns[0]] = pd.Series(xx)
             yy = []
@@ -201,9 +245,23 @@ class FitFrequencyCollectionItem(StandardItem):
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
         menu.addSeparator()
+        submenu = menu.addMenu("Sort")
+        submenu.addAction("Sort by temperature", partial(self.sort, SortModes.TEMP))
+        submenu.addAction("Sort by field", partial(self.sort, SortModes.FIELD))
         menu.addAction("Remove selected", self.remove_selected)
 
         menu.exec_(self.ui.window.mapToGlobal(position))
+
+    def sort(self, sort_mode=None):
+        if sort_mode is not None:
+            self.sort_mode = sort_mode
+            
+        i = 0
+        while self.child(i) is not None:
+            self.child(i).sort_mode = self.sort_mode
+            i += 1
+
+        self.sortChildren(0)
 
     def make_fit(self):
         if self.child(0) is not None:
@@ -244,6 +302,7 @@ class FitFrequencyCollectionItem(StandardItem):
         except Exception as e:
             print(e)
             return
+
     def make_fits_for_all(self):
         QApplication.setOverrideCursor(Qt.WaitCursor)
         QApplication.processEvents()

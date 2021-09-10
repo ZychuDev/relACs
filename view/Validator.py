@@ -6,8 +6,9 @@ from matplotlib.pyplot import plot
 
 class Validator(QDoubleValidator):
     def __init__(self, fitItem, param, lineEdit):
-        bottom = AppState.ranges[param][0]
-        top = AppState.ranges[param][1]
+        compound = fitItem.parent().parent()
+        bottom = compound.ranges[param][0]
+        top = compound.ranges[param][1]
         super().__init__(bottom, top, 9)
         self.fitItem = fitItem
         self.param = param

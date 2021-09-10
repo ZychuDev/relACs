@@ -21,13 +21,18 @@ from model.dataFrameModel import pandasModel
 from PyQt5.QtCore import Qt
 from .FrequencyItems import *
 
+from functools import partial
+from .SortModes import SortModes
+
+import configparser
 
 class DataItem(StandardItem):
     columnsHeadersInternal = ["Temperature","MagneticField","ChiPrime","ChiBis","Frequency"]
-    def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
+    def __init__(self, mainPage, txt='', font_size=12, set_bold=False,
+      color=QColor(0,0,0), sort_mode=SortModes.TEMP):
+
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
-        #self.columnsHeadersExternal = AppState.settings
 
         self.name = txt
         self.df = pd.DataFrame(columns=self.columnsHeadersInternal)
@@ -35,6 +40,19 @@ class DataItem(StandardItem):
 
         self.setUserTristate(True)
         self.setCheckState(Qt.Unchecked)
+        self.sort_mode = sort_mode
+
+    def __lt__(self, other):
+        
+        if self.sort_mode == SortModes.TEMP:
+            if self.temp == other.temp:
+                return self.field < other.field
+            return self.temp < other.temp
+
+        if self.sort_mode == SortModes.FIELD:
+            if self.field == other.field:
+                return self.temp < other.temp
+            return self.field < other.field
 
     def dfToDataItem(ui, df, sufix=''):
         temp = round((df["Temperature"].max() + df["Temperature"].min())/2, 1)
@@ -64,7 +82,6 @@ class DataItem(StandardItem):
         menu.addAction("Make fit with 2 relaxation process", self.make_fit_2)
         menu.exec_(self.ui.window.mapToGlobal(position))
         
-
         return
 
     def show(self):
@@ -86,9 +103,6 @@ class DataItem(StandardItem):
     def double_click(self):
         self.show()
 
-
-        
-    
     def click(self):
         if keyboard.is_pressed('ctrl'):
             if self.checkState() == Qt.Unchecked:
@@ -123,22 +137,22 @@ class DataItem(StandardItem):
             self.setText(self.name)
 
     def make_fit(self, show=True):
-        fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency")
+        fit = FitFrequencyItem(self.ui, self.df, self.parent().parent(), self.name + "FitFrequency")
         fit.temp = self.temp
         fit.field = self.field
         self.parent().parent().child(1).append(fit)
         if show:
-            fit.show()
+            fit.changePage()
 
     def make_fit_2(self, show=True):
-        fit = FitFrequencyItem(self.ui, self.df, self.name + "FitFrequency2Relaxations")
+        fit = FitFrequencyItem(self.ui, self.df,self.parent().parent(), self.name + "FitFrequency2Relaxations")
         fit.add_relaxation()
 
         fit.temp = self.temp
         fit.field = self.field
         self.parent().parent().child(2).append(fit)
         if show:
-            fit.show()
+            fit.changePage()
 
     def to_json(self):
         pass
@@ -156,17 +170,22 @@ class DataCollectionItem(StandardItem):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
         self.names = set()
+        self.sort_mode = SortModes.TEMP
 
 
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Load from file", self.loadFromFile)
-        menu.addAction("Make fits from all laded data", self.make_all_fits)
+        menu.addAction("Make fits from all loaded data", self.make_all_fits)
         menu.addAction("Make fits from checked data", self.make_fits_checked)
         menu.addAction("Make 2-relaxations fits from checked data", self.make_fits_checked_2)
         menu.addSeparator()
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
+        menu.addSeparator()
+        submenu = menu.addMenu("Sort")
+        submenu.addAction("Sort by temperature", partial(self.sort, SortModes.TEMP))
+        submenu.addAction("Sort by field", partial(self.sort, SortModes.FIELD))
         menu.addSeparator()
         menu.addAction("Remove selected", self.remove_selected)
         
@@ -174,11 +193,22 @@ class DataCollectionItem(StandardItem):
 
         menu.exec_(self.ui.window.mapToGlobal(position))
 
+    def sort(self, sort_mode=None):
+        if sort_mode is not None:
+            self.sort_mode = sort_mode
+        i = 0
+        while self.child(i) is not None:
+            self.child(i).sort_mode = self.sort_mode
+            i += 1
+
+        self.sortChildren(0)
+        
+
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file
         dlg = QtWidgets.QFileDialog()
-        dlg.setFileMode(QFileDialog.AnyFile) #TMP
+        dlg.setFileMode(QFileDialog.ExistingFile) #TMP
 
         if dlg.exec_():
            filenames = dlg.selectedFiles()
@@ -196,7 +226,11 @@ class DataCollectionItem(StandardItem):
         #.dat -> .csv nocverter, streaping unusefull header info
         with open(filepath,"r") as f:
             lines = f.readlines()
-            filepath = filepath[:-4] + ".csv"
+            if filepath.find('.'):
+                filepath = filepath[:filepath.rfind('.')]
+
+            filepath = filepath + ".csv"
+
             with open(filepath, "w+") as f:
                 header = True
                 for line in lines:
@@ -208,9 +242,17 @@ class DataCollectionItem(StandardItem):
         data = pd.read_csv(filepath, header=1)
         data = data.sort_values("Temperature (K)")
 
-        translateExternalToInternal = {}
-        for i in range(len(DataItem.columnsHeadersInternal)):
-            translateExternalToInternal[AppState.columnsHeadersExternal[i]] = DataItem.columnsHeadersInternal[i]
+        config = configparser.RawConfigParser()
+        config.optionxform = str
+
+        config.read('view/default_settings.ini')
+
+        translateExternalToInternal = {value:key for key, value in dict(config['Headers']).items()}
+        print(f"Nowy słownik{translateExternalToInternal}")
+        
+
+        # for i in range(len(DataItem.columnsHeadersInternal)):
+        #     translateExternalToInternal[AppState.columnsHeadersExternal[i]] = DataItem.columnsHeadersInternal[i]
 
         data = data.rename(columns=translateExternalToInternal)
         data = data[DataItem.columnsHeadersInternal]
@@ -220,7 +262,7 @@ class DataCollectionItem(StandardItem):
         dialog = QInputDialog()
         dialog.setInputMode(QInputDialog.DoubleInput)
         dialog.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
-        dialog.setLabelText('Enter sample mass:')
+        dialog.setLabelText('Enter sample mass in grams:')
         dialog.setDoubleMinimum(0.0)
         dialog.setDoubleMaximum(1000000.0)
         dialog.setDoubleDecimals(8)
@@ -239,9 +281,9 @@ class DataCollectionItem(StandardItem):
         sLength = len(data["Frequency"])
 
         data = data.sort_values("Temperature")
-        fields = self.cluster(data, "MagneticField", AppState.epsField)
+        fields = self.cluster(data, "MagneticField", float(config['Epsilons']['Field']))
         for i in list(range(0, len(fields))):
-            fields[i] = self.cluster( fields[i], "Temperature", AppState.epsTemp)
+            fields[i] = self.cluster( fields[i], "Temperature", float(config['Epsilons']['Temp']))
 
         sufix = filepath.split('/')[-1][:-4] #extract filename from filepath
         print(sufix)

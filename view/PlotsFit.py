@@ -1,6 +1,6 @@
 from numba.core.types.scalars import Float, Integer
 from view.AppStateBase import *
-from PyQt5.QtWidgets import QTableWidgetItem, QApplication
+from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QPushButton, QTableWidgetItem, QApplication, QDialog
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -74,6 +74,7 @@ class plotFitChi(FigureCanvasQTAgg):
         super().__init__(self.fig)
         self.xStr = "ChiPrimeMol"
 
+        self.fitItem = None
         self.colors_names = ["tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink"]
 
     def change(self, fitFrequecyItem):
@@ -82,19 +83,6 @@ class plotFitChi(FigureCanvasQTAgg):
         self.df = fitFrequecyItem.df
 
         self.refresh()
-
-
-        v = Validator(self.fitItem, 'alpha', self.fitItem.ui.lineEdit_Alpha)
-        self.fitItem.ui.lineEdit_Alpha.setValidator(v)
-        v = Validator(self.fitItem, 'beta', self.fitItem.ui.lineEdit_Beta)
-        self.fitItem.ui.lineEdit_Beta.setValidator(v)
-        v = Validator(self.fitItem, 'tau', self.fitItem.ui.lineEdit_Tau)
-        self.fitItem.ui.lineEdit_Tau.setValidator(v)
-        v = Validator(self.fitItem, 'chiT', self.fitItem.ui.lineEdit_ChiT)
-        self.fitItem.ui.lineEdit_ChiT.setValidator(v)
-        v = Validator(self.fitItem, 'chiS', self.fitItem.ui.lineEdit_ChiS)
-        self.fitItem.ui.lineEdit_ChiS.setValidator(v)
-
 
         ui = self.fitItem.ui
         ui.spinBoxRelaxation.setRange(1, len(self.fitItem.relaxations))
@@ -119,6 +107,8 @@ class plotFitChi(FigureCanvasQTAgg):
                 ui.pushButtonSave.clicked.disconnect()
                 ui.pushButtonNext.clicked.disconnect()
                 ui.pushButtonPrevious.clicked.disconnect()
+                ui.pushButtonSetRange.clicked.disconnect()
+                ui.pushButton_copyParameters2D.clicked.disconnect()
                 ui.pushButtonSetSavedAsCurrent.clicked.disconnect()
 
                 
@@ -132,6 +122,18 @@ class plotFitChi(FigureCanvasQTAgg):
 
                 plotFitChi.nr_of_connections = 0
             except Exception: pass
+        if plotFitChi.nr_of_connections == 0:
+            v = Validator(self.fitItem, 'alpha', self.fitItem.ui.lineEdit_Alpha)
+            self.fitItem.ui.lineEdit_Alpha.setValidator(v)
+            v = Validator(self.fitItem, 'beta', self.fitItem.ui.lineEdit_Beta)
+            self.fitItem.ui.lineEdit_Beta.setValidator(v)
+            v = Validator(self.fitItem, 'tau', self.fitItem.ui.lineEdit_Tau)
+            self.fitItem.ui.lineEdit_Tau.setValidator(v)
+            v = Validator(self.fitItem, 'chiT', self.fitItem.ui.lineEdit_ChiT)
+            self.fitItem.ui.lineEdit_ChiT.setValidator(v)
+            v = Validator(self.fitItem, 'chiS', self.fitItem.ui.lineEdit_ChiS)
+            self.fitItem.ui.lineEdit_ChiS.setValidator(v)
+            ui.pushButtonSetRange.clicked.connect(partial(self.fitItem.parent().parent().change_ranges, self.fitItem.changePage))
 
         plotFitChi.nr_of_connections = plotFitChi.nr_of_connections + 1
         ui.horizontalSlider_Alpha.valueChanged.connect(partial(self.value_changed, 'alpha'))
@@ -140,10 +142,14 @@ class plotFitChi(FigureCanvasQTAgg):
         ui.horizontalSlider_ChiS.valueChanged.connect(partial(self.value_changed, 'chiS'))
         ui.horizontalSlider_ChiT.valueChanged.connect(partial(self.value_changed, 'chiT'))
 
+            
         ui.pushButtonFit.clicked.connect(self.make_auto_fit)
         ui.pushButtonSave.clicked.connect(self.saveFit)
         ui.pushButtonNext.clicked.connect(self.next)
+        
+        
         ui.pushButtonPrevious.clicked.connect(self.previous)
+        ui.pushButton_copyParameters2D.clicked.connect(self.copy_parameters)
         ui.pushButtonSetSavedAsCurrent.clicked.connect(self.set_saved_as_current)
 
         
@@ -151,14 +157,46 @@ class plotFitChi(FigureCanvasQTAgg):
         ui.lineEdit_Alpha.editingFinished.connect(partial(self.value_edited, 'alpha'))
         ui.lineEdit_Beta.editingFinished.connect(partial(self.value_edited, 'beta'))
         ui.lineEdit_Tau.editingFinished.connect(partial(self.value_edited, 'tau'))
-        ui.lineEdit_ChiT.editingFinished.connect(partial(self.value_edited, 'chiS'))
-        ui.lineEdit_ChiS.editingFinished.connect(partial(self.value_edited, 'chiT'))
+        ui.lineEdit_ChiS.editingFinished.connect(partial(self.value_edited, 'chiS'))
+        ui.lineEdit_ChiT.editingFinished.connect(partial(self.value_edited, 'chiT'))
 
         for key in ui.checkFit2D:
             ui.checkFit2D[key].stateChanged.connect(partial(self.parameter_blocked, key))
 
     def parameter_blocked(self, name):
+        print(id(self.fitItem))
         self.fitItem.relaxations[plotFitChi.nr_of_relaxation].is_blocked[name] = not self.fitItem.relaxations[plotFitChi.nr_of_relaxation].is_blocked[name]
+
+
+    def copy_parameters(self):
+        dlg = QDialog()
+        dlg.setWindowTitle("Choose fit item to copy from")
+        layout = QHBoxLayout()
+        button = QPushButton("Copy")
+        combo_box = QComboBox()
+        layout.addWidget(combo_box)
+        layout.addWidget(button)
+        dlg.setLayout(layout)
+
+        parent = self.fitItem.parent()
+        i = 0
+        while(parent.child(i) is not None):
+            combo_box.addItem(parent.child(i).name)
+            i += 1
+        
+        button.clicked.connect(partial(self.copy_parameters_from, combo_box, dlg))
+        dlg.exec_()
+
+
+    def copy_parameters_from(self, combo_box, dlg):
+        check = self.fitItem.ui.checkBoxRemember
+        state = check.isChecked()
+        check.setChecked(True)
+        source = self.fitItem.parent().child(combo_box.currentIndex())
+        if  source is not None:
+            self.fitItem.changePage(source)
+            dlg.accept()
+            check.setChecked(state)
 
     def change_relaxation(self):
         ui = self.fitItem.ui 
@@ -202,9 +240,10 @@ class plotFitChi(FigureCanvasQTAgg):
         hiden = df.loc[df["Show"]== False] 
 
         self.ax.plot( shown["ChiPrimeMol"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
-        self.ax.plot( hiden["ChiPrimeMol"].values, hiden["ChiBisMol"].values, "o", label = "Hiden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+        self.ax.plot( hiden["ChiPrimeMol"].values, hiden["ChiBisMol"].values, "o", label = "Hidden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
 
-        step = (df['FrequencyLog'].max() - df['FrequencyLog'].min())/50
+        nr_of_steps = 50
+        step = (df['FrequencyLog'].max() - df['FrequencyLog'].min())/nr_of_steps
         min = df['FrequencyLog'].min()
         plotFitChi.domain = []
         while min <= (df['FrequencyLog'].max() + step):
@@ -266,13 +305,21 @@ class plotFitChi(FigureCanvasQTAgg):
 
         #self.ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1),fancybox=True, shadow=True)
         
-
-        for i in range(6):
+        saved_values = list(self.fitItem.relaxations[plotFitChi.nr_of_relaxation].previous.values())
+        plusminus = u'\u00b1'
+        length = len(self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current_error)
+        for i in range(length):
             self.fitItem.ui.tableWidget_error_frequency.setItem(1, i,
              QTableWidgetItem(str(self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current_error[i])))
 
             self.fitItem.ui.tableWidget_error_frequency.setItem(0, i,
-             QTableWidgetItem(str(self.fitItem.relaxations[plotFitChi.nr_of_relaxation].error[i])))
+             QTableWidgetItem(f"{saved_values[i]:.4f} {plusminus} {self.fitItem.relaxations[plotFitChi.nr_of_relaxation].error[i]:.5f}"))
+
+        self.fitItem.ui.tableWidget_error_frequency.setItem(1, length,
+        QTableWidgetItem(f"{self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current_residual_error:.4f}"))
+
+        self.fitItem.ui.tableWidget_error_frequency.setItem(0, length,
+            QTableWidgetItem(f"{self.fitItem.relaxations[plotFitChi.nr_of_relaxation].residual_error:.5f}"))
 
         self.draw()
 
@@ -298,20 +345,23 @@ class plotFitChi(FigureCanvasQTAgg):
         self.fitItem.ui.refreshFitFr()
 
     def map_value(self, slider, name=""):
-        max = AppState.ranges[name][1]
-        min = AppState.ranges[name][0]
+        compound = self.fitItem.parent().parent()
+        max = compound.ranges[name][1]
+        min = compound.ranges[name][0]
         leftSpan = slider.maximum() - slider.minimum()
         rightSpan = max - min
         valueScaled = float(slider.value() - slider.minimum()) / float(leftSpan)
         return round(min + (valueScaled * rightSpan),2)
 
     def map_value_reverse(self, slider, edit, name=""):
-        r = AppState.ranges
+        compound = self.fitItem.parent().parent()
+        r = compound.ranges
         m = interp1d([r[name][0], r[name][1]], [slider.minimum(), slider.maximum()])
         v = str(edit.text())
         if v == '':
             v = self.fitItem.relaxations[plotFitChi.nr_of_relaxation].current[name]
         v = float(v)
+        print(f"{r[name][0]}, {v}, {r[name][1]}")
         v = float(m(v))
         return round(v)
 
@@ -320,7 +370,8 @@ class plotFitChi(FigureCanvasQTAgg):
 
         for r in self.fitItem.relaxations:
             for i in range(len(r.current_error)):
-                r.current_error[i] = 0
+                r.current_error[i] = 0.0
+            r.current_residual_error = 0.0
 
         self.refresh()
 
@@ -330,6 +381,7 @@ class plotFitChi(FigureCanvasQTAgg):
         for r in self.fitItem.relaxations:
             for i in range(len(r.current_error)):
                 r.current_error[i] = 0
+            r.current_residual_error = 0.0
 
         if not auto:
             self.fitItem.ui.refreshFitFr()
@@ -383,7 +435,8 @@ class plotFitChi(FigureCanvasQTAgg):
             QApplication.processEvents()
 
         l = len(self.fitItem.relaxations)
-        r = AppState.ranges 
+        compound = self.fitItem.parent().parent()
+        r = compound.ranges
         b = ([r['alpha'][0], r['beta'][0], r['tau'][0], r['chiT'][0], r['chiS'][0]], [r['alpha'][1], r['beta'][1], r['tau'][1], r['chiT'][1], r['chiS'][1]])
         tmp = (b[0]*l, b[1]*l)
         b  = tmp
@@ -443,14 +496,9 @@ class plotFitChi(FigureCanvasQTAgg):
         cov *= chi2dof
 
         perr = np.sqrt(np.diag(cov))     # 1sigma uncertainty on fitted parameters
-        print(f"Error{perr}")
         for i in range(len(self.fitItem.relaxations)):
-            print(perr[i*5:i*5+5])
             self.fitItem.relaxations[i].current_error = perr[i*5:i*5+5]
-            self.fitItem.relaxations[i].current_error = np.append(self.fitItem.relaxations[i].current_error, res.cost)
-            print(len(self.fitItem.relaxations[i].current_error))
-            
-
+            self.fitItem.relaxations[i].current_residual_error =  res.cost
 
         self.fitItem.ui.refreshFitFr()
         if not auto:
@@ -462,8 +510,11 @@ class plotFitChi(FigureCanvasQTAgg):
         for r in self.fitItem.relaxations:
             for key in self.fitItem.ui.editFit2D:
                 r.previous[key] = r.current[key]
+            
             for i in range(len(r.error)):
                 r.error[i] = r.current_error[i]
+            r.residual_error = r.current_residual_error
+            print(r.residual_error)
 
         self.fitItem.ui.refreshFitFr()
 
@@ -482,7 +533,7 @@ class plotFitChi(FigureCanvasQTAgg):
             
             for i in range(len(r.error)):
                 r.current_error[i] = r.error[i]
-
+            r.current_residual_error = r.residual_error
             for key, edit  in self.fitItem.ui.editFit2D.items():
                 edit.setText(str(round(r.current[key],9)))
                 self.fitItem.ui.plotFr.edit_to_slider(self.fitItem.ui.sliderFit2D[key], edit, key)
@@ -515,7 +566,7 @@ class plotFitChi1(plotFitChi):
 
         
         self.ax.plot( shown[self.xStr].values , shown["ChiPrimeMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
-        self.ax.plot( hiden[self.xStr].values , hiden["ChiPrimeMol"].values, "o", label = "Hiden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+        self.ax.plot( hiden[self.xStr].values , hiden["ChiPrimeMol"].values, "o", label = "Hidden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
         color_nr = 0
         for c in plotFitChi.curves:
             self.ax.plot(plotFitChi.domain_omega, c.real, '--', c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]])
@@ -543,6 +594,9 @@ class plotFitChi1(plotFitChi):
         return
        # return super().make_auto_fit()
 
+    def copy_parameters(self):
+        return
+
 class plotFitChi2(plotFitChi):
     def __init__(self):
         super().__init__()
@@ -569,7 +623,7 @@ class plotFitChi2(plotFitChi):
         hiden = df.loc[df["Show"]== False]
 
         self.ax.plot( shown[self.xStr].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
-        self.ax.plot( hiden[self.xStr].values, hiden["ChiBisMol"].values, "o", label = "Hiden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+        self.ax.plot( hiden[self.xStr].values, hiden["ChiBisMol"].values, "o", label = "Hidden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
 
         color_nr = 0
         for c in plotFitChi.curves:
@@ -601,3 +655,6 @@ class plotFitChi2(plotFitChi):
     def make_auto_fit(self):
         return
         #return super().make_auto_fit()
+
+    def copy_parameters(self):
+        return
