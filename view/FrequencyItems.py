@@ -1,3 +1,4 @@
+from typing import Collection
 from PyQt5 import QtWidgets
 from .StandardItem import StandardItem
 
@@ -87,10 +88,6 @@ class FitFrequencyItem(StandardItem):
         for r in self.relaxations:
             jsonable['relaxations'].append(r.get_jsonable())
 
-        print('Relaxation types: ')
-        for k in jsonable:
-            print(k, type(jsonable[k]))
-
         return jsonable
 
     
@@ -102,7 +99,7 @@ class FitFrequencyItem(StandardItem):
             return
 
         with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
-            json.dump(jsonable, f)
+            json.dump(jsonable, f, indent=4)
 
     def from_json(self, json):
         self.name = json['name']
@@ -125,8 +122,8 @@ class FitFrequencyItem(StandardItem):
         menu = QMenu()
         
         menu.addAction("Save to file", self.save_to_file)
-        menu.addSeparator()
-        menu.addAction("Save", self.save_to_json)
+        # menu.addSeparator()
+        # menu.addAction("Save", self.save_to_json)
         menu.addSeparator()
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
@@ -302,8 +299,8 @@ class FitFrequencyCollectionItem(StandardItem):
         menu.addSeparator()
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
-        menu.addSeparator()
-        menu.addAction("Load from save", self.load_from_json)
+        # menu.addSeparator()
+        # menu.addAction("Load from save", self.load_from_json)
         menu.addSeparator()
         submenu = menu.addMenu("Sort")
         submenu.addAction("Sort by temperature", partial(self.sort, SortModes.TEMP))
@@ -333,6 +330,12 @@ class FitFrequencyCollectionItem(StandardItem):
             jsonable = json.load(f)
 
         print(f"Fit loaded json: {jsonable}")
+
+        frequency_item, collection = self.create_from_json(jsonable)
+        collection.append(frequency_item)
+        frequency_item.changePage()
+
+    def create_from_json(self, jsonable):
         frequency_item = FitFrequencyItem(self.ui, pd.read_json(jsonable['df']), self.parent())
         frequency_item.from_json(jsonable)
         collection = self.parent().child(jsonable['nr_of_relaxations'])
@@ -348,8 +351,34 @@ class FitFrequencyCollectionItem(StandardItem):
         frequency_item.setText(frequency_item.name)
         frequency_item.sort_mode = collection.sort_mode
 
-        collection.append(frequency_item)
-        frequency_item.changePage()
+        return frequency_item, collection
+
+    def get_jsonable(self):
+        items_list = []
+        i = 0
+        while(self.child(i) != None):
+            items_list.append(self.child(i).get_jsonable())
+            i += 1
+        jsonable = {'items_list':items_list, 'sort_mode':self.sort_mode,
+         'nr_of_relaxations': self.nr_of_relaxations}
+        return jsonable
+
+    def save_to_json(self):
+        jsonable = self.get_jsonable()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+
+        if name == "":
+            return
+
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+            json.dump(jsonable, f, indent=4)
+
+    def from_json(self, json):
+        for item in json['items_list']:
+            frequency_item, collection = self.create_from_json(item)
+            collection.append(frequency_item)
+        self.nr_of_relaxations = json['nr_of_relaxations']
+        self.sort_mode = json['sort_mode']
 
     def sort(self, sort_mode=None):
         if sort_mode is not None:

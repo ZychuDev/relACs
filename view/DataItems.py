@@ -67,9 +67,10 @@ class DataItem(StandardItem):
             return
 
         with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
-            json.dump(jsonable, f)
+            json.dump(jsonable, f, indent=4)
 
     def from_json(self, json):
+        print(f"Data json {json}")
         self.name = json["name"]
         self.df = pd.read_json(json['df'])
         self.state = json['state']
@@ -97,8 +98,8 @@ class DataItem(StandardItem):
         menu.addAction("Inspect data", self.show)
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
-        menu.addSeparator()
-        menu.addAction("Save", self.save_to_json)
+        # menu.addSeparator()
+        # menu.addAction("Save", self.save_to_json)
         menu.addSeparator()
         menu.addAction("Make fit with 1 relaxation process", self.make_fit)
         menu.addAction("Make fit with 2 relaxation process", self.make_fit_2)
@@ -199,8 +200,8 @@ class DataCollectionItem(StandardItem):
         menu.addSeparator()
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
-        menu.addSeparator()
-        menu.addAction("Load from save", self.load_from_json)
+        # menu.addSeparator()
+        # menu.addAction("Load from save", self.load_from_json)
         menu.addSeparator()
         submenu = menu.addMenu("Sort")
         submenu.addAction("Sort by temperature", partial(self.sort, SortModes.TEMP))
@@ -222,6 +223,31 @@ class DataCollectionItem(StandardItem):
 
         self.sortChildren(0)
         
+    def get_jsonable(self):
+        items_list = []
+        i = 0
+        while(self.child(i) != None):
+            items_list.append(self.child(i).get_jsonable())
+            i += 1
+        jsonable = {'items_list':items_list, 'sort_mode':self.sort_mode}
+        return jsonable
+
+    def save_to_json(self):
+        jsonable = self.get_jsonable()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+
+        if name == "":
+            return
+
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+            json.dump(jsonable, f, indent=4)
+
+    def from_json(self, json):
+        for item in json['items_list']:
+            data_item = self.create_from_json(item)
+            self.append(data_item)
+
+        self.sort_mode = json['sort_mode']
 
     def load_from_json(self):
         dlg = QtWidgets.QFileDialog()
@@ -243,6 +269,10 @@ class DataCollectionItem(StandardItem):
         with open(filepath, "r") as f:
             jsonable = json.load(f)
 
+        data_item = self.from_json(jsonable)
+        data_item.show()
+
+    def create_from_json(self, jsonable):
         data_item = DataItem(self.ui)
         data_item.from_json(jsonable)
         i = 2
@@ -257,9 +287,7 @@ class DataCollectionItem(StandardItem):
         data_item.setCheckState(data_item.state)
 
         data_item.sort_mode = self.sort_mode
-
-        self.append(data_item)
-        data_item.show()
+        return data_item
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file

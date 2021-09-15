@@ -84,7 +84,7 @@ class FitTauItem(StandardItem):
             return
 
         with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json' , 'w') as f:
-            json.dump(jsonable, f)
+            json.dump(jsonable, f, indent=4)
 
     def show(self):
         self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
@@ -177,7 +177,7 @@ class FitTauItem(StandardItem):
             self.setText(self.name)
 
     def remove(self):
-        # self.parent().container.my_dict.pop('key', None)
+        self.parent().container.pop(self.name, None)
         self.parent().removeRow(self.index().row())
 
 
@@ -185,9 +185,13 @@ class FitTauItem(StandardItem):
         menu = QMenu()
         menu.addAction("Inspect", self.change)
         menu.addAction("Rename", self.rename)
-        menu.addAction("Save to file", self.save_to_file)
         menu.addSeparator()
-        menu.addAction("Save", self.save_to_json)
+        menu.addAction("Remove", self.remove)
+        menu.addSeparator()
+        menu.addAction("Save to file", self.save_to_file)
+        # menu.addAction("Save", self.save_to_json)
+        
+
 
 
         menu.exec_(self.ui.window.mapToGlobal(position))
@@ -333,8 +337,8 @@ class FitTauCollectionItem(StandardItem):
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Save all to file", self.save_to_file)
-        menu.addSeparator()
-        menu.addAction("Load from save", self.load_from_json)
+        # menu.addSeparator()
+        # menu.addAction("Load from save", self.load_from_json)
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def load_from_json(self):
@@ -357,6 +361,11 @@ class FitTauCollectionItem(StandardItem):
         with open(filepath, "r") as f:
             jsonable = json.load(f)
 
+        tau_item = self.from_json(jsonable)
+
+        tau_item.change()
+
+    def create_from_json(self, jsonable):
         tau_item = FitTauItem(self.ui, self.parent())
         tau_item.from_json(jsonable)
         i = 2
@@ -368,10 +377,33 @@ class FitTauCollectionItem(StandardItem):
             tau_item.name = saved_name + f"_{i}"
 
         tau_item.setText(tau_item.name)
+        return tau_item
 
-        self.append(tau_item)
-        tau_item.change()
+    def get_jsonable(self):
+        items_list = []
+        i = 0
+        while(self.child(i) != None):
+            items_list.append(self.child(i).get_jsonable())
+            i += 1
+        jsonable = {'items_list':items_list}
+        return jsonable
 
+    def save_to_json(self):
+        jsonable = self.get_jsonable()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+
+        if name == "":
+            return
+
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+            json.dump(jsonable, f, indent=4)
+
+    def from_json(self, json):
+        for item in json['items_list']:
+            tau_item = self.create_from_json(item)
+            self.append(tau_item)
+
+        
     def save_to_file(self):
         compound = self.parent().parent()
         df = pd.DataFrame()

@@ -62,42 +62,68 @@ class CompoundCollectionItem(StandardItem):
         self.ui.TModel.expandAll()
         self.container[compound.name] = compound
 
-    def save_to_json(self, file_name=None):
-        if file_name is None:
-            file_name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
-        try:
-            with  open(file_name[0], 'w') as f:
-                #or make custom encoder and decoder
-                data = self.to_json()
-                json.dump(data, f, indent=4)
-        except Exception as e:
-            print(e)
+    def load_from_json(self):
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QtWidgets.QFileDialog.ExistingFile) #TMP
+
+        if dlg.exec_():
+           filenames = dlg.selectedFiles()
+        else:
+           return
+
+        if len(filenames) != 1 :
+            return 
+
+        filepath = filenames[0]  #TMP "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat"  #
+        if not os.path.isfile(filepath):
+            print("File path {} does not exist. Exiting...".format(filepath))
             return
 
-    def load_from_json(self, file_name=None):
-        if file_name is None:
-            file_name = QtWidgets.QFileDialog.getOpenFileName(self.ui.window, 'Load from file')
-        try:
-            with open(file_name[0], 'r') as f:
-                compounds = json.load(f)
-                self.from_json(compounds)
-        except Exception as e:
-            print(e)
+        with open(filepath, "r") as f:
+            jsonable = json.load(f)
+
+        self.from_json(jsonable)
+
+
+    def create_from_json(self, jsonable):
+        compound_item = CompoundItem(self.ui)
+        compound_item.from_json(jsonable)
+        i = 2
+        if compound_item.name in self.container:
+            saved_name = compound_item.name
+            compound_item.name = saved_name + f"_{i}"
+        while(compound_item.name in self.container):
+            i += 1
+            compound_item.name = saved_name + f"_{i}"
+
+        compound_item.setText(compound_item.name)
+        return compound_item
+
+    def get_jsonable(self):
+        items_list = []
+        i = 0
+        while(self.child(i) != None):
+            print(f"Collection nr {i}:",type(self.child(i).get_jsonable()), self.child(i).get_jsonable())
+            items_list.append(self.child(i).get_jsonable())
+            i += 1
+        jsonable = {'items_list':items_list}
+        return jsonable
+
+    def save_to_json(self):
+        jsonable = self.get_jsonable()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+
+        if name == "":
             return
 
-    def from_json(self, compounds):
-        self.removeRows(0, self.rowCount())
-        self.container = {}
-        for key in compounds:
-            self.append(self.compund_item_from_json(compounds[key]))
-        return
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+            json.dump(jsonable, f, indent=4)
 
-    def to_json(self):
-        return " "
-
-    def compound_item_from_json(self, compound):
-        new = CompoundItem()
-        return new
+    def from_json(self, json):
+        for item in json['items_list']:
+            compund_item = self.create_from_json(item)
+            self.append(compund_item)
+        
 
                 
 
@@ -132,6 +158,37 @@ class CompoundItem(StandardItem):
         self.appendRow(self.FrequencyFits2)
         self.appendRow(self.TauFits)
 
+    def get_jsonable(self):
+        jsonable = {'name': self.name, 'ranges': self.ranges, 'log_params':self.log_params, 'data':self.data.get_jsonable(),
+         'frequency_fits': self.FrequencyFits.get_jsonable(), 'frequency_fits_2': self.FrequencyFits2.get_jsonable(),
+         'tau_fits': self.TauFits.get_jsonable()}
+        return jsonable
+
+    def from_json(self, json):
+        self.name = json['name']
+        self.ranges = json['ranges']
+        self.log_params = json['log_params']
+
+        data_collection = DataCollectionItem(self.ui, 'Data')
+        self.appendRow(data_collection)
+        data_collection.from_json(json['data'])
+        self.data = data_collection
+
+        frequency_collection_1 = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Single Relaxation')
+        self.appendRow(frequency_collection_1)
+        frequency_collection_1.from_json(json['frequency_fits'])
+        self.FrequencyFits = frequency_collection_1
+
+        frequency_collection_2 = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Double Relaxations', 2)
+        self.appendRow(frequency_collection_2)
+        frequency_collection_2.from_json(json['frequency_fits_2'])
+        self.FrequencyFits2 = frequency_collection_2
+
+        tau_collection = FitTauCollectionItem(self.ui, 'TauFits(3D)') 
+        self.appendRow(tau_collection)
+        tau_collection.from_json(json['tau_fits'])
+        self.TauFits = tau_collection
+
     def addTo(self, collection):
         collection.appendRow(self)
         
@@ -139,7 +196,12 @@ class CompoundItem(StandardItem):
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Change Ranges", self.change_ranges)
+        menu.addAction("Remove", self.remove)
         menu.exec_(self.ui.window.mapToGlobal(position))
+
+    def remove(self):
+        self.parent().container.pop(self.name, None)
+        self.parent().removeRow(self.index().row())
 
     def change_ranges(self, return_to=None):
         dlg = QDialog()
@@ -187,6 +249,9 @@ class CompoundItem(StandardItem):
         dlg.setLayout(layout)
         dlg.exec_()
 
+
+
+        
     def set_new_ranges(self, edit_lines, force, dlg, return_to=None):
         for p in edit_lines:
             if float(edit_lines[p][0].text()) >=  float(edit_lines[p][1].text()):
@@ -298,6 +363,7 @@ class RootItem(StandardItem):
         
 
     def showMenu(self, position):
+        
         return
         # menu = QMenu()
         # new = menu.addAction("New", self.action)
