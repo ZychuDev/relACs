@@ -10,6 +10,8 @@ import pandas as pd
 import numpy as np
 
 import keyboard
+import os 
+import json 
 
 from functools import partial
 from .SortModes import SortModes
@@ -26,10 +28,26 @@ class Relaxation():
 
         
         self.error = [0.0,0.0,0.0,0.0,0.0]
-        self.current_error = [0.0,0.0,0.0,0.0,0.0]
+        self.current_error = np.array([0.0,0.0,0.0,0.0,0.0])
         self.residual_error = 0.0
         self.current_residual_error = 0.0
 
+    def get_jsonable(self):
+        jsonable ={'previous': self.previous, 'current': self.current,
+         'is_blocked':self.is_blocked, 'error': self.error, 'current_error': self.current_error.tolist(),
+         'residual_error': self.residual_error, 'current_residual_error': self.current_residual_error
+        }
+
+        return jsonable
+
+    def from_json(self, json):
+        self.previous = json['previous']
+        self.current = json['current']
+        self.is_blocked = json['is_blocked']
+        self.error = json['error']
+        self.current_error = json['current_error']
+        self.residual_error = json['residual_error']
+        self.current_residual_error = json['current_residual_error']
 
 class FitFrequencyItem(StandardItem):
     def __init__(self, mainPage, df, compound, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
@@ -39,7 +57,6 @@ class FitFrequencyItem(StandardItem):
         self.wasSaved = False
         self.compound = compound
         self.relaxations = [Relaxation(self.compound)]
-
         
         self.name = txt
         self.df = df.copy()
@@ -64,6 +81,43 @@ class FitFrequencyItem(StandardItem):
                     return self.temp < other.temp
                 return self.field < other.field
 
+    def get_jsonable(self):
+        jsonable = {"was_saved": self.wasSaved, 'relaxations': [], 'name': self.name, 'df':self.df.to_json(), 'state': self.checkState(),
+        'temp':self.temp.tolist(), 'field':self.field.tolist(), 'nr_of_relaxations': len(self.relaxations), 'sort_mode': self.sort_mode }
+        for r in self.relaxations:
+            jsonable['relaxations'].append(r.get_jsonable())
+
+        print('Relaxation types: ')
+        for k in jsonable:
+            print(k, type(jsonable[k]))
+
+        return jsonable
+
+    
+    def save_to_json(self):
+        jsonable = self.get_jsonable()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+
+        if name == "":
+            return
+
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+            json.dump(jsonable, f)
+
+    def from_json(self, json):
+        self.name = json['name']
+        self.wasSaved = json['was_saved'],
+        self.relaxations = []
+        for r in json['relaxations']:
+            relax = Relaxation(self.compound)
+            relax.from_json(r)
+            self.relaxations.append(relax)
+        self.df = pd.read_json(json['df'])
+        self.setCheckState(json['state'])
+
+        self.temp = json['temp']
+        self.field = json['field']
+
     def add_relaxation(self):
         self.relaxations.append(Relaxation(self.compound))
 
@@ -71,6 +125,9 @@ class FitFrequencyItem(StandardItem):
         menu = QMenu()
         
         menu.addAction("Save to file", self.save_to_file)
+        menu.addSeparator()
+        menu.addAction("Save", self.save_to_json)
+        menu.addSeparator()
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
 
@@ -229,12 +286,13 @@ class FitFrequencyItem(StandardItem):
 
 
 class FitFrequencyCollectionItem(StandardItem):
-    def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
+    def __init__(self, mainPage, txt='', nr_of_relaxations=1, font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
 
         self.ui = mainPage
         self.names = set()
-
+        self.sort_mode = SortModes.TEMP
+        self.nr_of_relaxations = nr_of_relaxations
 
     def showMenu(self, position):
         menu = QMenu()
@@ -245,12 +303,53 @@ class FitFrequencyCollectionItem(StandardItem):
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
         menu.addSeparator()
+        menu.addAction("Load from save", self.load_from_json)
+        menu.addSeparator()
         submenu = menu.addMenu("Sort")
         submenu.addAction("Sort by temperature", partial(self.sort, SortModes.TEMP))
         submenu.addAction("Sort by field", partial(self.sort, SortModes.FIELD))
         menu.addAction("Remove selected", self.remove_selected)
 
         menu.exec_(self.ui.window.mapToGlobal(position))
+
+    def load_from_json(self):
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QtWidgets.QFileDialog.ExistingFile) #TMP
+
+        if dlg.exec_():
+           filenames = dlg.selectedFiles()
+        else:
+           return
+
+        if len(filenames) != 1 :
+            return 
+
+        filepath = filenames[0]  #TMP "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat"  #
+        if not os.path.isfile(filepath):
+            print("File path {} does not exist. Exiting...".format(filepath))
+            return
+
+        with open(filepath, "r") as f:
+            jsonable = json.load(f)
+
+        print(f"Fit loaded json: {jsonable}")
+        frequency_item = FitFrequencyItem(self.ui, pd.read_json(jsonable['df']), self.parent())
+        frequency_item.from_json(jsonable)
+        collection = self.parent().child(jsonable['nr_of_relaxations'])
+
+        i = 2
+        if frequency_item.name in collection.names:
+            saved_name = frequency_item.name
+            frequency_item.name = saved_name + f"_{i}"
+        while (frequency_item.name in collection.names):
+            i += 1
+            frequency_item.name = saved_name + f"_{i}"
+
+        frequency_item.setText(frequency_item.name)
+        frequency_item.sort_mode = collection.sort_mode
+
+        collection.append(frequency_item)
+        frequency_item.changePage()
 
     def sort(self, sort_mode=None):
         if sort_mode is not None:

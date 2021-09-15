@@ -124,7 +124,7 @@ class CompoundItem(StandardItem):
 
         self.data = DataCollectionItem(self.ui, 'Data')
         self.FrequencyFits = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Single Relaxation')
-        self.FrequencyFits2 = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Double Relaxations')
+        self.FrequencyFits2 = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Double Relaxations', 2)
         self.TauFits = FitTauCollectionItem(self.ui, 'TauFits(3D)')
 
         self.appendRow(self.data)

@@ -16,12 +16,12 @@ from scipy.interpolate import interp1d
 from scipy import linalg
 
 from functools import partial
-from enum import Enum, auto
+from enum import IntEnum
 import matplotlib.colors as mcolors
 from .Fit_models import *
 import copy 
 
-class X_dimension(Enum):
+class X_dimension(IntEnum):
     TEMP = 1
     FIELD = 2
 

@@ -10,6 +10,8 @@ import pandas as pd
 import numpy as np
 
 import functools
+import json 
+import os 
 
 from .Fit_models import *
 
@@ -48,7 +50,41 @@ class FitTauItem(StandardItem):
                 self.previous[p] = (compound.ranges[p][0] + compound.ranges[p][1])/2
 
 
+    def get_jsonable(self):
+        jsonable = {'name': self.name, 'error': self.error, 'residual_error': self.residual_error, 
+         'current_error': self.current_error, 'current_residual_error':self.current_residual_error,
+         'points': self.points, 'hidden_points': self.hidden_points, 'tau': self.tau.to_json(),
+         'temp': self.temp.to_json(), 'field':self.field.to_json(), 'hidden_tau': self.hidden_tau.to_json(),
+         'hidden_temp': self.hidden_temp.to_json(), 'hidden_field': self.hidden_field.to_json(),
+         'previous': self.previous, 'current': self.current}
+        return jsonable
 
+    def from_json(self, json):
+        self.name = json['name']
+        self.error = json['error']
+        self.residual_error = json['residual_error']
+        self.current_error = json['current_error']
+        self.current_residual_error = json['current_residual_error']
+        self.points = json['points']
+        self.hidden_points = json['hidden_points']
+        self.tau = pd.read_json(json['tau'], typ='series', orient='records')
+        self.temp = pd.read_json(json['temp'], typ='series', orient='records')
+        self.field = pd.read_json(json['field'], typ='series', orient='records')
+        self.hidden_tau = pd.read_json(json['hidden_tau'], typ='series', orient='records')
+        self.hidden_temp = pd.read_json(json['hidden_temp'], typ='series', orient='records')
+        self.hidden_field = pd.read_json(json['hidden_field'], typ='series', orient='records')
+        self.previous = json['previous']
+        self.current = json['current']
+
+    def save_to_json(self):
+        jsonable = self.get_jsonable()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+
+        if name == "":
+            return
+
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json' , 'w') as f:
+            json.dump(jsonable, f)
 
     def show(self):
         self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
@@ -141,7 +177,8 @@ class FitTauItem(StandardItem):
             self.setText(self.name)
 
     def remove(self):
-        self.parent().removeRow(self.index().row()) 
+        # self.parent().container.my_dict.pop('key', None)
+        self.parent().removeRow(self.index().row())
 
 
     def showMenu(self, position):
@@ -149,6 +186,9 @@ class FitTauItem(StandardItem):
         menu.addAction("Inspect", self.change)
         menu.addAction("Rename", self.rename)
         menu.addAction("Save to file", self.save_to_file)
+        menu.addSeparator()
+        menu.addAction("Save", self.save_to_json)
+
 
         menu.exec_(self.ui.window.mapToGlobal(position))
 
@@ -157,7 +197,7 @@ class FitTauItem(StandardItem):
         name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
         try:
             with  open(name[0] + '.csv', 'w') as f:
-                self.result().to_csv(f.name, index=False, sep=compound.separator)
+                self.result().to_csv(f.name, index=False, sep=AppState.separator)
         except Exception as e:
             print(e)
             return
@@ -293,7 +333,44 @@ class FitTauCollectionItem(StandardItem):
     def showMenu(self, position):
         menu = QMenu()
         menu.addAction("Save all to file", self.save_to_file)
+        menu.addSeparator()
+        menu.addAction("Load from save", self.load_from_json)
         menu.exec_(self.ui.window.mapToGlobal(position))
+
+    def load_from_json(self):
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QtWidgets.QFileDialog.ExistingFile) #TMP
+
+        if dlg.exec_():
+           filenames = dlg.selectedFiles()
+        else:
+           return
+
+        if len(filenames) != 1 :
+            return 
+
+        filepath = filenames[0]  #TMP "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat"  #
+        if not os.path.isfile(filepath):
+            print("File path {} does not exist. Exiting...".format(filepath))
+            return
+
+        with open(filepath, "r") as f:
+            jsonable = json.load(f)
+
+        tau_item = FitTauItem(self.ui, self.parent())
+        tau_item.from_json(jsonable)
+        i = 2
+        if tau_item.name in self.container:
+            saved_name = tau_item.name
+            tau_item.name = saved_name + f"_{i}"
+        while(tau_item.name in self.container):
+            i += 1
+            tau_item.name = saved_name + f"_{i}"
+
+        tau_item.setText(tau_item.name)
+
+        self.append(tau_item)
+        tau_item.change()
 
     def save_to_file(self):
         compound = self.parent().parent()
@@ -305,7 +382,7 @@ class FitTauCollectionItem(StandardItem):
         name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
         try:
             with  open(name[0] + '.csv', 'w') as f:
-                df.to_csv(f.name, index=False, sep= compound.separator)
+                df.to_csv(f.name, index=False, sep= AppState.separator)
         except Exception as e:
             print(e)
             return

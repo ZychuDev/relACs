@@ -25,6 +25,7 @@ from functools import partial
 from .SortModes import SortModes
 
 import configparser
+import json 
 
 class DataItem(StandardItem):
     columnsHeadersInternal = ["Temperature","MagneticField","ChiPrime","ChiBis","Frequency"]
@@ -54,6 +55,26 @@ class DataItem(StandardItem):
                 return self.temp < other.temp
             return self.field < other.field
 
+    def get_jsonable(self):
+        jsonable = {"name": self.name, "df":self.df.to_json(), "state":self.checkState(), "sort_mode":int(self.sort_mode)}
+        return jsonable
+
+    def save_to_json(self):
+        jsonable = self.get_jsonable()
+        name = QtWidgets.QFileDialog.getSaveFileName(self.ui.window, 'Save file')
+
+        if name == "":
+            return
+
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+            json.dump(jsonable, f)
+
+    def from_json(self, json):
+        self.name = json["name"]
+        self.df = pd.read_json(json['df'])
+        self.state = json['state']
+        self.sort_mode = SortModes(json['sort_mode'])
+
     def dfToDataItem(ui, df, sufix=''):
         temp = round((df["Temperature"].max() + df["Temperature"].min())/2, 1)
         field = round((df["MagneticField"].max() + df["MagneticField"].min())/2, 0)
@@ -76,7 +97,8 @@ class DataItem(StandardItem):
         menu.addAction("Inspect data", self.show)
         menu.addAction("Rename", self.rename)
         menu.addAction("Remove", self.remove)
-        menu.addAction("Save", self.save)
+        menu.addSeparator()
+        menu.addAction("Save", self.save_to_json)
         menu.addSeparator()
         menu.addAction("Make fit with 1 relaxation process", self.make_fit)
         menu.addAction("Make fit with 2 relaxation process", self.make_fit_2)
@@ -140,6 +162,7 @@ class DataItem(StandardItem):
         fit = FitFrequencyItem(self.ui, self.df, self.parent().parent(), self.name + "FitFrequency")
         fit.temp = self.temp
         fit.field = self.field
+        fit.sort_mode = self.parent().parent().child(1).sort_mode
         self.parent().parent().child(1).append(fit)
         if show:
             fit.changePage()
@@ -150,18 +173,12 @@ class DataItem(StandardItem):
 
         fit.temp = self.temp
         fit.field = self.field
+        fit.sort_mode = self.parent().parent().child(2).sort_mode
         self.parent().parent().child(2).append(fit)
         if show:
             fit.changePage()
 
-    def to_json(self):
-        pass
-
-    def from_json(self):
-        pass
     
-    def save(self):
-        pass
     
 
 
@@ -182,6 +199,8 @@ class DataCollectionItem(StandardItem):
         menu.addSeparator()
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
+        menu.addSeparator()
+        menu.addAction("Load from save", self.load_from_json)
         menu.addSeparator()
         submenu = menu.addMenu("Sort")
         submenu.addAction("Sort by temperature", partial(self.sort, SortModes.TEMP))
@@ -204,6 +223,43 @@ class DataCollectionItem(StandardItem):
         self.sortChildren(0)
         
 
+    def load_from_json(self):
+        dlg = QtWidgets.QFileDialog()
+        dlg.setFileMode(QFileDialog.ExistingFile) #TMP
+
+        if dlg.exec_():
+           filenames = dlg.selectedFiles()
+        else:
+           return
+
+        if len(filenames) != 1 :
+            return 
+
+        filepath = filenames[0]  #TMP "C:/Users/wikto/Desktop/ACMA/ac_0_Oe.dat"  #
+        if not os.path.isfile(filepath):
+            print("File path {} does not exist. Exiting...".format(filepath))
+            return
+
+        with open(filepath, "r") as f:
+            jsonable = json.load(f)
+
+        data_item = DataItem(self.ui)
+        data_item.from_json(jsonable)
+        i = 2
+        if data_item.name in self.names:
+            saved_name = data_item.name
+            data_item.name = saved_name + f"_{i}"
+        while(data_item.name in self.names):
+            i += 1
+            data_item.name = saved_name + f"_{i}"
+
+        data_item.setText(data_item.name)
+        data_item.setCheckState(data_item.state)
+
+        data_item.sort_mode = self.sort_mode
+
+        self.append(data_item)
+        data_item.show()
 
     def loadFromFile(self):
         # TO DO: implement more complex custom dialog file
