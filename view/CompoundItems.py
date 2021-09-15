@@ -86,7 +86,7 @@ class CompoundCollectionItem(StandardItem):
 
 
     def create_from_json(self, jsonable):
-        compound_item = CompoundItem(self.ui)
+        compound_item = CompoundItem(self.ui, full=False)
         compound_item.from_json(jsonable)
         i = 2
         if compound_item.name in self.container:
@@ -128,7 +128,7 @@ class CompoundCollectionItem(StandardItem):
                 
 
 class CompoundItem(StandardItem):
-    def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0),
+    def __init__(self, mainPage,full=True, txt='', font_size=12, set_bold=False, color=QColor(0,0,0),
     molar_mass = 2000):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
@@ -153,10 +153,11 @@ class CompoundItem(StandardItem):
         self.FrequencyFits2 = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Double Relaxations', 2)
         self.TauFits = FitTauCollectionItem(self.ui, 'TauFits(3D)')
 
-        self.appendRow(self.data)
-        self.appendRow(self.FrequencyFits)
-        self.appendRow(self.FrequencyFits2)
-        self.appendRow(self.TauFits)
+        if full:
+            self.appendRow(self.data)
+            self.appendRow(self.FrequencyFits)
+            self.appendRow(self.FrequencyFits2)
+            self.appendRow(self.TauFits)
 
     def get_jsonable(self):
         jsonable = {'name': self.name, 'ranges': self.ranges, 'log_params':self.log_params, 'data':self.data.get_jsonable(),

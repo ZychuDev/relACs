@@ -79,6 +79,7 @@ class plotFitChi(FigureCanvasQTAgg):
 
     def change(self, fitFrequecyItem):
         self.fitItem = fitFrequecyItem
+        plotFitChi.nr_of_relaxation = len(self.fitItem.relaxations) - 1
         self.name = fitFrequecyItem.name
         self.df = fitFrequecyItem.df
 
