@@ -48,7 +48,7 @@ class CompoundCollectionItem(StandardItem):
         # molar_mass = 1000
         if status == True:
             molar_mass = dialog.doubleValue()
-            new = CompoundItem(self.ui, name, molar_mass= molar_mass)
+            new = CompoundItem(self.ui, txt=name, molar_mass= molar_mass)
             self.appendRow(new)
             self.ui.TModel.expandAll()
             self.container[name] = new
@@ -281,8 +281,9 @@ class CompoundItem(StandardItem):
                                     continue
                                 if r.previous[p] < lower or r.previous[p] > upper:
                                     message = str(f"Bounds for parameter: {p} are invalid\n"
-                                    +f"In {collection.child(i).name} saved value of paramater is not in given range\n"
-                                    +"Force new ranges or change saved values of the parameters")
+                                     +f"In {collection.child(i).name} saved value of paramater is not in given range\n"
+                                     +f"Lower : {lower}\n Upper: {upper}\n Actual: {r.previous[p]}" 
+                                     +"Force new ranges or change saved values of the parameters")
                                     msg = QMessageBox()
                                     msg.setIcon(QMessageBox.Warning)
                                     msg.setText(message)
@@ -296,10 +297,14 @@ class CompoundItem(StandardItem):
                             if p not in collection.child(i).previous.keys():
                                 i += 1
                                 continue
-                            if collection.child(i).previous[p] < lower or collection.child(i).previous[p] > upper:
+                            if (collection.child(i).previous[p] < (lower if p not in collection.parent().log_params else 10**lower) 
+                            or collection.child(i).previous[p] > (upper if p not in collection.parent().log_params else 10**upper)):
                                         message = str(f"Bounds for parameter: {p} are invalid\n"
-                                        +f"In {collection.child(i).name} saved value of paramater is not in given range\n"
-                                        +"Force new ranges or change saved values of the parameters")
+                                         +f"In {collection.child(i).name} saved value of paramater is not in given range\n"
+                                         +f"Lower : {lower if p not in collection.parent().log_params else 10**lower} "
+                                         +f"Upper: {upper if p not in collection.parent().log_params else 10**upper} "
+                                         +f"Actual: {collection.child(i).previous[p]}\n" 
+                                         +"Force new ranges or change saved values of the parameters")
                                         msg = QMessageBox()
                                         msg.setIcon(QMessageBox.Warning)
                                         msg.setText(message)
