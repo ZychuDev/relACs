@@ -1727,7 +1727,7 @@
                  <item>
                   <widget class="QPushButton" name="pushButton_set_current_3d">
                    <property name="text">
-                    <string>Set current as saved</string>
+                    <string>Set saved as current</string>
                    </property>
                   </widget>
                  </item>
@@ -2003,20 +2003,11 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionSave"/>
-    <addaction name="actionLoad"/>
-    <addaction name="actionImport"/>
-   </widget>
    <widget class="QMenu" name="menuSettings">
     <property name="title">
      <string>Settings</string>
     </property>
    </widget>
-   <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

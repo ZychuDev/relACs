@@ -97,14 +97,19 @@ class Plot3D(FigureCanvasQTAgg):
         self.draw()
 
         saved_values = list(self.tau_item.previous.values())
+        parameters = list(self.tau_item.previous.keys())
         plusminus = u'\u00b1'
         length = len(self.tau_item.current_error)
         for i in range(length):
             self.tau_item.ui.tableWidget_error_3d.setItem(1, i,
                 QTableWidgetItem(str(self.tau_item.current_error[i])))
 
-            self.tau_item.ui.tableWidget_error_3d.setItem(0, i,
-                QTableWidgetItem(f"{saved_values[i]:.4f} {plusminus} {self.tau_item.error[i]:.4e}"))
+            if parameters[i] not in self.tau_item.parent().parent().log_params:
+                self.tau_item.ui.tableWidget_error_3d.setItem(0, i,
+                    QTableWidgetItem(f"{saved_values[i]:.4f} {plusminus} {self.tau_item.error[i]:.4e}"))
+            else:
+                self.tau_item.ui.tableWidget_error_3d.setItem(0, i,
+                    QTableWidgetItem(f"{np.log10(saved_values[i]):.4f} {plusminus} {self.tau_item.error[i]:.4e}"))
 
         self.tau_item.ui.tableWidget_error_3d.setItem(1, length,
             QTableWidgetItem(f"{self.tau_item.current_residual_error:.4e}"))

@@ -183,7 +183,6 @@ class FitTauItem(StandardItem):
 
     def showMenu(self, position):
         menu = QMenu()
-        menu.addAction("Inspect", self.change)
         menu.addAction("Rename", self.rename)
         menu.addSeparator()
         menu.addAction("Remove", self.remove)
