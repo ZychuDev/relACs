@@ -56,7 +56,7 @@ class DataItem(StandardItem):
             return self.field < other.field
 
     def get_jsonable(self):
-        jsonable = {"name": self.name, "df":self.df.to_json(), "state":self.checkState(), "sort_mode":int(self.sort_mode)}
+        jsonable = {"name": self.name, "df":self.df.to_json(), "state":self.checkState(), "sort_mode":int(self.sort_mode), "temp":self.temp, "field":self.field}
         return jsonable
 
     def save_to_json(self):
@@ -75,6 +75,8 @@ class DataItem(StandardItem):
         self.df = pd.read_json(json['df'])
         self.state = json['state']
         self.sort_mode = SortModes(json['sort_mode'])
+        self.temp = json["temp"]
+        self.field = json["field"]
 
     def dfToDataItem(ui, df, sufix=''):
         temp = round((df["Temperature"].max() + df["Temperature"].min())/2, 1)
