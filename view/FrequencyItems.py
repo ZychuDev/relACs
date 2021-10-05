@@ -35,7 +35,7 @@ class Relaxation():
 
     def get_jsonable(self):
         jsonable ={'previous': self.previous, 'current': self.current,
-         'is_blocked':self.is_blocked, 'error': self.error, 'current_error': self.current_error.tolist(),
+         'is_blocked':self.is_blocked, 'error': self.error, 'current_error': self.current_error,
          'residual_error': self.residual_error, 'current_residual_error': self.current_residual_error
         }
 
