@@ -125,7 +125,6 @@ class FitTauItem(StandardItem):
     def delete_point(self, point):
         self.points.remove(point)
         self.regenerate_points()
-        self.regenerate_hidden_points()
     
     def add_point(self, point):
         self.points.append(point)
@@ -133,7 +132,6 @@ class FitTauItem(StandardItem):
 
     def delete_hidden_point(self, point):
         self.hidden_points.remove(point)
-        self.regenerate_hidden_points()
         self.regenerate_hidden_points()
 
     def add_hidden_point(self, point):
@@ -147,6 +145,10 @@ class FitTauItem(StandardItem):
             self.temp = pd.Series(list(unzipped[1]))
             self.field = pd.Series(list(unzipped[2]))
         except KeyError:
+            if len(self.hidden_points) == 0:
+                self.hidden_tau = pd.Series()
+                self.hidden_temp = pd.Series()
+                self.hidden_field = pd.Series()
             print("Not allowed, unzipped == 0")
             print(f"{unzipped}")
 
@@ -157,6 +159,10 @@ class FitTauItem(StandardItem):
             self.hidden_temp = pd.Series(list(unzipped[1]))
             self.hidden_field = pd.Series(list(unzipped[2]))
         except KeyError:
+            if len(self.hidden_points) == 0:
+                self.hidden_tau = pd.Series()
+                self.hidden_temp = pd.Series()
+                self.hidden_field = pd.Series()
             print("Not allowed, unzipped == 0")
             print(f"{unzipped}")
 

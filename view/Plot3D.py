@@ -704,6 +704,7 @@ class Slice(FigureCanvasQTAgg):
                         tau_item.delete_hidden_point(point)
 
         self.set_slice_x_ax(self.x_dimension)
+       
 
 
 
