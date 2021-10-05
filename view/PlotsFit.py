@@ -18,6 +18,8 @@ from .Validator import Validator
 
 from functools import partial
 
+import configparser
+
 class Curve():
     def __init__(self):
         self.yy = []
@@ -69,7 +71,12 @@ class plotFitChi(FigureCanvasQTAgg):
     nr_of_relaxation = 0
 
     def __init__(self):
-        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=80)
+        config = configparser.RawConfigParser()
+        config.optionxform = str
+        config.read('view/default_settings.ini')
+        
+        self.picker_radius = int(config['Plot']['picker_radius'])
+        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=int(config['Plot']['dpi_frequency_plots']))
         self.fig.patch.set_facecolor("#f0f0f0")
         super().__init__(self.fig)
         self.xStr = "ChiPrimeMol"
@@ -240,8 +247,8 @@ class plotFitChi(FigureCanvasQTAgg):
         shown = df.loc[df["Show"]== True] 
         hiden = df.loc[df["Show"]== False] 
 
-        self.ax.plot( shown["ChiPrimeMol"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
-        self.ax.plot( hiden["ChiPrimeMol"].values, hiden["ChiBisMol"].values, "o", label = "Hidden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+        self.ax.plot( shown["ChiPrimeMol"].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=self.picker_radius, c=mcolors.TABLEAU_COLORS["tab:blue"])
+        self.ax.plot( hiden["ChiPrimeMol"].values, hiden["ChiBisMol"].values, "o", label = "Hidden Experimental data", picker=self.picker_radius, c=mcolors.TABLEAU_COLORS["tab:orange"])
 
         nr_of_steps = 50
         step = (df['FrequencyLog'].max() - df['FrequencyLog'].min())/nr_of_steps
@@ -566,8 +573,8 @@ class plotFitChi1(plotFitChi):
         hiden = df.loc[df["Show"]== False] 
 
         
-        self.ax.plot( shown[self.xStr].values , shown["ChiPrimeMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
-        self.ax.plot( hiden[self.xStr].values , hiden["ChiPrimeMol"].values, "o", label = "Hidden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+        self.ax.plot( shown[self.xStr].values , shown["ChiPrimeMol"].values, "o", label = "Experimental data", picker=self.picker_radius, c=mcolors.TABLEAU_COLORS["tab:blue"])
+        self.ax.plot( hiden[self.xStr].values , hiden["ChiPrimeMol"].values, "o", label = "Hidden Experimental data", picker=self.picker_radius, c=mcolors.TABLEAU_COLORS["tab:orange"])
         color_nr = 0
         for c in plotFitChi.curves:
             self.ax.plot(plotFitChi.domain_omega, c.real, '--', c=mcolors.TABLEAU_COLORS[self.colors_names[color_nr]])
@@ -623,8 +630,8 @@ class plotFitChi2(plotFitChi):
         shown = df.loc[df["Show"]== True]
         hiden = df.loc[df["Show"]== False]
 
-        self.ax.plot( shown[self.xStr].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:blue"])
-        self.ax.plot( hiden[self.xStr].values, hiden["ChiBisMol"].values, "o", label = "Hidden Experimental data", picker=15, c=mcolors.TABLEAU_COLORS["tab:orange"])
+        self.ax.plot( shown[self.xStr].values, shown["ChiBisMol"].values, "o", label = "Experimental data", picker=self.picker_radius, c=mcolors.TABLEAU_COLORS["tab:blue"])
+        self.ax.plot( hiden[self.xStr].values, hiden["ChiBisMol"].values, "o", label = "Hidden Experimental data", picker=self.picker_radius, c=mcolors.TABLEAU_COLORS["tab:orange"])
 
         color_nr = 0
         for c in plotFitChi.curves:

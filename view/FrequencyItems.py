@@ -84,7 +84,7 @@ class FitFrequencyItem(StandardItem):
 
     def get_jsonable(self):
         jsonable = {"was_saved": self.wasSaved, 'relaxations': [], 'name': self.name, 'df':self.df.to_json(), 'state': self.checkState(),
-        'temp':self.temp.tolist(), 'field':self.field.tolist(), 'nr_of_relaxations': len(self.relaxations), 'sort_mode': self.sort_mode }
+        'temp':self.temp, 'field':self.field, 'nr_of_relaxations': len(self.relaxations), 'sort_mode': self.sort_mode }
         for r in self.relaxations:
             jsonable['relaxations'].append(r.get_jsonable())
 

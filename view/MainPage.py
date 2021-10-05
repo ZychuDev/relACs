@@ -10,7 +10,7 @@ from .CompoundItems import *
 from .PlotsFit import *
 from .Plot3D import *
 
-from PyQt5.QtGui import QStandardItemModel
+from PyQt5.QtGui import QStandardItemModel, QIntValidator
 from PyQt5.QtWidgets import QHeaderView, QTableView
 
 
@@ -251,6 +251,7 @@ class MainPage(Ui_MainWindow):
             edit = QLineEdit()
             edit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
             v = QDoubleValidator()
+            v.setBottom(0)
             loc = QLocale(QLocale.c())
             loc.setNumberOptions(QLocale.RejectGroupSeparator)
             v.setLocale(loc)
@@ -261,19 +262,41 @@ class MainPage(Ui_MainWindow):
             epsilons_edit[key] = edit
             layout.addLayout(l)
 
+        plot_edit = {}
+        plot_settings = dict(config['Plot'])
+        for key , val in plot_settings.items():
+            l = QHBoxLayout()
+            label = QLabel(key)
+            label.setMinimumSize(QSize(150, 0))
+            label.setAlignment(Qt.AlignLeft)
+            edit = QLineEdit()
+            edit.setLocale(QLocale(QLocale.English, QLocale.UnitedStates))
+            v = QIntValidator()
+            v.setRange(0,1000)
+            loc = QLocale(QLocale.c())
+            loc.setNumberOptions(QLocale.RejectGroupSeparator)
+            v.setLocale(loc)
+            edit.setValidator(v)
+            edit.setText(val)
+            l.addWidget(label)
+            l.addWidget(edit)
+            plot_edit[key] = edit
+            layout.addLayout(l)
+
         button = QPushButton("Apply new default settigs")
-        button.clicked.connect(partial(self.write_default_settings, ranges_edit, headers_edit, epsilons_edit,dlg))
+        button.clicked.connect(partial(self.write_default_settings, ranges_edit, headers_edit, epsilons_edit, plot_edit, dlg))
         layout.addWidget(button)
         dlg.setLayout(layout)
         dlg.exec_()
 
-    def write_default_settings(self, ranges_edit, headers_edit, epsilons_edit, dlg):
+    def write_default_settings(self, ranges_edit, headers_edit, epsilons_edit, plot_edit, dlg):
         config = configparser.RawConfigParser()
         config.optionxform = str
 
         config['Ranges'] = {key:f"{edit[0].text()}, {edit[1].text()}" for key, edit in ranges_edit.items()}
         config['Headers'] = {key:header.text() for key, header in headers_edit.items()}
         config['Epsilons'] = {key:epsilon.text() for key, epsilon in epsilons_edit.items()}
+        config['Plot'] = {key:value.text() for key, value in plot_edit.items()}
 
         with open('view/default_settings.ini', 'w') as f:
             config.write(f)

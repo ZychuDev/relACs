@@ -1,10 +1,15 @@
 import numpy as np
+import configparser
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
 class Plot(FigureCanvasQTAgg):
     def __init__(self, caption):
-        fig, self.ax = plt.subplots(figsize=(5,4), dpi=100)
+        config = configparser.RawConfigParser()
+        config.optionxform = str
+        config.read('view/default_settings.ini')
+
+        fig, self.ax = plt.subplots(figsize=(5,4), dpi=int(config['Plot']['dpi']))
         super().__init__(fig)
         #self.setParent(parent)
 
@@ -35,11 +40,16 @@ class Plot(FigureCanvasQTAgg):
 
 class PlotChi(FigureCanvasQTAgg):
     def __init__(self):
-        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=100)
+        config = configparser.RawConfigParser()
+        config.optionxform = str
+        config.read('view/default_settings.ini')
+        
+        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=int(config['Plot']['dpi']))
         self.fig.patch.set_facecolor("#f0f0f0")
         super().__init__(self.fig)
         self.xStr = "ChiPrimeMol"
-
+        self.picker_radius = int(config['Plot']['picker_radius'])
+        
     def change(self, dataItem):
         self.dataItem= dataItem
         self.df = dataItem.df
@@ -58,8 +68,8 @@ class PlotChi(FigureCanvasQTAgg):
         self.ax.set(title=r"Cole-Cole", xlabel=r"$\chi^{\prime} /cm^3*mol^{-1}$", ylabel=r"$\chi^{\prime \prime} / cm^3*mol^{-1}$")
         selected = df.loc[df["Selected"] == True]
         rest = df.loc[df["Selected"] == False]
-        self.ax.plot(rest["ChiPrimeMol"].values, rest["ChiBisMol"], "o", picker=15 )
-        self.ax.plot(selected["ChiPrimeMol"].values, selected["ChiBisMol"], "o", picker=15)
+        self.ax.plot(rest["ChiPrimeMol"].values, rest["ChiBisMol"], "o", picker=self.picker_radius )
+        self.ax.plot(selected["ChiPrimeMol"].values, selected["ChiBisMol"], "o", picker=self.picker_radius)
         
         self.draw()
 
@@ -97,8 +107,8 @@ class PlotChi1(PlotChi):
         self.ax.set(title=r"$\chi^{\prime}$", xlabel=r"$\log {\frac{v}{Hz}}$", ylabel=r"$\chi^{\prime} /cm^3*mol^{-1}$")
         selected = df.loc[df["Selected"] == True]
         rest = df.loc[df["Selected"] == False]
-        self.ax.plot(rest["FrequencyLog"].values, rest["ChiPrimeMol"], "o", picker=15 )
-        self.ax.plot(selected["FrequencyLog"].values, selected["ChiPrimeMol"], "o", picker=15 )
+        self.ax.plot(rest["FrequencyLog"].values, rest["ChiPrimeMol"], "o", picker=self.picker_radius )
+        self.ax.plot(selected["FrequencyLog"].values, selected["ChiPrimeMol"], "o", picker=self.picker_radius )
         
 
         self.draw()
@@ -119,8 +129,8 @@ class PlotChi2(PlotChi):
         self.ax.set(title=r"$\chi^{\prime \prime}$", xlabel=r"$\log {\frac{v}{Hz}}$", ylabel=r"$\chi^{\prime \prime} /cm^3*mol^{-1}$")
         selected = df.loc[df["Selected"] == True]
         rest = df.loc[df["Selected"] == False]
-        self.ax.plot(rest["FrequencyLog"].values, rest["ChiBisMol"], "o", picker=15 )
-        self.ax.plot(selected["FrequencyLog"].values, selected["ChiBisMol"], "o", picker=15 )
+        self.ax.plot(rest["FrequencyLog"].values, rest["ChiBisMol"], "o", picker=self.picker_radius )
+        self.ax.plot(selected["FrequencyLog"].values, selected["ChiBisMol"], "o", picker=self.picker_radius )
 
         
         self.draw()

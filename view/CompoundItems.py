@@ -147,7 +147,6 @@ class CompoundItem(StandardItem):
         print(f"Ranges{self.ranges}")
         self.log_params = ('Adir', 'B1', 'B2', 'B3', 'Tau0')
 
-
         self.data = DataCollectionItem(self.ui, 'Data')
         self.FrequencyFits = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Single Relaxation')
         self.FrequencyFits2 = FitFrequencyCollectionItem(self.ui, 'Frequency Fits Double Relaxations', 2)

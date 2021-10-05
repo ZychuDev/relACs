@@ -21,13 +21,20 @@ import matplotlib.colors as mcolors
 from .Fit_models import *
 import copy 
 
+import configparser
+
 class X_dimension(IntEnum):
     TEMP = 1
     FIELD = 2
 
 class Plot3D(FigureCanvasQTAgg): 
     def __init__(self):
-        self.fig = plt.figure(figsize=(1,1), dpi = 100, constrained_layout=True)
+        config = configparser.RawConfigParser()
+        config.optionxform = str
+        config.read('view/default_settings.ini')
+
+        self.picker_radius = int(config['Plot']['picker_radius'])
+        self.fig = plt.figure(figsize=(1,1), dpi = int(config['Plot']['dpi']), constrained_layout=True)
         self.fig.patch.set_facecolor("#f0f0f0")
         super().__init__(self.fig) # creating FigureCanvas
         self.axes = self.fig.gca(projection='3d') # generates 3D Axes object
@@ -414,7 +421,12 @@ class Plot3D(FigureCanvasQTAgg):
 
 class Slice(FigureCanvasQTAgg):
     def __init__(self):
-        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=100)
+        config = configparser.RawConfigParser()
+        config.optionxform = str
+        config.read('view/default_settings.ini')
+
+        self.picker_radius = int(config['Plot']['picker_radius'])
+        self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=int(config['Plot']['dpi']))
         self.fig.patch.set_facecolor("#f0f0f0")
         
         super().__init__(self.fig)
@@ -577,9 +589,8 @@ class Slice(FigureCanvasQTAgg):
             xx = [1/x for x in self.x_ax]
             hidden_xx = [1/x for x in self.hidden_x_ax]
 
-
-        self.ax.plot(xx, self.y_ax, 'o', picker=10)
-        self.ax.plot(hidden_xx, self.hidden_y_ax, 'o', picker=10, label='hidden points')
+        self.ax.plot(xx, self.y_ax, 'o', picker=self.picker_radius)
+        self.ax.plot(hidden_xx, self.hidden_y_ax, 'o', picker=self.picker_radius, label='hidden points')
 
         
         if self.x_dimension == X_dimension.TEMP:
@@ -611,18 +622,19 @@ class Slice(FigureCanvasQTAgg):
 
     def on_click(self, event):
         xdata = event.artist.get_xdata()
+        ydata = event.artist.get_ydata()
         mouse = event.mouseevent
         ind = event.ind
         if mouse.button == mouse.button.LEFT:
-            self.hide_point(xdata[ind])
+            self.hide_point(xdata[ind], ydata[ind])
 
         if mouse.button == mouse.button.RIGHT:
-            self.delete_point(xdata[ind])
+            self.delete_point(xdata[ind],ydata[ind])
         
         self.refresh()
         self.tau_item.ui.plot3d.refresh()
         
-    def hide_point(self, x):
+    def hide_point(self, x, y):
         if len(x) > 0:
             tau_item = self.tau_item
             points = tau_item.points
@@ -658,30 +670,30 @@ class Slice(FigureCanvasQTAgg):
                             tau_item.add_point(point)
         self.set_slice_x_ax(self.x_dimension)
 
-    def delete_point(self, x):
+    def delete_point(self, x, y):
         if len(self.x_ax) == 1:
             return
 
         tau_item = self.tau_item
         for point in tau_item.points:
             if self.x_dimension == X_dimension.TEMP:
-                if 1/point[1] == x[0]:
+                if 1/point[1] == x[0] and point[0] == np.log10(y[0]):
                     print(f"delete on {point}")
                     tau_item.delete_point(point)
 
             if self.x_dimension == X_dimension.FIELD:
-                if point[2] == x[0]:
+                if point[2] == x[0] and point[0] == np.log10(y[0]):
                     print(f"delete on {point}")
                     tau_item.delete_point(point)
 
         for point in tau_item.hidden_points:
             if self.x_dimension == X_dimension.TEMP:
-                if 1/point[1] == x[0]:
+                if 1/point[1] == x[0] and point[0] == np.log10(y[0]):
                     print(f"delete on {point}")
                     tau_item.delete_hidden_point(point)
 
             if self.x_dimension == X_dimension.FIELD:
-                if point[2] == x[0]:
+                if point[2] == x[0] and point[0] == np.log10(y[0]):
                     print(f"delete on {point}")
                     tau_item.delete_hidden_point(point)
 
