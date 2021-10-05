@@ -213,7 +213,10 @@ class FitTauItem(StandardItem):
         df_param = pd.DataFrame(columns=['Name', 'Value','Error'])
         i = 0
         for p in self.current:
-            row = {'Name': p, 'Value':self.current[p], 'Error':self.error[i]}
+            name = p
+            if name == 'Tau0':
+                name = 'Tau0^-1'
+            row = {'Name': name, 'Value':self.current[p], 'Error':self.error[i]}
             i += 1
             df_param = df_param.append(row, ignore_index=True)
 
