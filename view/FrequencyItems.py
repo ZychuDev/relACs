@@ -35,7 +35,7 @@ class Relaxation():
 
     def get_jsonable(self):
         jsonable ={'previous': self.previous, 'current': self.current,
-         'is_blocked':self.is_blocked, 'error': self.error, 'current_error': self.current_error,
+         'is_blocked':self.is_blocked, 'error': self.error, 'current_error': list(self.current_error),
          'residual_error': self.residual_error, 'current_residual_error': self.current_residual_error
         }
 
@@ -85,6 +85,7 @@ class FitFrequencyItem(StandardItem):
     def get_jsonable(self):
         jsonable = {"was_saved": self.wasSaved, 'relaxations': [], 'name': self.name, 'df':self.df.to_json(), 'state': self.checkState(),
         'temp':self.temp, 'field':self.field, 'nr_of_relaxations': len(self.relaxations), 'sort_mode': self.sort_mode }
+        
         for r in self.relaxations:
             jsonable['relaxations'].append(r.get_jsonable())
 

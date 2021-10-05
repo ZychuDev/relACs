@@ -650,7 +650,7 @@ class Slice(FigureCanvasQTAgg):
                                 tau_item.delete_point(point)
                                 tau_item.add_hidden_point(point)
                         if self.x_dimension == X_dimension.FIELD:
-                            if point[2] == x[0] and point[0] == np.exp(y[0]):
+                            if point[2] == x[0]:
                                 found = True
                                 tau_item.delete_point(point)
                                 tau_item.add_hidden_point(point)
@@ -659,14 +659,14 @@ class Slice(FigureCanvasQTAgg):
                 for point in hidden_points:
                     if isclose(point[0], np.exp(y[0]), rel_tol=1e-12):
                         if self.x_dimension == X_dimension.TEMP:
-                            if 1/point[1] == x[0] and point[0] == np.exp(y[0]):
+                            if 1/point[1] == x[0]:
                                 print(f"match on {point}")
                                 found = True
                                 tau_item.delete_hidden_point(point)
                                 tau_item.add_point(point)
                                 
                         if self.x_dimension == X_dimension.FIELD:
-                            if point[2] == x[0] and point[0] == np.exp(y[0]):
+                            if point[2] == x[0]:
                                 print(f"match on {point}")
                                 found = True
                                 tau_item.delete_hidden_point(point)

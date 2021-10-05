@@ -101,10 +101,6 @@ class FitTauItem(StandardItem):
         self.ui.WorkingSpace.setCurrentWidget(self.ui.fit3Dpage)
 
 
-
-
-
-
     def set_current_as_saved(self):
         for param in self.current:
             self.current[param] = self.previous[param]
