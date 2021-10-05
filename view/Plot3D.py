@@ -1,4 +1,4 @@
-from math import inf
+from math import inf, isclose
 from PyQt5.QtCore import QLocale, Qt
 from PyQt5.QtWidgets import QTableWidgetItem, QApplication, QDialog, QComboBox, QHBoxLayout, QPushButton
 
@@ -635,6 +635,7 @@ class Slice(FigureCanvasQTAgg):
         self.tau_item.ui.plot3d.refresh()
         
     def hide_point(self, x, y):
+
         if len(x) > 0:
             tau_item = self.tau_item
             points = tau_item.points
@@ -642,32 +643,34 @@ class Slice(FigureCanvasQTAgg):
             found = False
             if len(self.x_ax) > 1:
                 for point in points:
-                    if self.x_dimension == X_dimension.TEMP:
-                        if 1/point[1] == x[0]:
-                            found = True
-                            tau_item.delete_point(point)
-                            tau_item.add_hidden_point(point)
-                    if self.x_dimension == X_dimension.FIELD:
-                        if point[2] == x[0]:
-                            found = True
-                            tau_item.delete_point(point)
-                            tau_item.add_hidden_point(point)
+                    if isclose(point[0], np.exp(y[0]), rel_tol=1e-12):
+                        if self.x_dimension == X_dimension.TEMP:
+                            if 1/point[1] == x[0]:
+                                found = True
+                                tau_item.delete_point(point)
+                                tau_item.add_hidden_point(point)
+                        if self.x_dimension == X_dimension.FIELD:
+                            if point[2] == x[0] and point[0] == np.exp(y[0]):
+                                found = True
+                                tau_item.delete_point(point)
+                                tau_item.add_hidden_point(point)
 
             if not found:
                 for point in hidden_points:
-                    if self.x_dimension == X_dimension.TEMP:
-                        if 1/point[1] == x[0]:
-                            print(f"match on {point}")
-                            found = True
-                            tau_item.delete_hidden_point(point)
-                            tau_item.add_point(point)
-                            
-                    if self.x_dimension == X_dimension.FIELD:
-                        if point[2] == x[0]:
-                            print(f"match on {point}")
-                            found = True
-                            tau_item.delete_hidden_point(point)
-                            tau_item.add_point(point)
+                    if isclose(point[0], np.exp(y[0]), rel_tol=1e-12):
+                        if self.x_dimension == X_dimension.TEMP:
+                            if 1/point[1] == x[0] and point[0] == np.exp(y[0]):
+                                print(f"match on {point}")
+                                found = True
+                                tau_item.delete_hidden_point(point)
+                                tau_item.add_point(point)
+                                
+                        if self.x_dimension == X_dimension.FIELD:
+                            if point[2] == x[0] and point[0] == np.exp(y[0]):
+                                print(f"match on {point}")
+                                found = True
+                                tau_item.delete_hidden_point(point)
+                                tau_item.add_point(point)
         self.set_slice_x_ax(self.x_dimension)
 
     def delete_point(self, x, y):
@@ -676,26 +679,29 @@ class Slice(FigureCanvasQTAgg):
 
         tau_item = self.tau_item
         for point in tau_item.points:
-            if self.x_dimension == X_dimension.TEMP:
-                if 1/point[1] == x[0] and point[0] == np.log10(y[0]):
-                    print(f"delete on {point}")
-                    tau_item.delete_point(point)
+            if isclose(point[0], np.exp(y[0]), rel_tol=1e-12):
+                if self.x_dimension == X_dimension.TEMP:
+                    
+                    if 1/point[1] == x[0]:
+                        print(f"delete on {point}")
+                        tau_item.delete_point(point)
 
-            if self.x_dimension == X_dimension.FIELD:
-                if point[2] == x[0] and point[0] == np.log10(y[0]):
-                    print(f"delete on {point}")
-                    tau_item.delete_point(point)
+                if self.x_dimension == X_dimension.FIELD:
+                    if point[2] == x[0]:
+                        print(f"delete on {point}")
+                        tau_item.delete_point(point)
 
         for point in tau_item.hidden_points:
-            if self.x_dimension == X_dimension.TEMP:
-                if 1/point[1] == x[0] and point[0] == np.log10(y[0]):
-                    print(f"delete on {point}")
-                    tau_item.delete_hidden_point(point)
+            if isclose(point[0], np.exp(y[0]), rel_tol=1e-12):
+                if self.x_dimension == X_dimension.TEMP:
+                    if 1/point[1] == x[0]:
+                        print(f"delete on {point}")
+                        tau_item.delete_hidden_point(point)
 
-            if self.x_dimension == X_dimension.FIELD:
-                if point[2] == x[0] and point[0] == np.log10(y[0]):
-                    print(f"delete on {point}")
-                    tau_item.delete_hidden_point(point)
+                if self.x_dimension == X_dimension.FIELD:
+                    if point[2] == x[0]:
+                        print(f"delete on {point}")
+                        tau_item.delete_hidden_point(point)
 
         self.set_slice_x_ax(self.x_dimension)
 
