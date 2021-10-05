@@ -125,6 +125,7 @@ class FitTauItem(StandardItem):
     def delete_point(self, point):
         self.points.remove(point)
         self.regenerate_points()
+        self.regenerate_hidden_points()
     
     def add_point(self, point):
         self.points.append(point)
@@ -132,6 +133,7 @@ class FitTauItem(StandardItem):
 
     def delete_hidden_point(self, point):
         self.hidden_points.remove(point)
+        self.regenerate_hidden_points()
         self.regenerate_hidden_points()
 
     def add_hidden_point(self, point):
