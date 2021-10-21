@@ -1,7 +1,7 @@
 from .StandardItem import StandardItem
 from PyQt5.QtCore import  Qt
 
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QBrush
 from PyQt5.QtWidgets import QMenu, QInputDialog
 from PyQt5 import QtWidgets
 from .Plot3D import *
@@ -334,7 +334,8 @@ class FitTauItem(StandardItem):
 class FitTauCollectionItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
-        self.markColor = QColor(46,184,199)
+        self.setBackground(QBrush(QColor(255,201,183)))
+        self.markColor = QColor(255,170,0)
         #self.setBackground(markColor)
         self.ui = mainPage
         self.container = {}

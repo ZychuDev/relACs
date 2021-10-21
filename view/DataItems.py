@@ -1,4 +1,4 @@
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QBrush
 from PyQt5.QtWidgets import  QFileDialog, QMenu, QInputDialog
 from PyQt5.QtCore import  Qt, QLocale
 
@@ -188,6 +188,7 @@ class DataItem(StandardItem):
 class DataCollectionItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
+        self.setBackground(QBrush(QColor(255,201,183)))
         self.ui = mainPage
         self.names = set()
         self.sort_mode = SortModes.TEMP

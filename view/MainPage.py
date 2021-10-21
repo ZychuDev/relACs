@@ -11,7 +11,14 @@ from .PlotsFit import *
 from .Plot3D import *
 
 from PyQt5.QtGui import QStandardItemModel, QIntValidator
-from PyQt5.QtWidgets import QHeaderView, QTableView
+from PyQt5.QtWidgets import QHeaderView, QTableView, QLabel
+
+from webbrowser import open as wb_open
+
+class SvgImageLabel(QLabel):
+    """A TextEdit widget derived from QTextEdit and implementing its
+       own paintEvent"""
+
 
 
 class MainPage(Ui_MainWindow):
@@ -19,10 +26,16 @@ class MainPage(Ui_MainWindow):
     def __init__ (self, window):
         super().__init__()
         self.setupUi(window)
-        self.whole = RootItem(self, 'Main')
-
+        self.whole = RootItem(self, 'relACs')
         
         self.window = window
+        self.window.setWindowTitle("relACs")
+        """Main Page implementation"""
+        self.WorkingSpace.setCurrentWidget(self.homePage)
+        self.LeftTextTableWidget.item(7,1).setForeground(QBrush(QColor(0, 0, 255)))
+        self.LeftTextTableWidget.itemClicked.connect(self.open_link)
+
+        """Tree implementation"""
         self.WorkingSpace.setCurrentWidget(self.fit2Dpage)
         self.TModel.setRootIsDecorated(False)
         self.TModel.setAlternatingRowColors(True)
@@ -177,6 +190,9 @@ class MainPage(Ui_MainWindow):
         self.menuSettings.addAction("Default Settings", self.edit_default_settings)
         self.WorkingSpace.setCurrentWidget(self.homePage)
 
+    def open_link(self, item):
+        if item.text()[:3] == 'www':
+            wb_open(item.text())
 
     def edit_default_settings(self):
         dlg = QDialog()
@@ -215,7 +231,8 @@ class MainPage(Ui_MainWindow):
 
             ranges_edit[p] = [low, up]
             l.addWidget(low)
-            label = QLabel(p)
+            label_txt = p if p != 'chiT' else 'chiT-chiS'
+            label = QLabel(label_txt)
             label.setMinimumSize(QSize(65, 0))
             label.setAlignment(Qt.AlignCenter)
             l.addWidget(label)

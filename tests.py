@@ -1,55 +1,27 @@
-class Curve():
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QGridLayout, QWidget, QPushButton
+from PyQt5.QtGui import QPixmap
+
+class Example(QWidget):
+
     def __init__(self):
-        self.yy = [1, 2]
-        self.real = [1,3]
-        self.img = [1]
+        super().__init__()
 
-        self.yy_saved = [1]
-        self.real_saved = [1]
-        self.img_saved = [1]
+        self.im = QPixmap('.\image.jpg')
+        self.im.scaledToWidth(32)
+        self.label = QLabel()
+        self.label.setPixmap(self.im)
 
-    def __radd__(self, other):
-        if other == 0:
-            return self
-        else:
-            return self.__add__(other)
+        self.grid = QGridLayout()
+        self.grid.addWidget(self.label,1,1)
+        self.grid.addWidget(QPushButton(),1,2)
+        self.setLayout(self.grid)
 
-    def __add__(self, other):
-        "Adding to curves all fileds should be lists of the same length"
-        result = Curve()
-        result_vars = vars(result)
-        other_vars = vars(other)
+        self.setGeometry(50,50,320,200)
+        self.setWindowTitle("PyQT show image")
+        self.show()
 
-        for key, val in vars(self).items():
-            #diffrent length allowed version
-            # tmp = other_vars[key][:] #shallow copy
-            # size_diff = len(val) - len(other_vars[key])
-            # if size_diff != 0:
-            
-            #     zero_padding = [0] * abs(size_diff)
-            #     if size_diff < 0:
-            #         val = val + zero_padding
-            #     else:
-            #         tmp = other_vars[key] + zero_padding
-
-            # result_vars[key] = [sum(x) for x in zip(val, tmp)]
-            result_vars[key] = [sum(x) for x in zip(val, other_vars[key])]
-
-        return result
-
-    def var(self):
-        print(vars(self))
-
-    def var_edit(self, other):
-        result = Curve()
-        result_vars = vars(result)
-
-        for key, val in vars(self).items():
-            result_vars[key] = [sum(x) for x in zip(val, result_vars[key])]
-
-        return result
-
-a = Curve()
-a.yy = [4,8]
-a.var()
-print(sum([a, Curve()]).var())
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = Example()
+    sys.exit(app.exec_())

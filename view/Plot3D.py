@@ -63,8 +63,8 @@ class Plot3D(FigureCanvasQTAgg):
 
         x = [1/t for t in x]
         X, Y = np.meshgrid(x,y)
-        self.axes.plot_wireframe(X, Y, P, rstride=1, cstride=1, color='k', label='saved')
-        self.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1, label='current', linestyles=':', color=mcolors.TABLEAU_COLORS["tab:green"])
+        self.axes.plot_wireframe(X, Y, P, rstride=1, cstride=1, color='k', label='saved', alpha=0.5)
+        self.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1, label='current', linestyles=':', color=mcolors.TABLEAU_COLORS["tab:green"], alpha=0.4)
         
         t_invert = [1/t for t in self.tau_item.temp]
         hidden_t_invert = [1/t for t in self.tau_item.hidden_temp]

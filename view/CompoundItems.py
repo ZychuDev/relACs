@@ -1,6 +1,6 @@
 from .StandardItem import StandardItem
 
-from PyQt5.QtGui import QColor, QDoubleValidator
+from PyQt5.QtGui import QColor, QDoubleValidator, QBrush
 from PyQt5.QtWidgets import QLabel, QMenu, QVBoxLayout, QLineEdit
 from PyQt5.QtCore import QSize, Qt
 
@@ -15,6 +15,7 @@ import configparser
 class CompoundCollectionItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=14, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
+        self.setBackground(QBrush(QColor(255,144,40)))
         self.ui = mainPage
         self.container = {}
     
@@ -132,7 +133,7 @@ class CompoundItem(StandardItem):
     molar_mass = 2000):
         super().__init__(txt, font_size, set_bold, color)
         self.ui = mainPage
-
+        # self.setBackground(QBrush(QColor(0,255,0)))
         self.name = txt
         self.molar_mass = molar_mass #TO DO: implement dialog box option for it
 
@@ -231,7 +232,9 @@ class CompoundItem(StandardItem):
 
             new_ranges[p] = [low, up]
             l.addWidget(low)
-            label = QLabel(p)
+            print(p)
+            label_txt = p if p != 'chiT' else 'chiT-chiS'
+            label = QLabel(label_txt)
             label.setMinimumSize(QSize(65, 0))
             label.setAlignment(Qt.AlignCenter)
             l.addWidget(label)
@@ -360,11 +363,18 @@ class CompoundItem(StandardItem):
 class RootItem(StandardItem):
     def __init__(self, mainPage, txt='', font_size=16, set_bold=True, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
+        self.setBackground(QBrush(QColor(255,122,0)))
         self.ui = mainPage
 
         self.compounds = CompoundCollectionItem(self.ui, "Compounds")
         
         self.appendRow(self.compounds)
+
+    def double_click(self):
+        self.click()
+
+    def click(self):
+        self.ui.WorkingSpace.setCurrentWidget(self.ui.homePage)
         
 
     def showMenu(self, position):

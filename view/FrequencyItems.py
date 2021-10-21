@@ -2,7 +2,7 @@ from typing import Collection
 from PyQt5 import QtWidgets
 from .StandardItem import StandardItem
 
-from PyQt5.QtGui import QColor
+from PyQt5.QtGui import QColor, QBrush
 from PyQt5.QtWidgets import QStyle, QMenu, QApplication, QMessageBox
 
 from PyQt5.QtCore import Qt
@@ -286,6 +286,9 @@ class FitFrequencyItem(StandardItem):
 class FitFrequencyCollectionItem(StandardItem):
     def __init__(self, mainPage, txt='', nr_of_relaxations=1, font_size=12, set_bold=False, color=QColor(0,0,0)):
         super().__init__(txt, font_size, set_bold, color)
+
+        self.setBackground(QBrush(QColor(255,201,183)))
+            
 
         self.ui = mainPage
         self.names = set()
