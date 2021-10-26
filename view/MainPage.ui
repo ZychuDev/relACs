@@ -2016,7 +2016,7 @@
                </property>
                <property name="font">
                 <font>
-                 <pointsize>20</pointsize>
+                 <pointsize>16</pointsize>
                 </font>
                </property>
                <property name="autoFillBackground">
@@ -2035,10 +2035,13 @@
                 <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
                <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
+                <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
                <property name="sizeAdjustPolicy">
                 <enum>QAbstractScrollArea::AdjustIgnored</enum>
+               </property>
+               <property name="autoScroll">
+                <bool>false</bool>
                </property>
                <property name="editTriggers">
                 <set>QAbstractItemView::NoEditTriggers</set>
@@ -2052,6 +2055,15 @@
                <property name="selectionBehavior">
                 <enum>QAbstractItemView::SelectRows</enum>
                </property>
+               <property name="textElideMode">
+                <enum>Qt::ElideRight</enum>
+               </property>
+               <property name="verticalScrollMode">
+                <enum>QAbstractItemView::ScrollPerItem</enum>
+               </property>
+               <property name="horizontalScrollMode">
+                <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
                <property name="showGrid">
                 <bool>false</bool>
                </property>
@@ -2059,16 +2071,22 @@
                 <enum>Qt::NoPen</enum>
                </property>
                <property name="wordWrap">
-                <bool>false</bool>
+                <bool>true</bool>
                </property>
                <attribute name="horizontalHeaderVisible">
                 <bool>false</bool>
+               </attribute>
+               <attribute name="horizontalHeaderCascadingSectionResizes">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="horizontalHeaderMinimumSectionSize">
+                <number>175</number>
                </attribute>
                <attribute name="horizontalHeaderDefaultSectionSize">
                 <number>175</number>
                </attribute>
                <attribute name="horizontalHeaderHighlightSections">
-                <bool>true</bool>
+                <bool>false</bool>
                </attribute>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>true</bool>
@@ -2076,8 +2094,14 @@
                <attribute name="verticalHeaderVisible">
                 <bool>false</bool>
                </attribute>
+               <attribute name="verticalHeaderCascadingSectionResizes">
+                <bool>true</bool>
+               </attribute>
+               <attribute name="verticalHeaderMinimumSectionSize">
+                <number>40</number>
+               </attribute>
                <attribute name="verticalHeaderDefaultSectionSize">
-                <number>45</number>
+                <number>53</number>
                </attribute>
                <attribute name="verticalHeaderHighlightSections">
                 <bool>true</bool>
@@ -2122,7 +2146,7 @@
                </row>
                <row>
                 <property name="text">
-                 <string>Contact:</string>
+                 <string/>
                 </property>
                </row>
                <column>
@@ -2214,7 +2238,7 @@
                </item>
                <item row="7" column="0">
                 <property name="text">
-                 <string>Contact info:</string>
+                 <string>Contact:</string>
                 </property>
                </item>
                <item row="7" column="1">
@@ -2281,7 +2305,7 @@
      <x>0</x>
      <y>0</y>
      <width>1641</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSettings">
