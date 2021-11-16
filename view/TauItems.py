@@ -212,11 +212,11 @@ class FitTauItem(StandardItem):
     def result(self):
         df_param = pd.DataFrame(columns=['Name', 'Value','Error'])
         i = 0
-        for p in self.current:
+        for p in self.previous:
             name = p
             if name == 'Tau0':
                 name = 'Tau0^-1'
-            row = {'Name': name, 'Value':self.current[p], 'Error':self.error[i]}
+            row = {'Name': name, 'Value':self.previous[p], 'Error':self.error[i]}
             i += 1
             df_param = df_param.append(row, ignore_index=True)
 
@@ -229,7 +229,7 @@ class FitTauItem(StandardItem):
         y = np.linspace(self.field.min(),self.field.max(), 50)
         X, Y = np.meshgrid(x,y)
 
-        a = list(self.current.values())
+        a = list(self.previous.values())
         Z = 1/model(X,Y,*a)
 
         temp = []
@@ -252,7 +252,9 @@ class FitTauItem(StandardItem):
         c=pd.DataFrame(tau).rename(columns={0:'TauModel'})
         df_model = pd.concat([a,b,c], axis=1)
 
-        df_model_2 = self.partial_result(x,y)
+        df_model_2 = self.partial_result(x,y[-1])
+        for f in y[1:]:
+            df_model_2 += self.partial_result(x,f)
 
         
         all_temp = set()
