@@ -104,7 +104,6 @@ class CompoundCollectionItem(StandardItem):
         items_list = []
         i = 0
         while(self.child(i) != None):
-            print(f"Collection nr {i}:",type(self.child(i).get_jsonable()), self.child(i).get_jsonable())
             items_list.append(self.child(i).get_jsonable())
             i += 1
         jsonable = {'items_list':items_list}
