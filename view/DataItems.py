@@ -326,13 +326,15 @@ class DataCollectionItem(StandardItem):
                     if not header:
                         f.write(line + "\n")
         
-        data = pd.read_csv(filepath, header=1)
-        data = data.sort_values("Temperature (K)")
-
         config = configparser.RawConfigParser()
         config.optionxform = str
 
         config.read('view/default_settings.ini')
+
+        data = pd.read_csv(filepath, header=1)
+        data = data.sort_values(config['Headers']['Temperature'])
+
+
 
         translateExternalToInternal = {value:key for key, value in dict(config['Headers']).items()}
         print(f"Nowy słownik{translateExternalToInternal}")
