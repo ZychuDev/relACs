@@ -252,9 +252,10 @@ class FitTauItem(StandardItem):
         c=pd.DataFrame(tau).rename(columns={0:'TauModel'})
         df_model = pd.concat([a,b,c], axis=1)
 
-        df_model_2 = self.partial_result(x,y[-1])
-        for f in y[1:]:
-            df_model_2 += self.partial_result(x,f)
+        # df_model_2 = self.partial_result(x,y[-1])
+        # for f in y[1:]:
+        #     df_model_2 += self.partial_result(x,f)
+        df_model_2 = self.partial_result(x,y)
 
         
         all_temp = set()
@@ -322,7 +323,7 @@ class FitTauItem(StandardItem):
             c = pd.DataFrame(qtm).rename(columns={0:'QTM Tau'})
             d = pd.DataFrame(direct).rename(columns={0:'Direct Tau'})
             e = pd.DataFrame(sum).rename(columns={0:'Tau'})
-            return pd.concat([a,b,c,d,e], axis=1)
+            return pd.concat([a,b,c,d,e])
         else:
             return [orbach, raman, qtm, direct, sum]
 
