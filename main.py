@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from PyQt5.QtGui import QIcon
 
-import view.AppStateBase
-from view.MainPage import *
+import src.AppStateBase
+from src.MainPage import *
 
 if __name__ == "__main__":
     import sys

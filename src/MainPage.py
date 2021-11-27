@@ -200,7 +200,7 @@ class MainPage(Ui_MainWindow):
 
         config = configparser.RawConfigParser()
         config.optionxform = str
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
 
         r = config['Ranges']
         ranges = {}
@@ -315,7 +315,7 @@ class MainPage(Ui_MainWindow):
         config['Epsilons'] = {key:epsilon.text() for key, epsilon in epsilons_edit.items()}
         config['Plot'] = {key:value.text() for key, value in plot_edit.items()}
 
-        with open('view/default_settings.ini', 'w') as f:
+        with open('settings/default_settings.ini', 'w') as f:
             config.write(f)
 
         dlg.accept()

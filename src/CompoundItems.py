@@ -139,7 +139,7 @@ class CompoundItem(StandardItem):
         config = configparser.RawConfigParser()
         config.optionxform = str
 
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
         r = config['Ranges']
         self.ranges = {}
         for p in r:

@@ -1,5 +1,5 @@
 from numba.core.types.scalars import Float, Integer
-from view.AppStateBase import *
+from src.AppStateBase import *
 from PyQt5.QtWidgets import QComboBox, QHBoxLayout, QPushButton, QTableWidgetItem, QApplication, QDialog
 import numpy as np
 
@@ -73,7 +73,7 @@ class plotFitChi(FigureCanvasQTAgg):
     def __init__(self):
         config = configparser.RawConfigParser()
         config.optionxform = str
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
         
         self.picker_radius = int(config['Plot']['picker_radius'])
         self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=int(config['Plot']['dpi_frequency_plots']))

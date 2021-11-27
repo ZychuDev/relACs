@@ -329,7 +329,7 @@ class DataCollectionItem(StandardItem):
         config = configparser.RawConfigParser()
         config.optionxform = str
 
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
 
         data = pd.read_csv(filepath, header=1)
         data = data.sort_values(config['Headers']['Temperature'])

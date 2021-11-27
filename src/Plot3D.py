@@ -31,7 +31,7 @@ class Plot3D(FigureCanvasQTAgg):
     def __init__(self):
         config = configparser.RawConfigParser()
         config.optionxform = str
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
 
         self.picker_radius = int(config['Plot']['picker_radius'])
         self.fig = plt.figure(figsize=(1,1), dpi = int(config['Plot']['dpi']), constrained_layout=True)
@@ -423,7 +423,7 @@ class Slice(FigureCanvasQTAgg):
     def __init__(self):
         config = configparser.RawConfigParser()
         config.optionxform = str
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
 
         self.picker_radius = int(config['Plot']['picker_radius'])
         self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=int(config['Plot']['dpi']))

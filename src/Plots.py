@@ -7,7 +7,7 @@ class Plot(FigureCanvasQTAgg):
     def __init__(self, caption):
         config = configparser.RawConfigParser()
         config.optionxform = str
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
 
         fig, self.ax = plt.subplots(figsize=(5,4), dpi=int(config['Plot']['dpi']))
         super().__init__(fig)
@@ -42,7 +42,7 @@ class PlotChi(FigureCanvasQTAgg):
     def __init__(self):
         config = configparser.RawConfigParser()
         config.optionxform = str
-        config.read('view/default_settings.ini')
+        config.read('settings/default_settings.ini')
         
         self.fig, self.ax = plt.subplots(figsize=(1,1), dpi=int(config['Plot']['dpi']))
         self.fig.patch.set_facecolor("#f0f0f0")

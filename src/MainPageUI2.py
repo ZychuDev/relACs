@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'view/MainPage.ui'
+# Form implementation generated from reading ui file 'src/MainPage.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -868,7 +868,7 @@ class Ui_MainWindow(object):
         self.HomePageLayout.setObjectName("HomePageLayout")
         self.TitleImageLabel = QtWidgets.QLabel(self.homePage)
         self.TitleImageLabel.setText("")
-        self.TitleImageLabel.setPixmap(QtGui.QPixmap("view\\../assets/img/relacs.tif"))
+        self.TitleImageLabel.setPixmap(QtGui.QPixmap("src\\../assets/img/relacs.tif"))
         self.TitleImageLabel.setScaledContents(True)
         self.TitleImageLabel.setObjectName("TitleImageLabel")
         self.HomePageLayout.addWidget(self.TitleImageLabel)
@@ -991,7 +991,7 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.GroupLogoLabel.sizePolicy().hasHeightForWidth())
         self.GroupLogoLabel.setSizePolicy(sizePolicy)
         self.GroupLogoLabel.setText("")
-        self.GroupLogoLabel.setPixmap(QtGui.QPixmap("view\\../assets/img/logo-2.tif"))
+        self.GroupLogoLabel.setPixmap(QtGui.QPixmap("src\\../assets/img/logo-2.tif"))
         self.GroupLogoLabel.setScaledContents(True)
         self.GroupLogoLabel.setObjectName("GroupLogoLabel")
         self.Row_1.addWidget(self.GroupLogoLabel)
@@ -1005,7 +1005,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.splitter)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1641, 26))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1641, 21))
         self.menubar.setObjectName("menubar")
         self.menuSettings = QtWidgets.QMenu(self.menubar)
         self.menuSettings.setObjectName("menuSettings")
@@ -1184,7 +1184,7 @@ class Ui_MainWindow(object):
         item = self.LeftTextTableWidget.item(7, 0)
         item.setText(_translate("MainWindow", "Contact:"))
         item = self.LeftTextTableWidget.item(7, 1)
-        item.setText(_translate("MainWindow", "www.uj.edu.pl                             ."))
+        item.setText(_translate("MainWindow", "www.uj.edu.pl"))
         self.LeftTextTableWidget.setSortingEnabled(__sortingEnabled)
         self.menuSettings.setTitle(_translate("MainWindow", "Settings"))
         self.actionSave.setText(_translate("MainWindow", "Save"))
