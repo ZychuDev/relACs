@@ -1,6 +1,8 @@
-matplotlib
+matplotlib >= 3.3.3
 pyqt5
 pandas 
 numpy 
 pandas
 scipy
+numba
+keyboard

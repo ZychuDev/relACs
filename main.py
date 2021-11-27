@@ -1,16 +1,23 @@
-from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtGui import QIcon
 
-from view.MainPage import *
+import src.AppStateBase
+from src.MainPage import *
 
 if __name__ == "__main__":
     import sys
 
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
+    app = QApplication(sys.argv)
+    app_icon = QIcon('./assets/img/relac-fin.ico')
+    app.setWindowIcon(app_icon)
+    
+    screen = app.primaryScreen()
+    size = screen.size()
+    AppState.screen_size = (size.width(), size.height())
+    rect = screen.availableGeometry()
+    MainWindow = QMainWindow()
     ui = MainPage(MainWindow)
-    
-    
-    MainWindow.show()
+
+    MainWindow.showMaximized()
 
     sys.exit(app.exec_())
