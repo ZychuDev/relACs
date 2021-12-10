@@ -1,3 +1,24 @@
+"""
+    The relACs is a analysis tool for magnetic data for SMM systems using
+    various models for ac magnetic characteristics and the further reliable
+    determination of diverse relaxation processes.
+
+    Copyright (C) 2021  Wiktor Zychowicz & Mikolaj Zychowicz
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+""" 
+
 from .StandardItem import StandardItem
 
 from PyQt5.QtGui import QColor, QDoubleValidator, QBrush
@@ -18,6 +39,7 @@ class CompoundCollectionItem(StandardItem):
         self.setBackground(QBrush(QColor(255,144,40)))
         self.ui = mainPage
         self.container = {}
+        self.names = set()
     
     def showMenu(self, position):
         menu = QMenu()
@@ -51,6 +73,7 @@ class CompoundCollectionItem(StandardItem):
             molar_mass = dialog.doubleValue()
             new = CompoundItem(self.ui, txt=name, molar_mass= molar_mass)
             self.appendRow(new)
+            self.names.add(new.name)
             self.ui.TModel.expandAll()
             self.container[name] = new
 
@@ -59,7 +82,9 @@ class CompoundCollectionItem(StandardItem):
             #TO DO: Ui information
             print("Compound already exists choose other name or delete old one!")
             return False #To DO throw exception
+        
         self.appendRow(compound)
+        self.names.add(compound.name)
         self.ui.TModel.expandAll()
         self.container[compound.name] = compound
 
@@ -197,10 +222,13 @@ class CompoundItem(StandardItem):
         menu = QMenu()
         menu.addAction("Change Ranges", self.change_ranges)
         menu.addAction("Remove", self.remove)
+        menu.addSeparator()
+        menu.addAction("Rename", self.rename)
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def remove(self):
         self.parent().container.pop(self.name, None)
+        self.parent().names.remove(self.name)
         self.parent().removeRow(self.index().row())
 
     def change_ranges(self, return_to=None):
@@ -351,10 +379,21 @@ class CompoundItem(StandardItem):
                 self.ui.WorkingSpace.setCurrentWidget(self.ui.homePage)
             dlg.accept()
 
+    def rename(self):
+        text, ok = QInputDialog.getText(self.ui.window, 'Renaming Compound', "Enter new Compound name:")
+        names = self.parent().names
+        if ok:
+            if text in names:
+                print("Name already taken")
+                return
+            old_name = self.name
+            names.remove(old_name)
 
-
-
-
+            self.name = str(text)
+            names.add(self.name)
+            container = self.parent().container
+            container[self.name] = container.pop(old_name, None)
+            self.setText(self.name)
 
 
 
