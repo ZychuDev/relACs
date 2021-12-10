@@ -3,7 +3,7 @@ from PyQt5 import QtWidgets
 from .StandardItem import StandardItem
 
 from PyQt5.QtGui import QColor, QBrush
-from PyQt5.QtWidgets import QStyle, QMenu, QApplication, QMessageBox
+from PyQt5.QtWidgets import QStyle, QMenu, QApplication, QMessageBox, QInputDialog
 
 from PyQt5.QtCore import Qt
 
@@ -280,7 +280,18 @@ class FitFrequencyItem(StandardItem):
         return df
 
     def rename(self):
-        return
+        text, ok = QInputDialog.getText(self.ui.window, 'Renaming Frequency Fit', 'Enter new Frequency Fit name:')
+        names = self.parent().names
+        if ok:
+            if text in names:
+                print("Name already taken")
+                return
+
+            names.remove(self.name)
+
+            self.name = str(text)
+            names.add(self.name)
+            self.setText(self.name)
 
 
 class FitFrequencyCollectionItem(StandardItem):

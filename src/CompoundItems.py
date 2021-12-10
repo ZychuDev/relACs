@@ -18,6 +18,7 @@ class CompoundCollectionItem(StandardItem):
         self.setBackground(QBrush(QColor(255,144,40)))
         self.ui = mainPage
         self.container = {}
+        self.names = set()
     
     def showMenu(self, position):
         menu = QMenu()
@@ -51,6 +52,7 @@ class CompoundCollectionItem(StandardItem):
             molar_mass = dialog.doubleValue()
             new = CompoundItem(self.ui, txt=name, molar_mass= molar_mass)
             self.appendRow(new)
+            self.names.add(new.name)
             self.ui.TModel.expandAll()
             self.container[name] = new
 
@@ -59,7 +61,9 @@ class CompoundCollectionItem(StandardItem):
             #TO DO: Ui information
             print("Compound already exists choose other name or delete old one!")
             return False #To DO throw exception
+        
         self.appendRow(compound)
+        self.names.add(compound.name)
         self.ui.TModel.expandAll()
         self.container[compound.name] = compound
 
@@ -197,10 +201,13 @@ class CompoundItem(StandardItem):
         menu = QMenu()
         menu.addAction("Change Ranges", self.change_ranges)
         menu.addAction("Remove", self.remove)
+        menu.addSeparator()
+        menu.addAction("Rename", self.rename)
         menu.exec_(self.ui.window.mapToGlobal(position))
 
     def remove(self):
         self.parent().container.pop(self.name, None)
+        self.parent().names.remove(self.name)
         self.parent().removeRow(self.index().row())
 
     def change_ranges(self, return_to=None):
@@ -351,10 +358,21 @@ class CompoundItem(StandardItem):
                 self.ui.WorkingSpace.setCurrentWidget(self.ui.homePage)
             dlg.accept()
 
+    def rename(self):
+        text, ok = QInputDialog.getText(self.ui.window, 'Renaming Compound', "Enter new Compound name:")
+        names = self.parent().names
+        if ok:
+            if text in names:
+                print("Name already taken")
+                return
+            old_name = self.name
+            names.remove(old_name)
 
-
-
-
+            self.name = str(text)
+            names.add(self.name)
+            container = self.parent().container
+            container[self.name] = container.pop(old_name, None)
+            self.setText(self.name)
 
 
 
