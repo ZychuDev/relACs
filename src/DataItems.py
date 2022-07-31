@@ -45,6 +45,8 @@ from .FrequencyItems import *
 from functools import partial
 from .SortModes import SortModes
 
+from math import log10, floor, ceil
+
 import configparser
 import json 
 
@@ -100,8 +102,26 @@ class DataItem(StandardItem):
         self.field = json["field"]
 
     def dfToDataItem(ui, df, sufix=''):
-        temp = round((df["Temperature"].max() + df["Temperature"].min())/2, 1)
-        field = round((df["MagneticField"].max() + df["MagneticField"].min())/2, 0)
+        config = configparser.RawConfigParser()
+        config.optionxform = str
+        config.read('settings/default_settings.ini')
+        eps_temp = float(config['Epsilons']['Temp'])
+        eps_field = float(config['Epsilons']['Field'])
+
+        accuracy_temp = log10(eps_temp)
+        if(eps_temp >= 1):
+            accuracy_temp = 0
+        else:
+            accuracy_temp = abs(floor(accuracy_temp) + 1)
+
+        accuracy_field = log10(eps_field)
+        if(eps_field >= 1):
+            accuracy_field = 0
+        else:
+            accuracy_field = abs(floor(accuracy_field) + 1)
+
+        temp = round((df["Temperature"].max() + df["Temperature"].min())/2, accuracy_temp)
+        field = round((df["MagneticField"].max() + df["MagneticField"].min())/2, accuracy_field)
 
         name = f"T: {temp}K H: {field}Oe {sufix}"
 
