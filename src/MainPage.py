@@ -53,8 +53,10 @@ class MainPage(Ui_MainWindow):
         self.window.setWindowTitle("relACs")
         """Main Page implementation"""
         self.WorkingSpace.setCurrentWidget(self.homePage)
-        self.LeftTextTableWidget.item(7,1).setForeground(QBrush(QColor(0, 0, 255)))
+        self.LeftTextTableWidget.item(8,1).setForeground(QBrush(QColor(0, 0, 255)))
         self.LeftTextTableWidget.itemClicked.connect(self.open_link)
+        self.LeftTextTableWidget.item(4,1).setForeground(QBrush(QColor(0, 0, 255)))
+
 
         """Tree implementation"""
         self.WorkingSpace.setCurrentWidget(self.fit2Dpage)
@@ -214,6 +216,8 @@ class MainPage(Ui_MainWindow):
     def open_link(self, item):
         if item.text()[:3] == 'www':
             wb_open(item.text())
+        if item.text() == "10.1039/D2CC02238A":
+            wb_open("https://pubs.rsc.org/en/content/articlelanding/2022/CC/D2CC02238A")
 
     def edit_default_settings(self):
         dlg = QDialog()

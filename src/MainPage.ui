@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1641</width>
-    <height>939</height>
+    <width>1645</width>
+    <height>948</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -2101,7 +2101,7 @@
                 <number>40</number>
                </attribute>
                <attribute name="verticalHeaderDefaultSectionSize">
-                <number>53</number>
+                <number>40</number>
                </attribute>
                <attribute name="verticalHeaderHighlightSections">
                 <bool>true</bool>
@@ -2126,7 +2126,12 @@
                </row>
                <row>
                 <property name="text">
-                 <string>Reference:</string>
+                 <string>Reference DOI:</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>DOI:</string>
                 </property>
                </row>
                <row>
@@ -2146,7 +2151,12 @@
                </row>
                <row>
                 <property name="text">
-                 <string/>
+                 <string>Website:</string>
+                </property>
+               </row>
+               <row>
+                <property name="text">
+                 <string>Contact:</string>
                 </property>
                </row>
                <column>
@@ -2183,7 +2193,7 @@
                </item>
                <item row="1" column="1">
                 <property name="text">
-                 <string>21.10.2021</string>
+                 <string>31.07.2022</string>
                 </property>
                </item>
                <item row="2" column="0">
@@ -2203,50 +2213,87 @@
                </item>
                <item row="3" column="1">
                 <property name="text">
-                 <string>...</string>
+                 <string>Chem. Commun., 2022, 58, 6381-6384</string>
+                </property>
+                <property name="background">
+                 <brush brushstyle="NoBrush">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>255</blue>
+                  </color>
+                 </brush>
                 </property>
                </item>
                <item row="4" column="0">
                 <property name="text">
-                 <string>Created by:</string>
+                 <string>DOI:</string>
                 </property>
                </item>
                <item row="4" column="1">
                 <property name="text">
-                 <string>Wiktor &amp; Mikołaj Żychowicz</string>
+                 <string>10.1039/D2CC02238A</string>
+                </property>
+                <property name="background">
+                 <brush brushstyle="NoBrush">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>245</blue>
+                  </color>
+                 </brush>
+                </property>
+                <property name="foreground">
+                 <brush brushstyle="NoBrush">
+                  <color alpha="255">
+                   <red>0</red>
+                   <green>0</green>
+                   <blue>255</blue>
+                  </color>
+                 </brush>
                 </property>
                </item>
                <item row="5" column="0">
                 <property name="text">
-                 <string>Logo by:</string>
+                 <string>Created by:</string>
                 </property>
                </item>
                <item row="5" column="1">
                 <property name="text">
-                 <string>Robert Jankowski</string>
+                 <string>Wiktor &amp; Mikołaj Żychowicz</string>
                 </property>
                </item>
                <item row="6" column="0">
                 <property name="text">
-                 <string>Group name:</string>
+                 <string>Logo by:</string>
                 </property>
                </item>
                <item row="6" column="1">
                 <property name="text">
-                 <string>Multifunctional Luminescent Materials Group</string>
+                 <string>Robert Jankowski</string>
                 </property>
                </item>
                <item row="7" column="0">
                 <property name="text">
-                 <string>Contact:</string>
+                 <string>Group name:</string>
                 </property>
                </item>
                <item row="7" column="1">
                 <property name="text">
+                 <string>Multifunctional Luminescent Materials Group</string>
+                </property>
+               </item>
+               <item row="8" column="0">
+                <property name="text">
+                 <string>Website:</string>
+                </property>
+               </item>
+               <item row="8" column="1">
+                <property name="text">
                  <string>www.multilumimater.pl</string>
                 </property>
                 <property name="textAlignment">
-                 <set>AlignCenter</set>
+                 <set>AlignLeading|AlignVCenter</set>
                 </property>
                 <property name="background">
                  <brush brushstyle="NoBrush">
@@ -2265,6 +2312,16 @@
                    <blue>255</blue>
                   </color>
                  </brush>
+                </property>
+               </item>
+               <item row="9" column="0">
+                <property name="text">
+                 <string>Contact:</string>
+                </property>
+               </item>
+               <item row="9" column="1">
+                <property name="text">
+                 <string>mikolaj.zychowicz@uj.edu.pl</string>
                 </property>
                </item>
               </widget>
@@ -2304,7 +2361,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1641</width>
+     <width>1645</width>
      <height>21</height>
     </rect>
    </property>
