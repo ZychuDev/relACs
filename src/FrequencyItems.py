@@ -266,7 +266,7 @@ class FitFrequencyItem(StandardItem):
                 df_param = df_param.append(row, ignore_index=True)
 
 
-            df_experimental = self.df[["Frequency", "ChiPrimeMol","ChiBisMol"]].loc[self.df["Show"]== True]
+            df_experimental = self.df[["Frequency", "ChiPrimeMol","ChiBisMol"]] ##.loc[self.df["Show"]== True]
             df_experimental.columns = [f"Frequency T={self.temp} H={self.field}", f"ChiPrimeMol T={self.temp} H={self.field}",
              f"ChiBisMol T={self.temp} H={self.field}"]
             df_experimental.reset_index(drop=True, inplace=True)
