@@ -1,16 +1,11 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QApplication, QMainWindow
-
-from view.MainPage import *
+from PyQt6.QtWidgets import QApplication, QWidget
 
 if __name__ == "__main__":
     import sys
 
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = MainPage(MainWindow)
+    app = QApplication(sys.venv)
+    window = QtWidgets()
     
-    
-    MainWindow.show()
+    window.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
