@@ -1,14 +1,25 @@
 import sys
-from PyQt6.QtWidgets import QApplication, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtGui import QIcon
 from pandas import DataFrame # type: ignore
 
-if __name__ == "__main__":
-    app:QApplication = QApplication(sys.argv)
-    app_icon: QIcon = QIcon("./assets/img/relACs.ico")
-    app.setWindowIcon(app_icon)    
-    window:QWidget = QWidget()
-    
-    window.show()
+from models import MainModel
+from controllers import MainController
+from views import MainView
 
+
+class RelACs(QApplication):
+    def __init__(self, sys_argv:list[str]):
+        super(RelACs, self).__init__(sys_argv)
+        self.main_model = MainModel()
+        self.main_controller: MainController = MainController(self.main_model)
+        self.main_view: MainView = MainView(self.main_model, self.main_controller)
+
+        app_icon: QIcon = QIcon("./assets/img/relACs.ico")
+        RelACs.setWindowIcon(app_icon) 
+        self.main_view.show()
+
+if __name__ == "__main__":
+    app:QApplication = RelACs(sys.argv)
+   
     sys.exit(app.exec())
