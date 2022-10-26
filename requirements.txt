@@ -1,6 +1,10 @@
 matplotlib
-pyqt6
+PyQt6
 pandas 
 numpy 
 pandas
 scipy
+
+mypy
+pytest
+sphinx
