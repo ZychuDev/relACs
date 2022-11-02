@@ -1,8 +1,8 @@
-matplotlib >= 3.3.3
+matplotlib >= 3.3.3, < 3.4.1
 pyqt5
 pandas 
 numpy 
 pandas
-scipy
+scipy < 1.9
 numba
 keyboard

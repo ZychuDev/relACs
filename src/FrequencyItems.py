@@ -255,6 +255,7 @@ class FitFrequencyItem(StandardItem):
     def result(self):
         df_param = pd.DataFrame([['T', self.temp, 0], ['H', self.field, 0]], columns=['Name', 'Value','Error'])
         nr_of_relax = 0
+        df_model_final = pd.DataFrame()
         while nr_of_relax < len(self.relaxations):
             r = self.relaxations[nr_of_relax]
             i = 0
@@ -293,11 +294,19 @@ class FitFrequencyItem(StandardItem):
             df_model[columns[1]] = pd.Series(real)
             df_model[columns[2]] = pd.Series(img)
 
-            tmp = pd.concat([df_param, df_experimental], axis=1)
-            df = pd.concat([tmp, df_model], axis=1)
-
+            df_model_final = pd.concat([df_model_final, df_model], axis=1)
+            
             nr_of_relax += 1
+        if nr_of_relax != 1:
+            columns = list(df_model_final.columns)
+            for i in range(0, len(columns), 3):
+                columns[i] += f" rel_nr={i//3 + 1}"
+                columns[i+1] += f" rel_nr={i//3 + 1}"
+                columns[i+2] += f" rel_nr={i//3 + 1}"
+            df_model_final.columns = columns
 
+        tmp = pd.concat([df_param, df_experimental], axis=1)
+        df = pd.concat([tmp, df_model_final], axis=1)
         return df
 
     def rename(self):
