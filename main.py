@@ -17,7 +17,7 @@ class RelACs(QApplication):
 
         app_icon: QIcon = QIcon("./assets/img/relACs.ico")
         RelACs.setWindowIcon(app_icon) 
-        self.main_view.show()
+        self.main_view.showMaximized()
 
 if __name__ == "__main__":
     app:QApplication = RelACs(sys.argv)

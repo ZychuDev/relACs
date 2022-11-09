@@ -5,6 +5,13 @@ class MainModel(QObject):
     even_odd_changed = pyqtSignal(str)
     enable_reset_changed = pyqtSignal(bool)
 
+    def __init__(self):
+        super().__init__()
+
+        self._amount = 48
+        self._even_odd = ''
+        self._enable_reset = False
+
     @property
     def amount(self):
         return self._amount
@@ -32,9 +39,3 @@ class MainModel(QObject):
         self._enable_reset = value
         self.enable_reset_changed.emit(value)
 
-    def __init__(self):
-        super().__init__()
-
-        self._amount = 0
-        self._even_odd = ''
-        self._enable_reset = False
