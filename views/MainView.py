@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QMainWindow, QWidget, QSplitter, QVBoxLayout, QSpinBox, QLabel, QPushButton
-from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
 from models.MainModel import MainModel
 from controllers.MainController import MainController
@@ -7,6 +8,8 @@ from views.mvc_app_rc import Ui_MainWindow
 
 from .HomePageView import HomePageView
 from .ControlTreeView import ControlTreeView
+from .RootItem import RootItem
+
 class MainUi(QWidget):
     def __init__(self):
         super().__init__()
@@ -36,7 +39,15 @@ class MainView(QMainWindow):
         self.setObjectName("MainWindow")
         # self.resize(930, 86)
         self.splitter = QSplitter()
-        self.splitter.addWidget(ControlTreeView())
+        root:RootItem = RootItem("relACs")
+        control_tree: ControlTreeView = ControlTreeView()
+        control_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        control_tree.customContextMenuRequested.connect(lambda: print("KOKOKO")) # type: ignore 
+        self.splitter.addWidget(control_tree)
+        self.treeModel:QStandardItemModel = QStandardItemModel()
+        rootNode:QStandardItem  = self.treeModel.invisibleRootItem()
+        rootNode.appendRow(root)
+        control_tree.setModel(self.treeModel)
         self.splitter.addWidget(HomePageView())
         self.setCentralWidget(self.splitter)
         self.setStyleSheet("background-color: white;")

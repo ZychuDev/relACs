@@ -1,2 +1,4 @@
 from .MainController import MainController
 from .HomePageController import HomePageController
+from .CompoundItemController import CompoundItemController
+from .CompoundItemsCollectionController import CompoundItemsCollectionController
