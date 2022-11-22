@@ -2,10 +2,14 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 class Compound(QObject):
     name_changed = pyqtSignal(str)
-    def __init__(self, name: str, molar_mas: float):
+    def __init__(self, name: str, molar_mass: float):
         super().__init__()
+
+        if molar_mass < 0:
+            raise ValueError(f"Compund molar mase({molar_mass}) must be greater than 0. ")
+            
         self._name: str = name
-        self._molar_mass:float = molar_mas
+        self._molar_mass:float = molar_mass
 
     @property
     def name(self):

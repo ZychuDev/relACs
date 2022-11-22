@@ -19,6 +19,7 @@ class ControlTreeView(QTreeView):
         self.setTextElideMode(Qt.TextElideMode.ElideLeft)
         self.setIndentation(10)
         self.setSortingEnabled(True)
+        self.expandsOnDoubleClick()
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(lambda position: self._model.itemFromIndex(self.indexAt(position)).showMenu(self.window().mapToGlobal(position))) # type: ignore
@@ -31,3 +32,5 @@ class ControlTreeView(QTreeView):
 
         self.setAnimated(True)
         self.expandAll()
+
+

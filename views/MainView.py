@@ -44,12 +44,14 @@ class MainView(QMainWindow):
         # self.resize(930, 86)
         self.splitter = QSplitter()
         tree_model = CompoundItemsCollectionModel("relACs")
-        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model))
         self.control_tree: ControlTreeView = ControlTreeView()
+        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model), self.control_tree)
+        
  # type: ignore 
         self.splitter.addWidget(self.control_tree)
         rootNode:QStandardItem  = self.control_tree.model().invisibleRootItem() # type: ignore 
         rootNode.appendRow(self.compounds)
+
         self.splitter.addWidget(HomePageView())
         self.setCentralWidget(self.splitter)
         self.setStyleSheet("background-color: white;")
