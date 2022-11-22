@@ -1,12 +1,15 @@
 from PyQt6.QtWidgets import QWidget, QTreeView, QSizePolicy, QFrame, QAbstractScrollArea, QAbstractItemView
+from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtCore import pyqtSlot, Qt
-
 from models import ControlTreeModel
+from controllers import ControlTreeController
 
 class ControlTreeView(QTreeView):
     def __init__(self):
         super().__init__()
-        # self.setModel(ControlTreeModel())
+        self._model = ControlTreeModel()
+        self._ctr = ControlTreeController(self._model)
+        self.setModel(self._model)
         self.setObjectName("Control tree")
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setFrameShape(QFrame.Shape.StyledPanel)
@@ -16,6 +19,9 @@ class ControlTreeView(QTreeView):
         self.setTextElideMode(Qt.TextElideMode.ElideLeft)
         self.setIndentation(10)
         self.setSortingEnabled(True)
+
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(lambda position: self._model.itemFromIndex(self.indexAt(position)).showMenu(self.window().mapToGlobal(position))) # type: ignore
 
         header = self.header()
         header.setDefaultSectionSize(250)

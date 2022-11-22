@@ -35,7 +35,7 @@ class StandardItem(QStandardItem):
         self.setText(txt)
         #self.setIcon(jakasTam.png)
        
-        self.setCheckable(True)
+        self.setCheckable(False)
         self.setAutoTristate(False)
         self.setUserTristate(False)
         # self.setTristate(False)

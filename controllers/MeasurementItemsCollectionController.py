@@ -1,9 +1,9 @@
 from PyQt6.QtCore import QObject, pyqtSlot
-from models import CompoundItemsCollectionModel
+from models import MeasurementItemsCollectionModel
 
-class CompoundItemsCollectionController(QObject):
+class MeasurementsItemsCollectionController(QObject):
     def __init__(self, model:CompoundItemsCollectionModel):
         self._model = model
 
     def add_compound(self):
-        print("Adding new compund")
+        print("Adding new measurement")

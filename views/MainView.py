@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QMainWindow, QWidget, QSplitter, QVBoxLayout, QSpinBox, QLabel, QPushButton
-from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtWidgets import QMainWindow, QWidget, QSplitter, QVBoxLayout, QSpinBox, QLabel, QPushButton, QTreeView
+from PyQt6.QtCore import pyqtSlot, Qt, QPoint, QModelIndex
 from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
 from models.MainModel import MainModel
@@ -9,6 +9,10 @@ from views.mvc_app_rc import Ui_MainWindow
 from .HomePageView import HomePageView
 from .ControlTreeView import ControlTreeView
 from .RootItem import RootItem
+
+from controllers import CompoundItemsCollectionController
+from models import CompoundItemsCollectionModel
+from .CompundItemsCollection import CompoundItemsCollection
 
 class MainUi(QWidget):
     def __init__(self):
@@ -39,15 +43,13 @@ class MainView(QMainWindow):
         self.setObjectName("MainWindow")
         # self.resize(930, 86)
         self.splitter = QSplitter()
-        root:RootItem = RootItem("relACs")
-        control_tree: ControlTreeView = ControlTreeView()
-        control_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        control_tree.customContextMenuRequested.connect(lambda: print("KOKOKO")) # type: ignore 
-        self.splitter.addWidget(control_tree)
-        self.treeModel:QStandardItemModel = QStandardItemModel()
-        rootNode:QStandardItem  = self.treeModel.invisibleRootItem()
-        rootNode.appendRow(root)
-        control_tree.setModel(self.treeModel)
+        tree_model = CompoundItemsCollectionModel("relACs")
+        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model))
+        self.control_tree: ControlTreeView = ControlTreeView()
+ # type: ignore 
+        self.splitter.addWidget(self.control_tree)
+        rootNode:QStandardItem  = self.control_tree.model().invisibleRootItem() # type: ignore 
+        rootNode.appendRow(self.compounds)
         self.splitter.addWidget(HomePageView())
         self.setCentralWidget(self.splitter)
         self.setStyleSheet("background-color: white;")
