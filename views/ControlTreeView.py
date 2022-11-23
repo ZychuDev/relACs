@@ -1,13 +1,19 @@
 from PyQt6.QtWidgets import QWidget, QTreeView, QSizePolicy, QFrame, QAbstractScrollArea, QAbstractItemView
-from PyQt6.QtGui import QStandardItemModel
+from PyQt6.QtGui import QStandardItemModel, QStandardItem
 from PyQt6.QtCore import pyqtSlot, Qt
 from models import ControlTreeModel
 from controllers import ControlTreeController
 
+from controllers import CompoundItemsCollectionController
+from models import CompoundItemsCollectionModel, ControlTreeModel
+from .CompundItemsCollection import CompoundItemsCollection
+
+from protocols import Displayer
+
 class ControlTreeView(QTreeView):
-    def __init__(self):
+    def __init__(self, working_space:Displayer):
         super().__init__()
-        self._model = ControlTreeModel()
+        self._model = ControlTreeModel(working_space)
         self._ctr = ControlTreeController(self._model)
         self.setModel(self._model)
         self.setObjectName("Control tree")
@@ -31,6 +37,10 @@ class ControlTreeView(QTreeView):
         header.setVisible(False)
 
         self.setAnimated(True)
+        tree_model = CompoundItemsCollectionModel("relACs")
+        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model), self, self._model._working_space)
+        rootNode:QStandardItem  = self.model().invisibleRootItem() # type: ignore
+        rootNode.appendRow(self.compounds)
         self.expandAll()
 
 

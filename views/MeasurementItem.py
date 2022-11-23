@@ -4,7 +4,7 @@ from models import Measurement
 from controllers import MeasurementItemController
 from .StandardItem import StandardItem
 
-class CompoundItem(StandardItem):
+class MeasurementItem(StandardItem):
     def __init__(self, model: Measurement, ctrl: MeasurementItemController):
         super().__init__()
         self._model = model

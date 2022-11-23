@@ -1,7 +1,7 @@
 from PyQt6.QtGui import QStandardItemModel
-from .Compound import Compound
+from protocols import Displayer
 
 class ControlTreeModel(QStandardItemModel):
-    def __init__(self):
+    def __init__(self, working_space:Displayer):
         super().__init__()
-        self.compounds: list[Compound] = []
+        self._working_space: Displayer = working_space

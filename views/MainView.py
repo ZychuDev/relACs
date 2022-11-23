@@ -1,18 +1,15 @@
 from PyQt6.QtWidgets import QMainWindow, QWidget, QSplitter, QVBoxLayout, QSpinBox, QLabel, QPushButton, QTreeView
 from PyQt6.QtCore import pyqtSlot, Qt, QPoint, QModelIndex
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtGui import QStandardItemModel
 
 from models.MainModel import MainModel
 from controllers.MainController import MainController
 from views.mvc_app_rc import Ui_MainWindow
 
-from .HomePageView import HomePageView
+from .WorkingSpace import WorkingSpace
 from .ControlTreeView import ControlTreeView
 from .RootItem import RootItem
 
-from controllers import CompoundItemsCollectionController
-from models import CompoundItemsCollectionModel
-from .CompundItemsCollection import CompoundItemsCollection
 
 class MainUi(QWidget):
     def __init__(self):
@@ -43,16 +40,15 @@ class MainView(QMainWindow):
         self.setObjectName("MainWindow")
         # self.resize(930, 86)
         self.splitter = QSplitter()
-        tree_model = CompoundItemsCollectionModel("relACs")
-        self.control_tree: ControlTreeView = ControlTreeView()
-        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model), self.control_tree)
+        
+        self.working_space = WorkingSpace()
+        self.control_tree: ControlTreeView = ControlTreeView(self.working_space)
+        
         
  # type: ignore 
         self.splitter.addWidget(self.control_tree)
-        rootNode:QStandardItem  = self.control_tree.model().invisibleRootItem() # type: ignore 
-        rootNode.appendRow(self.compounds)
-
-        self.splitter.addWidget(HomePageView())
+         
+        self.splitter.addWidget(self.working_space)
         self.setCentralWidget(self.splitter)
         self.setStyleSheet("background-color: white;")
 
