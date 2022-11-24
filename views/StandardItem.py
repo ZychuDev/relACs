@@ -40,11 +40,12 @@ class StandardItem(QStandardItem):
         self.setUserTristate(False)
         # self.setTristate(False)
         
-    def double_click(self):
+    def on_double_click(self):
         print("No provided action for this item")
 
-    def click(self):
+    def on_click(self):
         print("No provided action for single click")
 
-    def showMenu(self, position: QPoint):
+    def show_menu(self, position: QPoint):
         print("This item does not support menus")
+

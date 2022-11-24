@@ -7,6 +7,9 @@ class CompoundItemsCollectionController(QObject):
         super().__init__()
         self._model: CompoundItemsCollectionModel = model
 
+    def display(self):
+        self._model._displayer.display_home_page()
+
     @pyqtSlot()
     def add_compound(self):
 

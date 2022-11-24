@@ -28,8 +28,8 @@ class ControlTreeView(QTreeView):
         self.expandsOnDoubleClick()
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(lambda position: self._model.itemFromIndex(self.indexAt(position)).showMenu(self.window().mapToGlobal(position))) # type: ignore
-
+        self.customContextMenuRequested.connect(lambda position: self._model.itemFromIndex(self.indexAt(position)).show_menu(self.window().mapToGlobal(position))) # type: ignore
+        self.clicked.connect(lambda index: self._model.itemFromIndex(index).on_click()) # type: ignore
         header = self.header()
         header.setDefaultSectionSize(250)
         header.setMinimumSectionSize(50)
@@ -37,8 +37,8 @@ class ControlTreeView(QTreeView):
         header.setVisible(False)
 
         self.setAnimated(True)
-        tree_model = CompoundItemsCollectionModel("relACs")
-        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model), self, self._model._working_space)
+        tree_model = CompoundItemsCollectionModel("relACs", self._model._working_space)
+        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model), self)
         rootNode:QStandardItem  = self.model().invisibleRootItem() # type: ignore
         rootNode.appendRow(self.compounds)
         self.expandAll()

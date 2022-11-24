@@ -14,7 +14,7 @@ class FitItemsCollection(StandardItem):
         self._ctrl = ctrl
 
 
-    def showMenu(self, menu_position: QPoint):
+    def show_menu(self, menu_position: QPoint):
         menu = QMenu()
         menu.addAction("Make fit from all checked", self._ctrl.add_fit)
         menu.exec(menu_position)

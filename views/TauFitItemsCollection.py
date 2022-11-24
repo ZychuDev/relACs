@@ -14,7 +14,7 @@ class TauFitItemsCollection(StandardItem):
         self._ctrl = ctrl
 
 
-    def showMenu(self, menu_position: QPoint):
+    def show_menu(self, menu_position: QPoint):
         menu = QMenu()
         menu.addAction("Save all to file", self._ctrl.add_tau_fit)
         menu.exec(menu_position)
