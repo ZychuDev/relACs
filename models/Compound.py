@@ -1,9 +1,10 @@
 from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QTreeView
 from protocols import Collection
 
 class Compound(QObject):
     name_changed = pyqtSignal(str)
-    def __init__(self, name: str, molar_mass: float, collection: Collection):
+    def __init__(self, name: str, molar_mass: float, collection: Collection, tree:QTreeView):
         super().__init__()
 
         if molar_mass < 0:
@@ -12,6 +13,7 @@ class Compound(QObject):
         self._name: str = name
         self._molar_mass: float = molar_mass
         self._collection: Collection = collection
+        self._tree: QTreeView = tree
 
     @property
     def name(self):
@@ -19,7 +21,6 @@ class Compound(QObject):
 
     @name.setter
     def name(self, val:str):
-        print("Name setter")
         if len(val) < 1:
             raise ValueError("Compund name must be at least one character long")
         self._collection.update_names(self._name, val)

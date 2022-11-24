@@ -1,11 +1,16 @@
 from PyQt6.QtCore import QObject, pyqtSignal
+from .Compound import Compound
+
+from protocols import Collection
 
 class Measurement(QObject):
     name_changed = pyqtSignal(str)
-    def __init__(self, name: str, molar_mas: float):
+    def __init__(self, name: str, compound: Compound, collection: Collection):
         super().__init__()
         self._name: str = name
-        self._molar_mass:float = molar_mas
+        self._compound: Compound = compound
+
+        self._collection: Collection = collection
 
     @property
     def name(self):
@@ -18,13 +23,3 @@ class Measurement(QObject):
         self._name = val
         self.name_changed.emit(val)
 
-    @property
-    def molar_mass(self):
-        return self._molar_mase
-
-    @molar_mass.setter
-    def molar_mass(self, val:float):
-        if val <= 0:
-            raise ValueError("Molar mass must be greater than 0")
-
-        self._molar_mase = val

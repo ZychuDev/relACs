@@ -1,17 +1,19 @@
 from .Compound import Compound
 from PyQt6.QtCore import QObject, pyqtSignal, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
+from PyQt6.QtWidgets import QTreeView
 
-from protocols import Displayer, Collection
+from protocols import Displayer
 
 class CompoundItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
     compound_added = pyqtSignal(Compound)
     compound_removed = pyqtSignal(QModelIndex)
 
-    def __init__(self, name:str, displayer:Displayer):
+    def __init__(self, name:str, tree:QTreeView, displayer:Displayer):
         super().__init__()
         self._name: str = name
+
         self._font_size: int = 16 
         self._set_bold: bool = True
         self._color: QColor = QColor(255,122,0)
@@ -19,6 +21,7 @@ class CompoundItemsCollectionModel(QObject):
         self._compounds: list[Compound] = []
         self._names: set[str] = set()
 
+        self._tree: QTreeView = tree
         self._displayer: Displayer = displayer
 
     @property
@@ -26,15 +29,17 @@ class CompoundItemsCollectionModel(QObject):
         return self._name
     
     @name.setter
-    def name(self, new_name:str):
-        self._name = new_name
-        self.name_changed.emit(new_name)
+    def name(self, val:str):
+        if len(val) < 1:
+            raise ValueError("Measurement name must be at least one character long")
+        self._name = val
+        self.name_changed.emit(val)
         
     def append_new_compound(self, name: str, molar_mass: float):
         if name in self._names:
             raise ValueError(f"Compund with name {name} already exist in this collection")
         
-        new: Compound = Compound(name, molar_mass, self)
+        new: Compound = Compound(name, molar_mass, self ,self._tree)
         self._compounds.append(new)
         self._names.add(name)
         self.compound_added.emit(new)

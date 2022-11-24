@@ -1,2 +1,2 @@
-from .displayer import Displayer
 from .collection import Collection
+from .modelAware.displayer import Displayer

@@ -37,8 +37,8 @@ class ControlTreeView(QTreeView):
         header.setVisible(False)
 
         self.setAnimated(True)
-        tree_model = CompoundItemsCollectionModel("relACs", self._model._working_space)
-        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model), self)
+        tree_model = CompoundItemsCollectionModel("relACs", self, self._model._working_space)
+        self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model))
         rootNode:QStandardItem  = self.model().invisibleRootItem() # type: ignore
         rootNode.appendRow(self.compounds)
         self.expandAll()
