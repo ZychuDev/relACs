@@ -20,11 +20,11 @@ class TauFit(QObject):
 
     @property
     def molar_mass(self):
-        return self._molar_mase
+        return self._molar_mass
 
     @molar_mass.setter
     def molar_mass(self, val:float):
         if val <= 0:
             raise ValueError("Molar mass must be greater than 0")
 
-        self._molar_mase = val
+        self._molar_mass = val

@@ -33,6 +33,10 @@ class MeasurementItemsCollectionModel(QObject):
 
         self._name = val
         self.name_changed.emit(val)
+
+    @property
+    def model(self):
+        return self._model
         
     def append_measurement(self, measurement: Measurement):
         self._measurements.append(measurement)

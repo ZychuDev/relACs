@@ -1,2 +1,2 @@
 from .DataReader import DataReader
-from .FileSettingsReader import FileSettingsReader
+from .SettingsReader import SettingsReader

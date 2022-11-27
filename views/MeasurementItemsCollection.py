@@ -32,5 +32,5 @@ class MeasurementItemsCollection(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
-        menu.addAction("Create new measurement", self._ctrl.add_measurement)
+        menu.addAction("Load measurements from file", self._ctrl.load_measurements_from_file)
         menu.exec(menu_position)
