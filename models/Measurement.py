@@ -1,14 +1,13 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from .Compound import Compound
 
-from protocols import Collection
+from protocols import Collection, SettingsSource
 
 class Measurement(QObject):
     name_changed = pyqtSignal(str)
-    def __init__(self, name: str, compound: Compound, collection: Collection):
+    def __init__(self, name: str, compound: SettingsSource, collection: Collection):
         super().__init__()
         self._name: str = name
-        self._compound: Compound = compound
+        self._compound: SettingsSource = compound
 
         self._collection: Collection = collection
 

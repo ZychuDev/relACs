@@ -1,10 +1,10 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QTreeView
-from protocols import Collection
+from protocols import Collection, Displayer
 
 class Compound(QObject):
     name_changed = pyqtSignal(str)
-    def __init__(self, name: str, molar_mass: float, collection: Collection, tree:QTreeView):
+    def __init__(self, name: str, molar_mass: float, collection: Collection, tree:QTreeView, displayer: Displayer):
         super().__init__()
 
         if molar_mass < 0:
@@ -14,6 +14,7 @@ class Compound(QObject):
         self._molar_mass: float = molar_mass
         self._collection: Collection = collection
         self._tree: QTreeView = tree
+        self._displayer: Displayer = displayer
 
     @property
     def name(self):

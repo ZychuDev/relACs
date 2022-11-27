@@ -8,10 +8,8 @@ from controllers import CompoundItemsCollectionController
 from models import CompoundItemsCollectionModel, ControlTreeModel
 from .CompundItemsCollection import CompoundItemsCollection
 
-from protocols import Displayer
-
 class ControlTreeView(QTreeView):
-    def __init__(self, working_space:Displayer):
+    def __init__(self, working_space):
         super().__init__()
         self._model = ControlTreeModel(working_space)
         self._ctr = ControlTreeController(self._model)

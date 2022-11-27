@@ -1,7 +1,6 @@
 from PyQt6.QtGui import QStandardItemModel
-from protocols import Displayer
 
 class ControlTreeModel(QStandardItemModel):
-    def __init__(self, working_space:Displayer):
+    def __init__(self, working_space):
         super().__init__()
-        self._working_space: Displayer = working_space
+        self._working_space = working_space

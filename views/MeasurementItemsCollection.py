@@ -18,15 +18,15 @@ class MeasurementItemsCollection(StandardItem):
 
         self._tree: QTreeView = tree
         self._model.name_changed.connect(self.on_name_changed)
-    
+
     def on_click(self):
         self._ctrl.display()
 
     def on_name_changed(self, new_name:str):
         self.setText(new_name)
 
-    def on_compound_added(self, new:Measurement):
-        self.appendRow(MeasurementItem(new, MeasurementItemController(new)))
+    def on_measurement_added(self, new:Measurement):
+        self.appendRow(MeasurementItem(new, MeasurementItemController(new, self._model._compound._displayer)))
         self._tree.expandAll()
         self._model._compound._displayer.display_measurement(new)
 

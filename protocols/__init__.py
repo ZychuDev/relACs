@@ -1,2 +1,3 @@
-from .collection import Collection
-from .modelAware.displayer import Displayer
+from .Collection import Collection
+from .Displayer import Displayer
+from .SettingsSource import SettingsSource

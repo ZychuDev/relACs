@@ -14,8 +14,6 @@ from .MeasurementItemsCollection import MeasurementItemsCollection
 from .FitItemsCollection import FitItemsCollection
 from .TauFitItemsCollection import TauFitItemsCollection
 
-from protocols import Displayer
-
 class CompoundItem(StandardItem):
     def __init__(self, model: Compound, ctrl: CompoundItemController):
         super().__init__(model._name, 14, False)
