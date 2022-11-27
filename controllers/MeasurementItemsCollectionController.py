@@ -43,7 +43,7 @@ class MeasurementItemsCollectionController(QObject):
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setText(
             "Error when converting file from .dat  to .csv fromat.\n"
-            + "Loading measurements form file {filepath} skipped.")
+            + f"Loading measurements form file {filepath} skipped.")
             msg.setWindowTitle("Wrong file format")
             msg.exec()
             return
@@ -51,23 +51,24 @@ class MeasurementItemsCollectionController(QObject):
             data: DataFrame = read_csv(csv_filepath, header=1)
             data = data.sort_values(internal_to_external['Temperature'])
 
-            external_to_internal: dict[str, str] = {value:key for key, value in internal_to_external}
+            external_to_internal: dict[str, str] = {value:key for key, value in internal_to_external.items()}
             data = data.rename(columns=external_to_internal)
             data = data[Measurement.columns_headers]
+            print("Data", data)
         except:
             msg: QMessageBox = QMessageBox()
             msg.setIcon(QMessageBox.Icon.Warning)
             msg.setText(
             "Headers in file does not match with ones setted in Default Settings.\n"
             + "Navigate to Settings -> Default Settings and make adjustment or edit headers in source file.\n"
-            + "Loading measurements form file {filepath} skipped.")
+            + f"Loading measurements form file {filepath} skipped.")
             msg.setWindowTitle("Wrong headers")
             msg.exec()
             return
         
         dialog:QInputDialog = QInputDialog()
-        dialog.setInputMode(QInputDialog.DoubleInput)
-        dialog.setLocale(QLocale(QLocale.Language.English, QLocale.Counry.UnitedStates))
+        dialog.setInputMode(QInputDialog.InputMode.DoubleInput)
+        dialog.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
         dialog.setLabelText('Enter sample mass in grams:')
         dialog.setDoubleMinimum(0.0)
         dialog.setDoubleMaximum(1000000.0)
@@ -87,7 +88,7 @@ class MeasurementItemsCollectionController(QObject):
         data["FrequencyLog"] = log10(data["Frequency"])
 
         data = data.sort_values("Temperature")
-        fields: list[DataFrame] = self.cluster(data, "MagneticField", float(field_epsilon))
+        fields: list[DataFrame] = self.cluster(data, "MagneticField", field_epsilon)
         i: int
         for i in list(range(0, len(fields))):
             fields[i] = self.cluster(fields[i], "Temperature", tmp_epsilon)
@@ -126,20 +127,20 @@ class MeasurementItemsCollectionController(QObject):
         min_value: float = sorted_data[by].min()
 
         results: list[DataFrame] = []
-        df: DataFrame = DataFrame(columns=sorted_data.columns)
+        df: DataFrame = DataFrame(columns=data.columns)
 
         row: Series
-        for _, row in data.iterrows():
+        for _, row in sorted_data.iterrows():
             if row[by] <= min_value + epsilon:
                 df.loc[-1] = row
                 df.index = df.index + 1
             else:
                 results.append(df)
-                df = DataFrame(columns=sorted_data.columns)
+                df = DataFrame(columns=data.columns)
                 min_value = row[by]
                 df.loc[-1] = row
                 df.index = df.index +1
-                
+        
         results.append(df)
 
         if reindex:
@@ -149,7 +150,8 @@ class MeasurementItemsCollectionController(QObject):
 
         # i: int
         for i in range(0, len(results)):
-            results[i] = results[i].sort_values("Omega")
+                results[i] = results[i].sort_values("Omega")
+        print("Results", results)
         return results
 
         

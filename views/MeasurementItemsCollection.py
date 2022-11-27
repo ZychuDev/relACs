@@ -17,7 +17,8 @@ class MeasurementItemsCollection(StandardItem):
         self._ctrl: MeasurementItemsCollectionController = ctrl
 
         self._tree: QTreeView = tree
-        self._model.name_changed.connect(self.on_name_changed)
+        #self._model.name_changed.connect(self.on_name_changed)
+        self._model.measurement_added.connect(self.on_measurement_added) # type: ignore
 
     def on_click(self):
         self._ctrl.display()

@@ -10,4 +10,4 @@ class SettingsReader():
         return dict(self.config['Headers'].items())
 
     def get_epsilons(self) -> tuple[float, float]:
-        return (self.config['Epsilons']['Field'], self.config['Epsilons']['Temp'])
+        return (float(self.config['Epsilons']['Field']), float(self.config['Epsilons']['Temp']))

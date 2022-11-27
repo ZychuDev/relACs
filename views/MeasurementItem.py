@@ -1,17 +1,20 @@
 from PyQt6.QtCore import pyqtSlot
 
+from PyQt6.QtGui import QColor, QBrush
+
 from models import Measurement
 from controllers import MeasurementItemController
 from .StandardItem import StandardItem
 
 class MeasurementItem(StandardItem):
     def __init__(self, model: Measurement, ctrl: MeasurementItemController):
-        super().__init__()
-        self._model = model
+        super().__init__(model._name, 14, False)
+        self.setBackground(QBrush(QColor(255,255,255)))
+        self.setCheckable(True)
+        self._model: Measurement = model
         self._controller = ctrl
 
         self._model.name_changed.connect(self.on_name_changed)
         
-    @pyqtSlot(str)
     def on_name_changed(self, new_name:str):
         self.setText(new_name)
