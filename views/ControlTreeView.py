@@ -1,12 +1,13 @@
 from PyQt6.QtWidgets import QWidget, QTreeView, QSizePolicy, QFrame, QAbstractScrollArea, QAbstractItemView
 from PyQt6.QtGui import QStandardItemModel, QStandardItem
-from PyQt6.QtCore import pyqtSlot, Qt
+from PyQt6.QtCore import pyqtSlot, Qt, QPoint
 from models import ControlTreeModel
-from controllers import ControlTreeController
+ 
 
-from controllers import CompoundItemsCollectionController
+from controllers import ControlTreeController, CompoundItemsCollectionController
 from models import CompoundItemsCollectionModel, ControlTreeModel
 from .CompundItemsCollection import CompoundItemsCollection
+from .StandardItem import StandardItem
 
 class ControlTreeView(QTreeView):
     def __init__(self, working_space):
@@ -26,7 +27,7 @@ class ControlTreeView(QTreeView):
         self.expandsOnDoubleClick()
 
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        self.customContextMenuRequested.connect(lambda position: self._model.itemFromIndex(self.indexAt(position)).show_menu(self.window().mapToGlobal(position))) # type: ignore
+        self.customContextMenuRequested.connect(self.show_item_menu) # type: ignore
         self.clicked.connect(lambda index: self._model.itemFromIndex(index).on_click()) # type: ignore
         header = self.header()
         header.setDefaultSectionSize(250)
@@ -41,4 +42,7 @@ class ControlTreeView(QTreeView):
         rootNode.appendRow(self.compounds)
         self.expandAll()
 
-
+    def show_item_menu(self, position: QPoint):
+        item: StandardItem = self._model.itemFromIndex(self.indexAt(position))
+        if item:
+            item.show_menu(self.window().mapToGlobal(position))
