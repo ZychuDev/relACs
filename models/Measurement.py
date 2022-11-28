@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-
+from PyQt6.QtWidgets import QMessageBox
 from protocols import Collection, SettingsSource # type: ignore
 from readers import SettingsReader
 
@@ -9,6 +9,8 @@ from numpy import zeros
 
 class Measurement(QObject):
     name_changed = pyqtSignal(str)
+    df_changed= pyqtSignal()
+    
     columns_headers = ["Temperature","MagneticField","ChiPrime","ChiBis","Frequency"]
 
     def from_data_frame(df: DataFrame, sufix:str, compound:SettingsSource, collection: Collection):
@@ -34,7 +36,7 @@ class Measurement(QObject):
         
         name = f"T: {temp}K H: {field}Oe {sufix}"
         length: int = len(df["Frequency"])
-        df["Selected"] = Series(zeros(length), index=df.index)
+        df["Hidden"] = Series(zeros(length), index=df.index)
         return Measurement(df, name, temp, field, compound, collection)
 
 
@@ -48,6 +50,10 @@ class Measurement(QObject):
         self._compound: SettingsSource = compound
         self._collection: Collection = collection
 
+    # @property
+    # def df(self):
+    #     return self._df
+
     @property
     def name(self):
         return self._name
@@ -58,5 +64,24 @@ class Measurement(QObject):
             raise ValueError("Compund name must be at least one character long")
         self._name = val
         self.name_changed.emit(val)
+
+    def hide_point(self, x: float, x_str: str):
+        actual: bool = bool(self._df.loc[self._df[x_str] == x]['Hidden'].values[0])
+        self._df.loc[self._df[x_str] == x, "Hidden"] = not actual
+        self.df_changed.emit()
+        # self.dataChanged.emit() #type: ignore
+
+    def delete_point(self, x: float, x_str: str):
+        if self._df.shape[0] == 2:
+            msg: QMessageBox = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("Measurement must consist of at least 2 data points")
+            msg.setWindowTitle("Data point removal error")
+            msg.exec()
+            return
+
+        self._df.drop(self._df.loc[self._df[x_str] == x].index, inplace=True)
+        self.df_changed.emit()
+        # self.dataChanged.emit() #type: ignore
 
 

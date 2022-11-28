@@ -22,3 +22,5 @@ class MeasurementItem(StandardItem):
     def on_click(self):
         if self._model._collection.check_if_is_selected(self.index()):
             self._model._collection.change_displayed_item(self._model.name)
+
+            
