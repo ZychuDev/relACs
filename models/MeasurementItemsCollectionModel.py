@@ -9,6 +9,7 @@ class MeasurementItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
     measurement_added = pyqtSignal(Compound)
     measurement_removed = pyqtSignal(QModelIndex)
+    displayed_item_changed = pyqtSignal(Measurement)
 
     def __init__(self, name:str, compound:Compound):
         super().__init__()
@@ -21,6 +22,12 @@ class MeasurementItemsCollectionModel(QObject):
 
         self._measurements: list[Measurement] = []
         self._names: set[str] = set()
+
+        self._displayed_item: Measurement
+
+    @property
+    def tree(self):
+        return self._compound._tree
 
     @property
     def name(self):
@@ -37,11 +44,18 @@ class MeasurementItemsCollectionModel(QObject):
     @property
     def model(self):
         return self._model
-        
-    def append_measurement(self, measurement: Measurement):
+    
+    def change_displayed_item(self, name: str):
+        new_item: Measurement = next( measurement for measurement in self._measurements if measurement.name == name)
+        self._displayed_item = new_item
+        self.displayed_item_changed.emit(new_item)
+
+    def append_measurement(self, measurement: Measurement, silent: bool=False):
         self._measurements.append(measurement)
         self._names.add(measurement.name)
-        self.measurement_added.emit(measurement)
+        if not silent:
+            self.measurement_added.emit(measurement)
+            self.change_displayed_item(measurement.name)
 
     def remove(self, measurement_name: str, index: QModelIndex):
         if measurement_name in self._names:
@@ -55,6 +69,13 @@ class MeasurementItemsCollectionModel(QObject):
     def update_names(self, old_name: str, new_name: str):
         self._names.remove(old_name)
         self._names.add(new_name)
+
+    def check_if_is_selected(self, index: QModelIndex) -> bool:
+        selected: list[QModelIndex] = self.tree.selectedIndexes()
+        for selected_index in selected:
+            if selected_index == index:
+                return True
+        return False
 
 
 

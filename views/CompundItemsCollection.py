@@ -26,7 +26,8 @@ class CompoundItemsCollection(StandardItem):
         self.setText(new_name)
 
     def on_compound_added(self, new:Compound):
-        self.appendRow(CompoundItem(new, CompoundItemController(new)))
+        cmp: CompoundItem = CompoundItem(new, CompoundItemController(new))
+        self.appendRow(cmp)
         self._model._tree.expandAll()
         
 

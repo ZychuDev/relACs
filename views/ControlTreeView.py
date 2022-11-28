@@ -21,8 +21,9 @@ class ControlTreeView(QTreeView):
         self.setSizeAdjustPolicy(QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
         self.setSelectionMode(QAbstractItemView.SelectionMode.MultiSelection)
         self.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.setTextElideMode(Qt.TextElideMode.ElideLeft)
+        self.setTextElideMode(Qt.TextElideMode.ElideRight)
         self.setIndentation(10)
+        self.setSelectionMode(QTreeView.SelectionMode.SingleSelection)
         self.setSortingEnabled(True)
         self.expandsOnDoubleClick()
 

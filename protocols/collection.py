@@ -11,3 +11,9 @@ class Collection(Protocol):
 
     def remove(self, name: str, index: QModelIndex):
         pass
+
+    def change_displayed_item(self, name: str):
+        pass
+
+    def check_if_is_selected(self, index: QModelIndex) -> bool:
+        pass

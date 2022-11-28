@@ -3,13 +3,14 @@ from PyQt6.QtCore import QObject, pyqtSignal, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
 from PyQt6.QtWidgets import QTreeView
 
+from protocols import Displayer
 
 class CompoundItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
     compound_added = pyqtSignal(Compound)
     compound_removed = pyqtSignal(QModelIndex)
 
-    def __init__(self, name:str, tree:QTreeView, displayer):
+    def __init__(self, name:str, tree:QTreeView, displayer: Displayer):
         super().__init__()
         self._name: str = name
 
@@ -57,8 +58,15 @@ class CompoundItemsCollectionModel(QObject):
         self._names.remove(old_name)
         self._names.add(new_name)
 
-    
+    def change_displayed_item(self, name: str):
+        pass
 
+    def check_if_is_selected(self, index: QModelIndex) -> bool:
+        selected: list[QModelIndex] = self._tree.selectedIndexes()
+        for selected_index in selected:
+            if selected_index == index:
+                return True
+        return False
 
 
     

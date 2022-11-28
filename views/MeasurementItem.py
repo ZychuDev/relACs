@@ -18,3 +18,7 @@ class MeasurementItem(StandardItem):
         
     def on_name_changed(self, new_name:str):
         self.setText(new_name)
+
+    def on_click(self):
+        if self._model._collection.check_if_is_selected(self.index()):
+            self._model._collection.change_displayed_item(self._model.name)

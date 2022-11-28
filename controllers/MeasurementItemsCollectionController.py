@@ -54,7 +54,6 @@ class MeasurementItemsCollectionController(QObject):
             external_to_internal: dict[str, str] = {value:key for key, value in internal_to_external.items()}
             data = data.rename(columns=external_to_internal)
             data = data[Measurement.columns_headers]
-            print("Data", data)
         except:
             msg: QMessageBox = QMessageBox()
             msg.setIcon(QMessageBox.Icon.Warning)
@@ -151,7 +150,7 @@ class MeasurementItemsCollectionController(QObject):
         # i: int
         for i in range(0, len(results)):
                 results[i] = results[i].sort_values("Omega")
-        print("Results", results)
+    
         return results
 
         

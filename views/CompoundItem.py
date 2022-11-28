@@ -23,7 +23,7 @@ class CompoundItem(StandardItem):
         self._model: Compound = model
         self._ctrl: CompoundItemController = ctrl
         m_model = MeasurementItemsCollectionModel("Measurements", self._model)
-        self.appendRow(MeasurementItemsCollection(m_model, MeasurementItemsCollectionController(m_model), self._model._tree))
+        self.appendRow(MeasurementItemsCollection(m_model, MeasurementItemsCollectionController(m_model)))
         f1_model = FitItemsCollectionModel("Frequency Fits Single Relaxation")
         self.appendRow(FitItemsCollection(f1_model, FitItemsCollectionController(f1_model)))
         f2_model = FitItemsCollectionModel("Frequency Fits Double Relaxation")
