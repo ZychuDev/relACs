@@ -94,10 +94,14 @@ class MeasurementItemsCollectionController(QObject):
 
         filename: str = filepath.split('/')[-1][:-4]
         x: DataFrame
+        first: bool = True
         for x in fields:
             for y in x:
-                self._model.append_measurement(Measurement.from_data_frame(y, filename, self._model._compound, self._model))
-
+                if first:
+                    self._model.append_measurement(Measurement.from_data_frame(y, filename, self._model._compound, self._model), display=True)
+                    first = False
+                else:
+                    self._model.append_measurement(Measurement.from_data_frame(y, filename, self._model._compound, self._model))
         self._model._compound._tree.resizeColumnToContents(0)
 
     def dat_to_csv(self, filepath:str) -> str:

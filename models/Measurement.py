@@ -62,6 +62,7 @@ class Measurement(QObject):
     def name(self, val:str):
         if len(val) < 1:
             raise ValueError("Compund name must be at least one character long")
+        self._collection.update_names(self._name, val)
         self._name = val
         self.name_changed.emit(val)
 

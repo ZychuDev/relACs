@@ -50,11 +50,16 @@ class MeasurementItemsCollectionModel(QObject):
         self._displayed_item = new_item
         self.displayed_item_changed.emit(new_item)
 
-    def append_measurement(self, measurement: Measurement, silent: bool=False):
+    def append_measurement(self, measurement: Measurement, silent: bool=False, display: bool=False):
+        if measurement.name in self._names:
+            print(f"Measurements with name {measurement.name} already exists.\n Loading skipped")
+            return
+
         self._measurements.append(measurement)
         self._names.add(measurement.name)
         if not silent:
             self.measurement_added.emit(measurement)
+        if display:
             self.change_displayed_item(measurement.name)
 
     def remove(self, measurement_name: str, index: QModelIndex):

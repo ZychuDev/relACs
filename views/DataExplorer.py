@@ -46,6 +46,9 @@ class TableModel(QAbstractTableModel):
                     return "Visible"
                 else:
                     return "Hidden"
+        
+        if (role == Qt.ItemDataRole.TextAlignmentRole):
+             return Qt.AlignmentFlag.AlignCenter
 
     def rowCount(self, index):
         return self._data.shape[0]
@@ -111,11 +114,17 @@ class DataExplorer(QWidget):
         self.measurement = measurement
         self.measurement.df_changed.connect(self.update_plots)
         self.measurement.df_changed.connect(self.table.update)
+        self.measurement.name_changed.connect(lambda new_name: self.title_label.setText(new_name))
         self.title_label.setText(measurement.name)
 
         self.table_model = TableModel(self.measurement._df)
         self.table.setModel(self.table_model)
         header = self.table.horizontalHeader() 
+        font: QFont = header.font()
+        font.setBold(True)
+        font.setWeight(100)
+        header.setFont(font)
+
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         for i in range(1, self.measurement._df.shape[1]):
             header.setSectionResizeMode(i, QHeaderView.ResizeMode.ResizeToContents)
