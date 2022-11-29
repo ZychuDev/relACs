@@ -1,11 +1,26 @@
 from PyQt6.QtCore import QObject, pyqtSignal
+from models import Measurement
+
+from protocols import Collection, SettingsSource
+
+
 
 class Fit(QObject):
     name_changed = pyqtSignal(str)
-    def __init__(self, name: str, molar_mas: float):
+    parameter_changed = pyqtSignal()
+    fit_changed = pyqtSignal()
+    
+    @staticmethod
+    def from_measurement(measurement: Measurement, compound:SettingsSource, collection: Collection):
+        fit_name: str = measurement._name + "_Fit_Frequency"
+        return Fit(fit_name, compound, collection)
+
+    def __init__(self, name: str, compound:SettingsSource, collection: Collection):
         super().__init__()
         self._name: str = name
-        self._molar_mass:float = molar_mas
+
+        self._compound: SettingsSource = compound
+        self._collection: Collection = collection
 
     @property
     def name(self):

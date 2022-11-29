@@ -13,6 +13,7 @@ class Measurement(QObject):
     
     columns_headers = ["Temperature","MagneticField","ChiPrime","ChiBis","Frequency"]
 
+    @staticmethod
     def from_data_frame(df: DataFrame, sufix:str, compound:SettingsSource, collection: Collection):
         settings: SettingsReader = SettingsReader()
         field_epsilon: float

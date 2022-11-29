@@ -1,3 +1,4 @@
+from .Literals import PARAMETER_NAME
 from .MainModel import MainModel
 from .Compound import Compound
 from .Measurement import Measurement

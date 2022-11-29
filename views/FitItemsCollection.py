@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QMenu
 from models import FitItemsCollectionModel
 from controllers import FitItemsCollectionController
 from .StandardItem import StandardItem
-
+from .FitItem import FitItem
 class FitItemsCollection(StandardItem):
     def __init__(self, model: FitItemsCollectionModel, ctrl: FitItemsCollectionController):
         super().__init__(model._name, 14, False)
