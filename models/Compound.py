@@ -12,6 +12,7 @@ class Compound(QObject):
             
         self._name: str = name
         self._molar_mass: float = molar_mass
+
         self._collection: Collection = collection
         self._tree: QTreeView = tree
         self._displayer: Displayer = displayer
@@ -39,4 +40,8 @@ class Compound(QObject):
 
         self._molar_mass = val
 
+
+    def get_jsonable(self) -> dict:
+        jsonable: dict = {"name": self._name, "molar_mass":self._molar_mass}
+        return jsonable
 

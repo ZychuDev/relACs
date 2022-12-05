@@ -22,14 +22,14 @@ class CompoundItem(StandardItem):
 
         self._model: Compound = model
         self._ctrl: CompoundItemController = ctrl
-        m_model = MeasurementItemsCollectionModel("Measurements", self._model)
-        self.appendRow(MeasurementItemsCollection(m_model, MeasurementItemsCollectionController(m_model)))
-        f1_model = FitItemsCollectionModel("Frequency Fits Single Relaxation")
-        self.appendRow(FitItemsCollection(f1_model, FitItemsCollectionController(f1_model)))
-        f2_model = FitItemsCollectionModel("Frequency Fits Double Relaxation")
-        self.appendRow(FitItemsCollection(f2_model, FitItemsCollectionController(f2_model)))
-        t_model = TauFitItemsCollectionModel("TauFits(3D)")
-        self.appendRow(TauFitItemsCollection(t_model, TauFitItemsCollectionController(t_model)))
+        self.m_model = MeasurementItemsCollectionModel("Measurements", self._model)
+        self.appendRow(MeasurementItemsCollection(self.m_model, MeasurementItemsCollectionController(self.m_model)))
+        self.f1_model = FitItemsCollectionModel("Frequency Fits Single Relaxation", self._model)
+        self.appendRow(FitItemsCollection(self.f1_model, FitItemsCollectionController(self.f1_model)))
+        self.f2_model = FitItemsCollectionModel("Frequency Fits Double Relaxation", self._model)
+        self.appendRow(FitItemsCollection(self.f2_model, FitItemsCollectionController(self.f2_model)))
+        self.t_model = TauFitItemsCollectionModel("TauFits(3D)")
+        self.appendRow(TauFitItemsCollection(self.t_model, TauFitItemsCollectionController(self.t_model)))
         self._model.name_changed.connect(self.on_name_changed)
         
     pyqtSlot(str)
@@ -41,4 +41,7 @@ class CompoundItem(StandardItem):
         menu.addAction("Rename", lambda : self._ctrl.rename())
         menu.addAction("Delete", lambda : self._model._collection.remove(self._model.name, self.index()) )
         menu.exec(menu_position)
+
+
+        
 

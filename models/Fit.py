@@ -9,11 +9,11 @@ class Fit(QObject):
     name_changed = pyqtSignal(str)
     parameter_changed = pyqtSignal()
     fit_changed = pyqtSignal()
-    
+
     @staticmethod
-    def from_measurement(measurement: Measurement, compound:SettingsSource, collection: Collection):
+    def from_measurement(measurement: Measurement, compound:SettingsSource):
         fit_name: str = measurement._name + "_Fit_Frequency"
-        return Fit(fit_name, compound, collection)
+        return Fit(fit_name, compound, None)
 
     def __init__(self, name: str, compound:SettingsSource, collection: Collection):
         super().__init__()
@@ -30,6 +30,7 @@ class Fit(QObject):
     def name(self, val:str):
         if len(val) < 1:
             raise ValueError("Compund name must be at least one character long")
+        self._collection.update_names(self._name, val)
         self._name = val
         self.name_changed.emit(val)
 

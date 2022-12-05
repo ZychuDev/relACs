@@ -104,13 +104,14 @@ class DataExplorer(QWidget):
         
         self.setLayout(vertical_layout)
 
-        print("Connectig")
         self.cid:int = self.sc.mpl_connect('pick_event', self.on_click)
         self._last_event_time:float = time()
 
     def set_measurement(self, measurement:Measurement):
         if self.measurement is not None:
             self.measurement.df_changed.disconnect()
+            self.measurement.name_changed.disconnect()
+            
         self.measurement = measurement
         self.measurement.df_changed.connect(self.update_plots)
         self.measurement.df_changed.connect(self.table.update)
@@ -196,7 +197,11 @@ class DataExplorer(QWidget):
         if i == 2:
             x_str = "ChiPrimeMol"
 
-        x_data = event.artist.get_xdata().values.tolist()
+        try:
+            x_data = event.artist.get_xdata().values.tolist()
+        except AttributeError:
+            x_data = event.artist.get_xdata().tolist()
+            
         ind = event.ind[0]
 
         if mouse.button == mouse.button.LEFT:

@@ -44,7 +44,22 @@ class CompoundItemsCollectionModel(QObject):
         self._names.add(name)
         self.compound_added.emit(new)
         
+    def append_existing_compound(self, compound: Compound):
+        if compound._name in self._names:
+            raise ValueError(f"Compund with name {compound._name} already exist in this collection")
 
+        self._compounds.append(compound)
+        self._names.add(compound._name)
+        self.compound_added.emit(compound)
+
+                
+    
+    def create_compound_from_json(self, json):
+        new_model: Compound = Compound(json["name"], json["molar_mass"], self, self._tree, self._displayer)
+        return new_model
+
+        self.append_existing_compound(new_model)
+    
     def remove(self, compound_name:str, index: QModelIndex):
         if compound_name in self._names:
             self._names.remove(compound_name)
@@ -67,6 +82,9 @@ class CompoundItemsCollectionModel(QObject):
             if selected_index == index:
                 return True
         return False
+
+
+
 
 
     

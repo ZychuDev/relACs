@@ -4,6 +4,7 @@ from PyQt6.QtGui import QColor, QBrush
 from .Measurement import Measurement
 from .Compound import Compound
 
+from pandas import read_json
 
 class MeasurementItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
@@ -11,7 +12,7 @@ class MeasurementItemsCollectionModel(QObject):
     measurement_removed = pyqtSignal(QModelIndex)
     displayed_item_changed = pyqtSignal(Measurement)
 
-    def __init__(self, name:str, compound:Compound):
+    def __init__(self, name: str, compound: Compound):
         super().__init__()
         self._name: str = name
         self._compound: Compound = compound
@@ -34,17 +35,13 @@ class MeasurementItemsCollectionModel(QObject):
         return self._name
     
     @name.setter
-    def name(self, val:str):
+    def name(self, val: str):
         if len(val) < 1:
             raise ValueError("Measurement name must be at least one character long")
 
         self._name = val
         self.name_changed.emit(val)
 
-    @property
-    def model(self):
-        return self._model
-    
     def change_displayed_item(self, name: str):
         new_item: Measurement = next( measurement for measurement in self._measurements if measurement.name == name)
         self._displayed_item = new_item
@@ -81,6 +78,15 @@ class MeasurementItemsCollectionModel(QObject):
             if selected_index == index:
                 return True
         return False
+
+    def get_jsonable(self) -> dict:
+        jsonable: dict = [measurement.get_jsonable() for measurement in self._measurements]
+        return jsonable
+
+    def from_json(self, measurements: list[dict]):
+        for m in measurements:
+            new_model = Measurement(read_json(m["df"]), m["name"], m["tmp"], m["field"], self._compound, self)
+            self.append_measurement(new_model)
 
 
 

@@ -1,7 +1,7 @@
 from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt
 from PyQt6.QtGui import QColor, QBrush
 from PyQt6.QtWidgets import QMenu, QTreeView
-from models import MeasurementItemsCollectionModel, Measurement
+from models import MeasurementItemsCollectionModel, Measurement, Fit
 from controllers import MeasurementItemsCollectionController, MeasurementItemController
 
 from .StandardItem import StandardItem
@@ -101,7 +101,14 @@ class MeasurementItemsCollection(StandardItem):
         pass
 
     def make_fits_checked(self):
-        pass
+        i : int
+        first: bool = True
+        for i in range(self.rowCount()):
+            item: MeasurementItem = cast(MeasurementItem, self.child(i))
+            if item.checkState() == Qt.CheckState.Checked:
+                new_fit: Fit = Fit.from_measurement(item._model, self._model._compound)
+                self.parent().child(1)._model.append_fit(new_fit)
+
 
     def make_fits_checked_2(self):
         pass

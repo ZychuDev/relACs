@@ -1,12 +1,16 @@
 from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
-from PyQt6.QtWidgets import QMenu, QTreeView
+from PyQt6.QtWidgets import QMenu, QTreeView, QFileDialog, QWidget
 
 from models import CompoundItemsCollectionModel, Compound
 from controllers import CompoundItemsCollectionController, CompoundItemController
 
 from .StandardItem import StandardItem
 from .CompoundItem import CompoundItem
+
+from os import path
+from json import load, dump
+from typing import cast 
 
 class CompoundItemsCollection(StandardItem):
 
@@ -36,5 +40,75 @@ class CompoundItemsCollection(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
-        menu.addAction("Create new compound", self._ctrl.add_compound)    
+        menu.addAction("Create new compound", self._ctrl.add_compound)  
+        menu.addAction("Load compounds from .json file", self.load_from_json)
+        menu.addAction("Save compounds to .json file", self.save_to_json)  
         menu.exec(menu_position)
+
+    def load_from_json(self):
+        # dlg: QFileDialog = QFileDialog()
+        # dlg.setFileMode(QFileDialog.FileMode.ExistingFile)
+
+        # if dlg.exec():
+        #    filenames = dlg.selectedFiles()
+        # else:
+        #    return
+
+        # if len(filenames) != 1 :
+        #     return 
+
+        filepath = "C:\\Users\\wikto\\Desktop\\repos\\relACs\\data\\save_test.json" #TMP filenames[0]    #
+        if not path.isfile(filepath):
+            print("File path {} does not exist. Exiting...".format(filepath))
+            return
+
+        with open(filepath, "r") as f:
+            jsonable = load(f)
+
+        self.from_json(jsonable)
+
+    def from_json(self, json: dict):
+        names_to_skip: set[str] = set()
+        for compound in json["compounds"]:
+            try:
+                self._model.append_existing_compound(Compound(compound["name"], compound["molar_mass"], self, self._model._tree, self._model._displayer))
+            except ValueError as e:
+                names_to_skip.add(compound["name"])
+                print(e)
+                print("Loading skipped")
+
+        i: int = 0
+        nr_of_rows: int = self.rowCount()
+        while i < nr_of_rows:
+            compound_item: CompoundItem = cast(CompoundItem, self.child(i))
+            compound_json = json["compounds"][i]
+
+            if compound_json["name"] not in names_to_skip:
+                compound_item.m_model.from_json(compound_json["measurements"])
+                # compound_item.f1_model.from_json(compound_json[""])
+                # compound_item.f2_model.from_json(compound_json[""])
+                # compound_item.t_model.from_json(compound_json[""])
+
+            i = i + 1
+
+    def save_to_json(self):
+        name: str = QFileDialog.getSaveFileName(QWidget(), 'Save file')
+        if name == "":
+            return
+
+        compounds: list[dict] = []
+        i: int = 0
+        nr_of_rows: int = self.rowCount()
+        while i < nr_of_rows:
+            compound_item: CompoundItem = cast(CompoundItem, self.child(i))
+            jsonable: dict = compound_item._model.get_jsonable()
+            jsonable.update({"measurements": compound_item.m_model.get_jsonable()})
+            # jsonable.update("f1_fits", compound_item.f1_model.get_jsonable())
+            # jsonable.update("f2_fits", compound_item.f2_model.get_jsonable())
+            # jsonable.update("tau_fits", compound_item.t_model.get_jsonable())
+            compounds.append(jsonable)
+            i = i + 1
+
+        jsonable = {"version:": 2, "compounds": compounds}
+        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+            dump(jsonable, f, indent=4)

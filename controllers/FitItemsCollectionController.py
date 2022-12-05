@@ -6,6 +6,5 @@ class FitItemsCollectionController(QObject):
         super().__init__()
         self._model = model
 
-    @pyqtSlot()
-    def add_fit(self):
-        print("Adding new measurement")
+
+        

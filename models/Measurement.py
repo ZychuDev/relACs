@@ -86,4 +86,11 @@ class Measurement(QObject):
         self.df_changed.emit()
         # self.dataChanged.emit() #type: ignore
 
-
+    def get_jsonable(self) -> dict:
+        jsonable = {
+         "name": self._name, 
+         "df": self._df.to_json(),
+         "tmp": self._tmp,
+         "field": self._field,
+        }
+        return jsonable

@@ -33,7 +33,11 @@ class MeasurementItem(StandardItem):
         menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index()))
         menu.exec(menu_position)
 
-    
+    def get_jsonable(self):
+        jsonable: dict = self._model.get_jsonable()
+        jsonable.update({"state": self.checkState(), "sort_mode": self.sort_mode})
+        return jsonable
+        
     def __lt__(self, other):
         if self.sort_mode == "temp":
             if self._model._tmp == other._model._tmp:

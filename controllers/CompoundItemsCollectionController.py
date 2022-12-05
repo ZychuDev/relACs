@@ -1,7 +1,8 @@
 from PyQt6.QtCore import QObject, pyqtSlot, QLocale
-from PyQt6.QtWidgets import QInputDialog, QMessageBox, QWidget
+from PyQt6.QtWidgets import QInputDialog, QMessageBox, QFileDialog, QWidget
 from models import CompoundItemsCollectionModel
-
+from json import dump, load
+from os import path
 class CompoundItemsCollectionController(QObject):
     def __init__(self, model:CompoundItemsCollectionModel):
         super().__init__()
@@ -44,3 +45,7 @@ class CompoundItemsCollectionController(QObject):
             if status:
                 molar_mass: float = dialog.doubleValue()
                 self._model.append_new_compound(name, molar_mass)
+
+        
+
+
