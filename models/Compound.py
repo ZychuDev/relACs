@@ -45,3 +45,22 @@ class Compound(QObject):
         jsonable: dict = {"name": self._name, "molar_mass":self._molar_mass}
         return jsonable
 
+# TO DO
+    def get_min(self, param_name: str):
+        map = {"alpha" : 0.0, 
+            "beta" : 0.0, 
+            "tau" : -10.0, 
+            "chi_t" : 0.0, 
+            "chi_s" : 0.0
+        }
+        return map[param_name]
+
+# TO DO
+    def get_max(self, param_name: str):
+        map = {"alpha" : 1.0, 
+            "beta" : 1.0, 
+            "tau" : 0.0, 
+            "chi_t" : 30.0, 
+            "chi_s" : 30.0
+        }
+        return map[param_name]

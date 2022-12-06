@@ -7,7 +7,6 @@ from models import MainModel
 from controllers import MainController
 from views import MainView
 
-
 class RelACs(QApplication):
     def __init__(self, sys_argv:list[str]):
         super(RelACs, self).__init__(sys_argv)
@@ -21,5 +20,5 @@ class RelACs(QApplication):
 
 if __name__ == "__main__":
     app:QApplication = RelACs(sys.argv)
-   
+    app.setStyle("Fusion")
     sys.exit(app.exec())

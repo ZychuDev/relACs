@@ -27,7 +27,6 @@ class WorkingSpace(QStackedWidget):
     def display_fit(self, model:Fit):
         self._fit_page.set_fit(model)
         self.setCurrentIndex(self._fit_page_index)
-        print(self._fit_page_index)
 
     def display_tau_fit(self, model:TauFit):
         pass

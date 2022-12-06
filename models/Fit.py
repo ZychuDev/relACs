@@ -1,5 +1,8 @@
 from PyQt6.QtCore import QObject, pyqtSignal
+
+from .Relaxation import Relaxation
 from models import Measurement
+from .Parameter import Parameter
 
 from protocols import Collection, SettingsSource
 
@@ -13,12 +16,15 @@ class Fit(QObject):
     @staticmethod
     def from_measurement(measurement: Measurement, compound:SettingsSource):
         fit_name: str = measurement._name + "_Fit_Frequency"
-        return Fit(fit_name, compound, None)
+        fit: Fit =  Fit(fit_name, compound, None)
 
+        fit.relaxations: list[Relaxation] = [Relaxation(compound)]
+
+        return fit
     def __init__(self, name: str, compound:SettingsSource, collection: Collection):
         super().__init__()
         self._name: str = name
-
+        self.relaxations: list[Relaxation]
         self._compound: SettingsSource = compound
         self._collection: Collection = collection
 
