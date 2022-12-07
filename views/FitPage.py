@@ -122,12 +122,15 @@ class ParametersControl(QTabWidget):
             tab = RelaxationTab()
             self.relaxations.append(tab)
             self.addTab(tab, f"Relaxation nr {relaxation}")
+            self.setTabEnabled(relaxation, False)
 
     def set_fit(self, fit: Fit):
         for i, r in enumerate(self.relaxations):
             if len(fit.relaxations) == i:
-                break
+                self.setTabEnabled(i, False)
+                continue
             r.set_relaxation(fit.relaxations[i])
+            self.setTabEnabled(i, True)
 
 class FitPage(QWidget):
     def __init__(self):

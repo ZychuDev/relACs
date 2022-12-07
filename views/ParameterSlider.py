@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QSlider
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import QSize, QLocale, Qt
+from PyQt6.QtGui import QFont, QDoubleValidator
 
 from models import Parameter
 
@@ -28,7 +28,7 @@ class ParameterSlider(QWidget):
         self.line_edit = QLineEdit()
         self.line_edit.setMinimumSize(QSize(0, 8))
         self.line_edit.setMaximumSize(QSize(100, 16777215))
-
+        
         self.blocked_check = QCheckBox("Blocked")
         self.blocked_check.setMinimumSize(QSize(85, 0))
         self.blocked_check.setMaximumSize(QSize(85, 16777215))
@@ -45,35 +45,61 @@ class ParameterSlider(QWidget):
         if self.parameter is not None:
             self.slider.disconnect()
             self.line_edit.disconnect()
+            self.blocked_check.disconnect()
 
         self.parameter: Parameter = parameter
-
+        validator: QDoubleValidator = QDoubleValidator(self.parameter.min, self.parameter.max, 8)
+        l = QLocale(QLocale.c())
+        l.setNumberOptions(QLocale.NumberOption.RejectGroupSeparator)
+        validator.setLocale(l)
+        validator.fixup = self.fixup_line_edit
+        self.line_edit.setValidator(validator)
         self.label.setText(self.parameter.symbol)
-        self.set_edit_value_silent(self.parameter.value)
+        self.set_edit_value_silent(round(self.parameter.value, 8))
         self.set_slider_value_silent(self.edit_to_slider())
+        self.set_blocked_silent(self.parameter.is_blocked)
 
 
         self.slider.valueChanged.connect(lambda: self.set_edit_value_silent(self.slider_to_param()))
         self.line_edit.editingFinished.connect(lambda: self.set_slider_value_silent(self.edit_to_slider()))
+        self.blocked_check.stateChanged.connect(self.on_checkbox_clicked)
+        
+
+    
+
+    def on_checkbox_clicked(self):
+        self.parameter.set_blocked(self.blocked_check.isChecked())
+
+    def set_blocked_silent(self, v: bool):
+        self.blocked_check.blockSignals(True)
+        self.blocked_check.setChecked(v)
+        self.blocked_check.blockSignals(False)
 
     def set_slider_value_silent(self, v: int):
         self.slider.blockSignals(True)
         self.slider.setValue(v)
+        self.parameter.set_value(float(interp1d([self.slider.minimum(), self.slider.maximum()], [self.parameter.min, self.parameter.max])(v)))
         self.slider.blockSignals(False)
 
     def set_edit_value_silent(self, v: float):
         self.slider.blockSignals(True)
         self.line_edit.setText(str(v))
+        self.parameter.set_value(v)
         self.slider.blockSignals(False)
 
     def edit_to_slider(self) -> int: 
         v: float = float(self.line_edit.text())
         return int(interp1d([self.parameter.min, self.parameter.max], [self.slider.minimum(), self.slider.maximum()])(v))
 
+
     def slider_to_param(self) -> float:
         v: int = self.slider.value()
         result: float = float(interp1d([self.slider.minimum(), self.slider.maximum()], [self.parameter.min, self.parameter.max])(v))
         return round(result, 8)
+    
+    def fixup_line_edit(self, v: str):
+        self.set_edit_value_silent(round(self.parameter.value, 8))
+
 
 
 
