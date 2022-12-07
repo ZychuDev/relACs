@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit, QCheckBox, QSlider
 from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtGui import QFont
 
 from models import Parameter
 
@@ -12,15 +13,20 @@ class ParameterSlider(QWidget):
 
         layout: QHBoxLayout = QHBoxLayout()
         self.label = QLabel("p_name")
+        self.label.setMinimumSize(QSize(25,22))
+        font: QFont = self.label.font()
+        font.setPixelSize(16)
+        font.setBold(True)
+        self.label.setFont(font)
         self.slider = QSlider()
-        self.slider.setMinimumSize(QSize(50, 16))
+        self.slider.setMinimumSize(QSize(40, 22))
         self.slider.setTracking(True)
         self.slider.setOrientation(Qt.Orientation.Horizontal)
         self.slider.setTickPosition(QSlider.TickPosition.TicksBelow)
         self.slider.setRange(0, 100)
 
         self.line_edit = QLineEdit()
-        self.line_edit.setMinimumSize(QSize(0, 10))
+        self.line_edit.setMinimumSize(QSize(0, 8))
         self.line_edit.setMaximumSize(QSize(100, 16777215))
 
         self.blocked_check = QCheckBox("Blocked")
@@ -41,17 +47,18 @@ class ParameterSlider(QWidget):
             self.line_edit.disconnect()
 
         self.parameter: Parameter = parameter
-        p = self.parameter
-        self.label.setText(p.symbol)
-        self.set_slider_value_silent(map(p.value))
-        self.line_edit.set_edit_value_silent(p.value)
 
-        self.slider.valueChanged.connect(lambda v: self.set_edit_value_silent(self.slider_to_param(v)))
-        self.line_edit.textEdited.connect(lambda s: self.set_edit_value_silent(self.param_to_slider(float(s))))
+        self.label.setText(self.parameter.symbol)
+        self.set_edit_value_silent(self.parameter.value)
+        self.set_slider_value_silent(self.edit_to_slider())
 
-    def set_slider_value_silent(self, v: float):
+
+        self.slider.valueChanged.connect(lambda: self.set_edit_value_silent(self.slider_to_param()))
+        self.line_edit.editingFinished.connect(lambda: self.set_slider_value_silent(self.edit_to_slider()))
+
+    def set_slider_value_silent(self, v: int):
         self.slider.blockSignals(True)
-        self.slider.setValue(self.parameter.value)
+        self.slider.setValue(v)
         self.slider.blockSignals(False)
 
     def set_edit_value_silent(self, v: float):
@@ -59,12 +66,14 @@ class ParameterSlider(QWidget):
         self.line_edit.setText(str(v))
         self.slider.blockSignals(False)
 
-    def param_to_slider(self, v: float) -> int: 
+    def edit_to_slider(self) -> int: 
+        v: float = float(self.line_edit.text())
         return int(interp1d([self.parameter.min, self.parameter.max], [self.slider.minimum(), self.slider.maximum()])(v))
 
     def slider_to_param(self) -> float:
         v: int = self.slider.value()
-        return interp1d([self.slider.minimum(), self.slider.maximum()], [self.parameter.min, self.parameter.max])(v)
+        result: float = float(interp1d([self.slider.minimum(), self.slider.maximum()], [self.parameter.min, self.parameter.max])(v))
+        return round(result, 8)
 
 
 

@@ -1,14 +1,16 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableView, QHeaderView
 from PyQt6.QtCore import QAbstractTableModel, QSize, Qt
 from PyQt6.QtGui import QFont
+
 from models import Measurement
+
 from pandas import DataFrame, Series # type: ignore
-import matplotlib # type: ignore
-matplotlib.use('Qt5Agg')
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg # type: ignore
 from matplotlib.figure import Figure # type: ignore
 from matplotlib.artist import Artist # type: ignore
+from matplotlib import use # type: ignore
+use('Qt5Agg')
 
 from time import time
 
@@ -111,7 +113,7 @@ class DataExplorer(QWidget):
         if self.measurement is not None:
             self.measurement.df_changed.disconnect()
             self.measurement.name_changed.disconnect()
-            
+
         self.measurement = measurement
         self.measurement.df_changed.connect(self.update_plots)
         self.measurement.df_changed.connect(self.table.update)
