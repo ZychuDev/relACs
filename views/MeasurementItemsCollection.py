@@ -19,7 +19,6 @@ class MeasurementItemsCollection(StandardItem):
 
         self.sort_mode: Literal["temp", "field"] = "temp"
 
-        #self._model.name_changed.connect(self.on_name_changed)
         self._model.measurement_added.connect(self.on_measurement_added) 
         self._model.measurement_removed.connect(self.on_measurement_removed)
         self._model.displayed_item_changed.connect(self.on_displayed_item_changed)

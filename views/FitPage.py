@@ -16,40 +16,46 @@ from matplotlib.artist import Artist # type: ignore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg # type: ignore
 from matplotlib.colors import CSS4_COLORS # type: ignore
 from matplotlib.ticker import LinearLocator # type: ignore
+
 from matplotlib import use # type: ignore
+import matplotlib.colors as mcolors
 
 from numpy import ndarray, pi, power, add
-from scipy.optimize import least_squares
+from scipy.optimize import least_squares # type: ignore
 
+
+from functools import partial
 use('Qt5Agg')
 
 from time import time
+from math import nextafter
 
 def model(logFrequency: ndarray, alpha: float, beta: float, tau: float, chi_t: float, chi_s: float) -> ndarray:
     return chi_s + (chi_t - chi_s)/((1 + (10**logFrequency*2*pi * power(10, tau) * 1j )**(1- alpha))**beta)
-
-
-
 
 class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, width: int=10, height: int=5, dpi: int=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
+        #Order is importnat for legend display
         self.ax1 = fig.add_subplot(222)
         self.ax1.grid(True, linestyle='--', linewidth=1, color=CSS4_COLORS["silver"])
         self.ax1.xaxis.set_major_locator(LinearLocator(10))
         self.ax1.yaxis.set_major_locator(LinearLocator(8))
         self.ax1.set(title=r"$\chi^{\prime}$", xlabel=r"$\log {\frac{v}{Hz}}$", ylabel=r"$\chi^{\prime} /cm^3*mol^{-1}$")
-        self.ax2 = fig.add_subplot(2,2, (3,4))
-        self.ax2.grid(True, linestyle='--', linewidth=1, color=CSS4_COLORS["silver"])
-        self.ax2.xaxis.set_major_locator(LinearLocator(10))
-        self.ax2.yaxis.set_major_locator(LinearLocator(8))
-        self.ax2.set(title=r"$\chi^{\prime \prime}$", xlabel=r"$\log {\frac{v}{Hz}}$", ylabel=r"$\chi^{\prime \prime} /cm^3*mol^{-1}$")
+        
         self.ax3 = fig.add_subplot(221)
         self.ax3.grid(True, linestyle='--', linewidth=1, color=CSS4_COLORS["silver"])
         self.ax3.xaxis.set_major_locator(LinearLocator(10))
         self.ax3.yaxis.set_major_locator(LinearLocator(8))
         self.ax3.set(title=r"Cole-Cole", xlabel=r"$\chi^{\prime} /cm^3*mol^{-1}$", ylabel=r"$\chi^{\prime \prime} / cm^3*mol^{-1}$")
+
+        self.ax2 = fig.add_subplot(2,2, (3,4))
+        self.ax2.grid(True, linestyle='--', linewidth=1, color=CSS4_COLORS["silver"])
+        self.ax2.xaxis.set_major_locator(LinearLocator(10))
+        self.ax2.yaxis.set_major_locator(LinearLocator(8))
+        self.ax2.set(title=r"$\chi^{\prime \prime}$", xlabel=r"$\log {\frac{v}{Hz}}$", ylabel=r"$\chi^{\prime \prime} /cm^3*mol^{-1}$")
+
         fig.subplots_adjust(left=0.06, right=0.99, top=0.9, bottom=0.15)
         super(MplCanvas, self).__init__(fig)
 
@@ -239,15 +245,27 @@ class FitPage(QWidget):
         self.setLayout(vertical_layout)
 
         self.fit_button.clicked.connect(self.make_auto_fit)
+        self.save_button.clicked.connect(self.save_all_relaxations)
+        self.reset_current_button.clicked.connect(self.reset_all_relaxations)
+
+    def save_all_relaxations(self):
+        for r in self.fit.relaxations:
+            r.save()
+
+    def reset_all_relaxations(self):
+        for r in self.fit.relaxations:
+            r.reset()
 
     def set_fit(self, fit:Fit):
         if self.fit is not None:
             self.fit.df_changed.disconnect()
             self.fit.df_point_deleted.disconnect()
-            self.fit.name_changed.disconnect()
             for r in self.fit.relaxations:
+                r.parameters_saved.disconnect()
+                r.all_parameters_changed.disconnect()
                 for p in r.parameters:
                     p.value_changed.disconnect()
+                    
 
         self.fit = fit
         self.fit.df_changed.connect(self._update_measurements_plots)
@@ -255,14 +273,16 @@ class FitPage(QWidget):
         self.fit.name_changed.connect(lambda new_name: self.title_label.setText(new_name))
 
         for i, r in enumerate(self.fit.relaxations):
+            r.parameters_saved.connect(partial(self._update_fit_plot_for_one_saved_relax, i, True))
+            r.all_parameters_changed.connect(self._recreate_fit_plot)
             for p in r.parameters:
-                p.value_changed.connect(lambda: self._update_fit_plot_for_one_relax(i, True))
+                p.value_changed.connect(partial(self._update_fit_plot_for_one_relax, i, True))
 
         self.title_label.setText(fit.name)
 
         self.left_side.set_fit(fit)
 
-
+        self._recreate_fit_plot()
         self._update_domains()
         self._update_fit_plots()
         self._update_measurements_plots()
@@ -278,12 +298,12 @@ class FitPage(QWidget):
         visible: DataFrame = df.loc[df["Hidden"] == False]
 
         if self._chi_prime_m is None or self._chi_bis_m is None or self._cole_cole_m is None:
-            self._chi_prime_m = self.canvas.ax1.plot(visible["FrequencyLog"].values, visible["ChiPrimeMol"], "bo", picker=self.picker_radius)[0]
-            self._chi_prime_m_h = self.canvas.ax1.plot(hidden["FrequencyLog"].values, hidden["ChiPrimeMol"], "yo", picker=self.picker_radius)[0]
-            self._chi_bis_m = self.canvas.ax2.plot(visible["FrequencyLog"].values, visible["ChiBisMol"], "bo", picker=self.picker_radius )[0]
-            self._chi_bis_m_h = self.canvas.ax2.plot(hidden["FrequencyLog"].values, hidden["ChiBisMol"], "yo", picker=self.picker_radius )[0]
-            self._cole_cole_m = self.canvas.ax3.plot(visible["ChiPrimeMol"].values, visible["ChiBisMol"], "bo", picker=self.picker_radius)[0]
-            self._cole_cole_m_h = self.canvas.ax3.plot(hidden["ChiPrimeMol"].values, hidden["ChiBisMol"], "yo", picker=self.picker_radius)[0]
+            self._chi_prime_m = self.canvas.ax1.plot(visible["FrequencyLog"].values, visible["ChiPrimeMol"], "o", c=mcolors.TABLEAU_COLORS["tab:blue"], picker=self.picker_radius)[0]
+            self._chi_prime_m_h = self.canvas.ax1.plot(hidden["FrequencyLog"].values, hidden["ChiPrimeMol"], "o", c=mcolors.TABLEAU_COLORS["tab:orange"], picker=self.picker_radius)[0]
+            self._chi_bis_m = self.canvas.ax2.plot(visible["FrequencyLog"].values, visible["ChiBisMol"], "o", c=mcolors.TABLEAU_COLORS["tab:blue"], label="Mesurement points", picker=self.picker_radius )[0]
+            self._chi_bis_m_h = self.canvas.ax2.plot(hidden["FrequencyLog"].values, hidden["ChiBisMol"], "o", c=mcolors.TABLEAU_COLORS["tab:orange"], label="Hidden points", picker=self.picker_radius )[0]
+            self._cole_cole_m = self.canvas.ax3.plot(visible["ChiPrimeMol"].values, visible["ChiBisMol"], "o", c=mcolors.TABLEAU_COLORS["tab:blue"], picker=self.picker_radius)[0]
+            self._cole_cole_m_h = self.canvas.ax3.plot(hidden["ChiPrimeMol"].values, hidden["ChiBisMol"], "o", c=mcolors.TABLEAU_COLORS["tab:orange"], picker=self.picker_radius)[0]
         else:
             self._chi_prime_m.set_xdata(visible["FrequencyLog"])
             self._chi_prime_m.set_ydata(visible["ChiPrimeMol"])
@@ -302,13 +322,14 @@ class FitPage(QWidget):
 
             self._cole_cole_m_h.set_xdata(hidden["ChiPrimeMol"])
             self._cole_cole_m_h.set_ydata(hidden["ChiBisMol"])
-            
-        print("Hidden", len(hidden["FrequencyLog"]), len(hidden["ChiPrimeMol"]), len(hidden["ChiBisMol"]))
-        print("visible", len(visible["FrequencyLog"]), len(visible["ChiPrimeMol"]), len(visible["ChiBisMol"]))
+
+        l = self.canvas.ax2.legend()
+        l.set_draggable(True)
+        l.set_zorder(1000)
         self.canvas.draw()
+        
 
     def _update_fit_plots(self):
-        print("fit_plots")
         if self.fit is None:
             return
         relax_nr: int = len(self.fit.relaxations)
@@ -319,7 +340,19 @@ class FitPage(QWidget):
                 self._update_fit_plot_for_one_relax(r)
 
     def _recreate_fit_plot(self):
-        print("reacreate_fit_plots")
+        for l in self._chi_prime_c:
+            l.remove()
+        for l in self._chi_bis_c:
+            l.remove()
+        for l in self._cole_cole_c:
+            l.remove()
+        for l in self._chi_prime_s:
+            l.remove()
+        for l in self._chi_bis_s:
+            l.remove()
+        for l in self._cole_cole_s:
+            l.remove()
+
         self._chi_prime_c = []
         self._chi_bis_c = []
         self._cole_cole_c = []
@@ -337,88 +370,107 @@ class FitPage(QWidget):
         for r in range(relax_nr):
             result: ndarray = model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
             result_s: ndarray = model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
-            print(result)
 
             self._chi_prime_c.append(self.canvas.ax1.plot(frequency_log, result.real, "--")[0])
-            self._chi_bis_c.append(self.canvas.ax2.plot(frequency_log, result.imag, "--")[0])
-            self._cole_cole_c.append(self.canvas.ax3.plot(result.real, result.imag, "--")[0])
-
+            self._chi_bis_c.append(self.canvas.ax2.plot(frequency_log, -result.imag, "--", label=f"Relaxation nr {r+1}")[0])
+            self._cole_cole_c.append(self.canvas.ax3.plot(result.real, -result.imag, "--")[0])
+            
             self._chi_prime_s.append(self.canvas.ax1.plot(frequency_log, result_s.real, "-")[0])
-            self._chi_bis_s.append(self.canvas.ax2.plot(frequency_log, result_s.imag, "-")[0])
-            self._cole_cole_s.append(self.canvas.ax3.plot(result_s.real, result_s.imag, "-")[0])
+            self._chi_bis_s.append(self.canvas.ax2.plot(frequency_log, -result_s.imag, "-", label=f"Saved Relaxation nr {r+1}")[0])
+            self._cole_cole_s.append(self.canvas.ax3.plot(result_s.real, -result_s.imag, "-")[0])
 
-            if len(total) == 0:
-                total = result
-            else:
-                add(total, result, total)
+            if relax_nr > 1:
+                if len(total) == 0:
+                    total = result
+                else:
+                    add(total, result, total)
 
-            if len(total_s) == 0:
-                total_s = result_s
-            else:
-                add(total_s, result_s, total_s)
+                if len(total_s) == 0:
+                    total_s = result_s
+                else:
+                    add(total_s, result_s, total_s)
 
-            self._chi_prime_total = self.canvas.ax1.plot(frequency_log, total.real, "--")[0]
-            self._chi_bis_total = self.canvas.ax2.plot(frequency_log, total.imag, "--")[0]
-            self._cole_cole_total = self.canvas.ax3.plot(total.real, total.imag, "--")[0]
+                if self._chi_prime_total is not None:
+                    self._chi_prime_total.remove()
+                self._chi_prime_total = self.canvas.ax1.plot(frequency_log, total.real, "--")[0]
 
-            self._chi_prime_total_s = self.canvas.ax1.plot(frequency_log, total_s.real, "-")[0]
-            self._chi_bis_total_s = self.canvas.ax2.plot(frequency_log, total_s.imag, "-")[0]
-            self._cole_cole_total_s = self.canvas.ax3.plot(total_s.real, total_s.imag, "-")[0]
+                if self._chi_bis_total is not None:
+                    self._chi_bis_total.remove()
+                self._chi_bis_total = self.canvas.ax2.plot(frequency_log, -total.imag, "--", label="Sum of relaxations")[0]
+
+                if self._cole_cole_total is not None:
+                    self._cole_cole_total.remove()
+                self._cole_cole_total = self.canvas.ax3.plot(total.real, -total.imag, "--")[0]
+
+                if self._chi_prime_total_s is not None:
+                    self._chi_prime_total_s.remove()
+                self._chi_prime_total_s = self.canvas.ax1.plot(frequency_log, total_s.real, "-")[0]
+
+                if self._chi_bis_total_s is not None:
+                    self._chi_bis_total_s.remove()
+                self._chi_bis_total_s = self.canvas.ax2.plot(frequency_log, -total_s.imag, "-", label="Saved sum of relaxations")[0]
+
+                if self._cole_cole_total_s is not None:
+                    self._cole_cole_total_s.remove()
+                self._cole_cole_total_s = self.canvas.ax3.plot(total_s.real, -total_s.imag, "-")[0]
            
 
     def _update_fit_plot_for_one_relax(self, r: int, redraw: bool=False):  
-        print("update_fit_plots")
         df: DataFrame = self.fit._df
         frequency_log: ndarray = df["FrequencyLog"].values
         result: ndarray = model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
         self._cole_cole_c[r].set_xdata(result.real)
-        self._cole_cole_c[r].set_ydata(result.imag)
+        self._cole_cole_c[r].set_ydata(-result.imag)
         self._chi_prime_c[r].set_ydata(result.real)
-        self._chi_bis_c[r].set_ydata(result.imag)
+
+        self._chi_bis_c[r].set_ydata(-result.imag)
         
         total = result
         for other in range(len(self.fit.relaxations)):
             if other != r:
                 src = self._cole_cole_c[other]
                 add(total, src.get_xdata().astype(complex), total)
-                add(total, src.get_ydata().astype(complex), total)
+                add(total, -src.get_ydata().astype(complex), total)
 
-
-        self._cole_cole_total.set_xdata(total.real)
-        self._cole_cole_total.set_ydata(total.imag)
-        self._chi_prime_total.set_ydata(total.real)
-        self._chi_bis_total.set_ydata(total.imag)
+        if len(self.fit.relaxations) > 1:
+            self._cole_cole_total.set_xdata(total.real)
+            self._cole_cole_total.set_ydata(total.imag)
+            self._chi_prime_total.set_ydata(total.real)
+            self._chi_bis_total.set_ydata(total.imag)
 
         if redraw:
-            self._update_domains(result=result)
+            self._update_domains(result=result, total=total)
             self.canvas.draw()
 
 
     def _update_fit_plot_for_one_saved_relax(self, r: int, redraw: bool = False):  
+
         df: DataFrame = self.fit._df
         frequency_log: ndarray = df["FrequencyLog"].values
         result: ndarray = model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
-        self._cole_cole_c[r].set_xdata(result.real)
-        self._cole_cole_c[r].set_ydata(result.imag)
-        self._chi_prime_c[r].set_ydata(result.real)
-        self._chi_bis_c[r].set_ydata(result.imag)
-        
+        self._cole_cole_s[r].set_xdata(result.real)
+        self._cole_cole_s[r].set_ydata(-result.imag)
+        self._chi_prime_s[r].set_ydata(result.real)
+
+        self._chi_bis_s[r].set_ydata(-result.imag)
+
         total = result
         for other in range(len(self.fit.relaxations)):
             if other != r:
                 src = self._cole_cole_s[other]
                 add(total, src.get_xdata().astype(complex), total)
-                add(total, src.get_ydata().astype(complex), total)
+                add(total, -src.get_ydata().astype(complex), total)
 
-        self._cole_cole_total_s.set_xdata(total.real)
-        self._cole_cole_total_s.set_ydata(total.imag)
-        self._chi_prime_total_s.set_ydata(total.real)
-        self._chi_bis_total_s.set_ydata(total.imag)
+        if len(self.fit.relaxations) > 1:
+            self._cole_cole_total_s.set_xdata(total.real)
+            self._cole_cole_total_s.set_ydata(-total.imag)
+            self._chi_prime_total_s.set_ydata(total.real)
+            self._chi_bis_total_s.set_ydata(-total.imag)
 
         if redraw:
             self.canvas.draw()
 
-    def _update_domains(self, result=None):
+    def _update_domains(self, result=None, total=None):
         df: DataFrame = self.fit._df
         span:float = df["FrequencyLog"].max() - df["FrequencyLog"].min()
         span_prime:float = df["ChiPrimeMol"].max() - df["ChiPrimeMol"].min()
@@ -430,14 +482,26 @@ class FitPage(QWidget):
         self.canvas.ax3.set_xbound(df["ChiPrimeMol"].min()-span_prime*0.05, df["ChiPrimeMol"].max()+span_prime*0.05)
         self.canvas.ax3.set_ybound(df["ChiBisMol"].min()-span_bis*0.05, df["ChiBisMol"].max()+span_bis*0.05)
 
-        if result is not None:
-            self.canvas.ax1.set_ybound(result.real.min()-span_prime*0.05, result.real.max()+span_prime*0.05)
-            self.canvas.ax2.set_ybound(result.imag.min()-span_bis*0.05, result.imag.max()+span_bis*0.05)
-            self.canvas.ax3.set_ybound(result.imag.min()-span_bis*0.05, result.imag.max()+span_bis*0.05)
+        if result is not None and total is not None:
+            bis = -result.imag
+            total_bis = -total.imag
+            lower_bis = min(df["ChiBisMol"].min(), bis.min(), total_bis.min()) 
+            upper_bis = max(df["ChiBisMol"].max(), bis.max(), total_bis.max())
+            span_bis = upper_bis - lower_bis
+            self.canvas.ax2.set_ybound(lower_bis-span_bis*0.05, upper_bis+span_bis*0.05)
+            self.canvas.ax3.set_ybound(lower_bis-span_bis*0.05, upper_bis+span_bis*0.05)
+
+            prime = result.real
+            lower_prime = min(df["ChiPrimeMol"].min(), prime.min(), total.real.min())
+            upper_prime = max(df["ChiPrimeMol"].max(), prime.max(), total.real.max())
+            span_prime = upper_prime - lower_prime
+            self.canvas.ax1.set_ybound(lower_prime.min()-span_prime*0.05, upper_prime.max()+span_prime*0.05)
+
 
     def on_point_deleted(self):
-        self._update_domains()
         self._recreate_fit_plot()
+        self._update_domains()
+
         self._update_fit_plots()
         self._update_measurements_plots()
 
@@ -472,8 +536,8 @@ class FitPage(QWidget):
 
         self._last_event_time = time()
 
-    def costF(self, p):
-        rest = self.fit._df
+    def cost_function(self, p):
+        rest = self.fit._df.loc[self.fit._df["Hidden"] == False]
 
         sum_real = 0
         sum_img = 0
@@ -492,16 +556,23 @@ class FitPage(QWidget):
         return  dif_real + dif_img
 
     def make_auto_fit(self, auto: bool = False):
-        p = []
+        params: tuple = ()
         min = []
         max = []
         for r in range(len(self.fit.relaxations)):
             relaxation = self.fit.relaxations[r]
-            p = p + list(relaxation.get_parameters_values())
+            params = params + relaxation.get_parameters_values()
             min = min + relaxation.get_parameters_min_bounds()
             max = max + relaxation.get_parameters_max_bounds()
 
-        res = least_squares(self.costF, tuple(p), bounds=(min, max))
+        bounds: tuple(list[float], list[float]) = (min, max)
+        for i, r in enumerate(self.fit.relaxations):
+            for j, p in enumerate(r.parameters):
+                if p.is_blocked:
+                    min[j + i*len(r.parameters)] = nextafter(p.value, min[j + i*len(r.parameters)])
+                    max[j + i*len(r.parameters)] = nextafter(p.value, max[j + i*len(r.parameters)])
+
+        res = least_squares(self.cost_function, params, bounds=bounds)
 
         
 

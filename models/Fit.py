@@ -20,7 +20,7 @@ class Fit(QObject):
     @staticmethod
     def from_measurement(measurement: Measurement, compound:SettingsSource, nr_of_relaxations: int = 1):
         fit_name: str = measurement._name + "_Fit_Frequency"
-        fit: Fit =  Fit(fit_name, measurement._df.copy(), compound, None)
+        fit: Fit =  Fit(fit_name, measurement._df.copy(), measurement._tmp, measurement._field, compound, None)
 
         fit.relaxations = []
         i: int
@@ -28,10 +28,14 @@ class Fit(QObject):
             fit.relaxations.append(Relaxation(compound))
 
         return fit
-    def __init__(self, name: str, df: DataFrame, compound:SettingsSource, collection: Collection):
+    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:SettingsSource, collection: Collection):
         super().__init__()
         self._name: str = name
         self._df: DataFrame = df
+
+        self._tmp: float = temp
+        self._field: float = field
+
         self.relaxations: list[Relaxation]
 
         self._compound: SettingsSource = compound

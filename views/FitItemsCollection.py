@@ -1,4 +1,4 @@
-from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex
+from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt
 from PyQt6.QtGui import QColor, QBrush
 from PyQt6.QtWidgets import QMenu
 
@@ -6,6 +6,10 @@ from models import FitItemsCollectionModel, Fit
 from controllers import FitItemsCollectionController, FitItemController
 from .StandardItem import StandardItem
 from .FitItem import FitItem
+
+from typing import Literal
+from functools import partial
+
 class FitItemsCollection(StandardItem):
     def __init__(self, model: FitItemsCollectionModel, ctrl: FitItemsCollectionController):
         super().__init__(model._name, 14, False)
@@ -19,7 +23,17 @@ class FitItemsCollection(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
-        menu.addAction("Make fit from all checked", self.parent().child(0).make_fits_checked)
+        submenu = menu.addMenu("Sort")
+        submenu.addAction("Sort by temperature", partial(self.sort, "temp"))
+        submenu.addAction("Sort by field", partial(self.sort, "field"))
+        menu.addSeparator()
+
+        menu.addAction("Check all", self.check_all)
+        menu.addAction("Uncheck all", self.uncheck_all)
+        menu.addSeparator()
+
+        menu.addAction("Make auto fit for all checked", lambda: print("TO DO"))
+        menu.addAction("Remove checked", self.remove_selected)
         menu.exec(menu_position)
 
     def on_fit_added(self, new:Fit):
@@ -31,4 +45,35 @@ class FitItemsCollection(StandardItem):
 
     def on_fit_removed(self, index:QModelIndex):
         self.removeRow(index.row())
+
+    def check_all(self):
+        i: int
+        for i in range(self.rowCount()):
+            self.child(i).setCheckState(Qt.CheckState.Checked)
+
+    def uncheck_all(self):
+        i: int
+        for i in range(self.rowCount()):
+            self.child(i).setCheckState(Qt.CheckState.Unchecked)
+
+    def sort(self, sort_by: Literal["temp", "field"]):
+        self.sort_mode = sort_by
+
+        i: int = 0
+        while self.child(i) is not None:
+            self.child(i).sort_mode = self.sort_mode # type: ignore
+            i += 1
+
+        self.sortChildren(0)
+
+    def remove_selected(self):
+        i: int = 0
+        nr_of_rows: int = self.rowCount()
+        while i < nr_of_rows:
+            child = self.child(i)
+            if child.checkState() == Qt.CheckState.Checked:
+                self._model.remove(child._model._name, child.index())
+                nr_of_rows -= 1
+                i -= 1
+            i += 1
 

@@ -79,8 +79,8 @@ class MeasurementItemsCollectionModel(QObject):
                 return True
         return False
 
-    def get_jsonable(self) -> dict:
-        jsonable: dict = [measurement.get_jsonable() for measurement in self._measurements]
+    def get_jsonable(self) -> list:
+        jsonable: list = [measurement.get_jsonable() for measurement in self._measurements]
         return jsonable
 
     def from_json(self, measurements: list[dict]):

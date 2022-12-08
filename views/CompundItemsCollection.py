@@ -57,7 +57,7 @@ class CompoundItemsCollection(StandardItem):
         # if len(filenames) != 1 :
         #     return 
 
-        filepath = "C:\\Users\\wikto\\Desktop\\repos\\relACs\\data\\save_test.json" #TMP filenames[0]    #
+        filepath = "C:\\Users\\wikto\\Desktop\\repos\\relACs\\data\\good_fit.json" #TMP filenames[0]    #
         if not path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return

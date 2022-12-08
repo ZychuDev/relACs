@@ -23,7 +23,7 @@ class ParameterSlider(QWidget):
         self.slider.setTracking(True)
         self.slider.setOrientation(Qt.Orientation.Horizontal)
         self.slider.setTickPosition(QSlider.TickPosition.TicksBelow)
-        self.slider.setRange(0, 200)
+        self.slider.setRange(0, 100)
 
         self.line_edit = QLineEdit()
         self.line_edit.setMinimumSize(QSize(0, 8))
@@ -85,7 +85,7 @@ class ParameterSlider(QWidget):
 
     def set_edit_value_silent(self, v: float):
         self.slider.blockSignals(True)
-        self.line_edit.setText(str(v))
+        self.line_edit.setText(str(round(v, 8)))
         self.slider.blockSignals(False)
 
     def slider_to_param(self) -> float:

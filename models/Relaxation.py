@@ -1,10 +1,13 @@
 from .Parameter import Parameter, PARAMETER_NAME
 from protocols import SettingsSource
-
+from PyQt6.QtCore import pyqtSignal, QObject
 FrequencyParameters = tuple[Parameter, Parameter, Parameter, Parameter, Parameter]
-class Relaxation():
+class Relaxation(QObject):
+    parameters_saved = pyqtSignal()
+    all_parameters_changed = pyqtSignal()
+    
     def __init__(self, compound: SettingsSource):
-        
+        super().__init__()
         self.parameters: FrequencyParameters  = (
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
             Parameter("beta", compound.get_min("beta"), compound.get_max("beta")),
@@ -22,6 +25,25 @@ class Relaxation():
 
         self.residual_error = 0.0
         self.saved_residual_error = 0.0
+        self.was_saved: bool = False
+
+    def save(self):
+        for i, p in enumerate(self.parameters):
+            s = self.saved_parameters[i]
+            s.set_value(p.value)
+            s.set_blocked(p.is_blocked)
+            s.set_error(p.error)
+        self.was_saved = True
+        self.parameters_saved.emit()
+
+    def reset(self):
+        for i, p in enumerate(self.parameters):
+            s = self.saved_parameters[i]
+            p.set_value(s.value)
+            p.set_blocked(s.is_blocked)
+            p.set_error(s.error)
+
+        self.all_parameters_changed.emit()
 
     def get_parameters_values(self) -> tuple[float, float, float, float, float]:
         return tuple(p.value for p in self.parameters) # type: ignore
