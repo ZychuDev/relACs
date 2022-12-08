@@ -4,6 +4,7 @@ from .Literals import PARAMETER_NAME
 
 class Parameter(QObject):
     value_changed = pyqtSignal(float)
+    block_state_changed = pyqtSignal(bool)
     error_changed = pyqtSignal(float)
 
     name_to_symbol:dict[PARAMETER_NAME, str] = {
@@ -42,3 +43,4 @@ class Parameter(QObject):
 
     def set_blocked(self, block: bool):
         self.is_blocked = block
+        self.block_state_changed.emit(self.is_blocked)

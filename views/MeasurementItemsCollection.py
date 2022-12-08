@@ -98,7 +98,13 @@ class MeasurementItemsCollection(StandardItem):
             i += 1
 
     def make_all_fits(self):
-        pass
+        i : int
+        first: bool = True
+        for i in range(self.rowCount()):
+            item: MeasurementItem = cast(MeasurementItem, self.child(i))
+            new_fit: Fit = Fit.from_measurement(item._model, self._model._compound)
+            self.parent().child(1)._model.append_fit(new_fit, display=first)
+            first = False
 
     def make_fits_checked(self):
         i : int
@@ -107,8 +113,16 @@ class MeasurementItemsCollection(StandardItem):
             item: MeasurementItem = cast(MeasurementItem, self.child(i))
             if item.checkState() == Qt.CheckState.Checked:
                 new_fit: Fit = Fit.from_measurement(item._model, self._model._compound)
-                self.parent().child(1)._model.append_fit(new_fit)
+                self.parent().child(1)._model.append_fit(new_fit, display=first)
+                first = False
 
 
     def make_fits_checked_2(self):
-        pass
+        i : int
+        first: bool = True
+        for i in range(self.rowCount()):
+            item: MeasurementItem = cast(MeasurementItem, self.child(i))
+            if item.checkState() == Qt.CheckState.Checked:
+                new_fit: Fit = Fit.from_measurement(item._model, self._model._compound, nr_of_relaxations=2)
+                self.parent().child(2)._model.append_fit(new_fit, display=first)
+                first = False

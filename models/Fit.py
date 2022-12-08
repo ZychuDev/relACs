@@ -22,7 +22,7 @@ class Fit(QObject):
         fit_name: str = measurement._name + "_Fit_Frequency"
         fit: Fit =  Fit(fit_name, measurement._df.copy(), compound, None)
 
-        fit.relaxations: list[Relaxation] = []
+        fit.relaxations = []
         i: int
         for i in range(nr_of_relaxations):
             fit.relaxations.append(Relaxation(compound))

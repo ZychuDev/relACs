@@ -4,7 +4,7 @@ from PyQt6.QtGui import QColor, QBrush
 from .Measurement import Measurement
 from .Compound import Compound
 
-from pandas import read_json
+from pandas import read_json # type: ignore
 
 class MeasurementItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)

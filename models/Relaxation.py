@@ -23,6 +23,18 @@ class Relaxation():
         self.residual_error = 0.0
         self.saved_residual_error = 0.0
 
+    def get_parameters_values(self) -> tuple[float, float, float, float, float]:
+        return tuple(p.value for p in self.parameters) # type: ignore
+
+    def get_parameters_min_bounds(self):
+        return [p.min for p in self.parameters]
+
+    def get_parameters_max_bounds(self):
+        return [p.max for p in self.parameters]
+
+    def get_saved_parameters_values(self) -> tuple[float, float, float, float, float]:
+        return tuple(p.value for p in self.saved_parameters) # type: ignore
+
     def get_jsonable(self):
         pass
 
