@@ -157,4 +157,14 @@ class MeasurementItemsCollectionController(QObject):
     
         return results
 
-        
+    def get_next(self, name: str):
+        pass
+
+    def get_previous(self, name: str):
+        pass
+
+    def get_item_model(self, name: str):
+        pass
+
+    def get_names(self) -> list[str]: 
+        pass

@@ -5,7 +5,8 @@ FrequencyParameters = tuple[Parameter, Parameter, Parameter, Parameter, Paramete
 class Relaxation(QObject):
     parameters_saved = pyqtSignal()
     all_parameters_changed = pyqtSignal()
-    
+    all_error_changed = pyqtSignal(float)
+
     def __init__(self, compound: SettingsSource):
         super().__init__()
         self.parameters: FrequencyParameters  = (
@@ -43,6 +44,26 @@ class Relaxation(QObject):
             p.set_blocked(s.is_blocked)
             p.set_error(s.error)
 
+        self.all_parameters_changed.emit()
+
+    def copy(self, other):
+        for i, p in enumerate(self.parameters):
+            o = other.saved_parameters[i]
+            p.set_value(o.value)
+            p.set_blocked(o.is_blocked)
+            p.set_error(o.error)
+
+        self.all_parameters_changed.emit()
+
+    def set_all_errors(self, residual_error: float, params_error: list[float]):
+        self.residual_error = residual_error
+        for i, er in enumerate(params_error):
+            self.parameters[i].set_error(er, silent=True)
+        self.all_parameters_changed.emit()
+
+    def set_all_values(self, values: list[float]):
+        for i, v in enumerate(values):
+            self.parameters[i].set_value(v, silent=True)
         self.all_parameters_changed.emit()
 
     def get_parameters_values(self) -> tuple[float, float, float, float, float]:

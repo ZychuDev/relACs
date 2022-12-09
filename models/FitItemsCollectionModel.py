@@ -78,6 +78,33 @@ class FitItemsCollectionModel(QObject):
         self._displayed_item = new_item
         self.displayed_item_changed.emit(new_item)
 
+    def get_next(self, name: str) -> str:
+        for i, f in enumerate(self._fits):
+            if f.name == name:
+                break
 
+        if i == len(self._fits)-1:
+            return self._fits[0].name
+        else:
+            return self._fits[i+1].name
 
+    def get_previous(self, name: str) -> str:
+        for i, f in enumerate(self._fits):
+            if f.name == name:
+                break
+
+        if i == 0:
+            return self._fits[-1].name
+        else:
+            return self._fits[i-1].name
+
+    def get_item_model(self, name: str):
+        for f in self._fits:
+            if f.name == name:
+                return f
+        else:
+            return None
+
+    def get_names(self) -> list[str]: 
+        return self._names
     

@@ -34,12 +34,14 @@ class Parameter(QObject):
         if v < self.min or v > self.max:
             raise ValueError(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
         self.value = v
+        self.set_error(0)
         if not silent:
             self.value_changed.emit(v)
 
-    def set_error(self, v: float):
+    def set_error(self, v: float, silent=False):
         self.error = v
-        self.error_changed.emit(v)
+        if not silent:
+            self.error_changed.emit(v)
 
     def set_blocked(self, block: bool):
         self.is_blocked = block

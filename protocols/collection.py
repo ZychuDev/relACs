@@ -17,3 +17,15 @@ class Collection(Protocol):
 
     def check_if_is_selected(self, index: QModelIndex) -> bool:
         pass
+
+    def get_next(self, name: str) -> str:
+        pass
+
+    def get_previous(self, name: str) -> str:
+        pass
+
+    def get_item_model(self, name: str):
+        pass
+
+    def get_names(self) -> list[str]: 
+        pass

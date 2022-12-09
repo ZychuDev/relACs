@@ -42,6 +42,7 @@ class FitItemsCollection(StandardItem):
 
     def on_displayed_item_changed(self, fit:Fit):
         self._model._compound._displayer.display_fit(fit)
+        print(fit.name)
 
     def on_fit_removed(self, index:QModelIndex):
         self.removeRow(index.row())

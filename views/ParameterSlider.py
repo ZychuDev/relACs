@@ -46,7 +46,6 @@ class ParameterSlider(QWidget):
             self.slider.disconnect()
             self.line_edit.disconnect()
             self.blocked_check.disconnect()
-            self.parameter.disconnect()
 
         self.parameter: Parameter = parameter
         validator: QDoubleValidator = QDoubleValidator(self.parameter.min, self.parameter.max, 8)
