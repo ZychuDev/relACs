@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
  QStackedWidget, QPushButton, QCheckBox, QTableView, QTableWidget, QAbstractScrollArea,
  QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox)
-from PyQt6.QtCore import QAbstractTableModel, QSize, Qt
+from PyQt6.QtCore import QAbstractTableModel, QSize, QMetaObject, QObject, Qt
 from PyQt6.QtGui import QFont, QPalette, QBrush, QColor
 
 from models import Fit, PARAMETER_NAME, Relaxation
@@ -129,18 +129,18 @@ class RelaxationTab(QWidget):
 
     def set_relaxation(self, relaxation: Relaxation):
         if self.relaxation is not None:
-            relaxation.disconnect(self.cid)
-            relaxation.disconnect(self.cid_2)
+            QObject.disconnect(self.cid) 
+            QObject.disconnect(self.cid_2)
             for i, p in enumerate(self.relaxation.parameters):
-                p.disconnect(self.p_cid[i])
+                QObject.disconnect(self.p_cid[i])
 
         for i, s in enumerate(self.sliders):
             s.set_parameter(relaxation.parameters[i])
 
         self.relaxation = relaxation
-        self.cid = relaxation.all_parameters_changed.connect(self.update_errors)
-        self.cid_2 = relaxation.parameters_saved.connect(self.update_saved_errors)
-        self.p_cid = []
+        self.cid: QMetaObject.Connection = relaxation.all_parameters_changed.connect(self.update_errors)
+        self.cid_2: QMetaObject.Connection  = relaxation.parameters_saved.connect(self.update_saved_errors)
+        self.p_cid: list[QMetaObject.Connection] = []
         for i, p in enumerate(self.relaxation.parameters):
             self.p_cid.append(p.value_changed.connect(self.update_errors))
             
@@ -495,9 +495,6 @@ class FitPage(QWidget):
             self._chi_bis_total_s = self.canvas.ax2.plot(frequency_log, -total_s.imag, "-", label="Saved sum of relaxations")[0]
             self._cole_cole_total_s = self.canvas.ax3.plot(total_s.real, -total_s.imag, "-")[0]
 
-    def _clear_lines(self, lines: list):
-        if lines is not None:
-            lines.remove()
                 
     def _update_fit_plot_for_one_relax(self, r: int, redraw: bool=False): 
         df: DataFrame = self.fit._df
@@ -660,15 +657,17 @@ class FitPage(QWidget):
 
     def make_auto_fit(self, auto: bool = False):
         params: tuple = ()
-        min = []
-        max = []
-        for r in range(len(self.fit.relaxations)):
-            relaxation = self.fit.relaxations[r]
+        min: list = []
+        max: list = []
+        for r_nr in range(len(self.fit.relaxations)):
+            relaxation = self.fit.relaxations[r_nr]
             params = params + relaxation.get_parameters_values()
             min = min + relaxation.get_parameters_min_bounds()
             max = max + relaxation.get_parameters_max_bounds()
 
-        bounds: tuple(list[float], list[float]) = (min, max)
+        bounds: tuple[list[float], list[float]] = (min, max)
+        r: Relaxation
+        i: int
         for i, r in enumerate(self.fit.relaxations):
             for j, p in enumerate(r.parameters):
                 if p.is_blocked:

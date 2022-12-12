@@ -20,5 +20,5 @@ class RelACs(QApplication):
 
 if __name__ == "__main__":
     app:QApplication = RelACs(sys.argv)
-    app.setStyle("Fusion")
+    # app.setStyle("Fusion")
     sys.exit(app.exec())

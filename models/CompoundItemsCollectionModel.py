@@ -3,7 +3,9 @@ from PyQt6.QtCore import QObject, pyqtSignal, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
 from PyQt6.QtWidgets import QTreeView
 
-from protocols import Displayer
+from protocols import Displayer, Collection
+
+from typing import cast 
 
 class CompoundItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
@@ -39,7 +41,7 @@ class CompoundItemsCollectionModel(QObject):
         if name in self._names:
             raise ValueError(f"Compund with name {name} already exist in this collection")
         
-        new: Compound = Compound(name, molar_mass, self ,self._tree, self._displayer)
+        new: Compound = Compound(name, molar_mass, cast(Collection, self) ,self._tree, self._displayer)
         self._compounds.append(new)
         self._names.add(name)
         self.compound_added.emit(new)

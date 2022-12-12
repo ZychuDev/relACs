@@ -2,12 +2,13 @@ from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
 from PyQt6.QtWidgets import QMenu, QTreeView, QFileDialog, QWidget
 
-from models import CompoundItemsCollectionModel, Compound
+from models import CompoundItemsCollectionModel, Compound 
 from controllers import CompoundItemsCollectionController, CompoundItemController
 
 from .StandardItem import StandardItem
 from .CompoundItem import CompoundItem
 
+from protocols import Collection
 from os import path
 from json import load, dump
 from typing import cast 
@@ -71,7 +72,7 @@ class CompoundItemsCollection(StandardItem):
         names_to_skip: set[str] = set()
         for compound in json["compounds"]:
             try:
-                self._model.append_existing_compound(Compound(compound["name"], compound["molar_mass"], self, self._model._tree, self._model._displayer))
+                self._model.append_existing_compound(Compound(compound["name"], compound["molar_mass"], cast(Collection, self), self._model._tree, self._model._displayer))
             except ValueError as e:
                 names_to_skip.add(compound["name"])
                 print(e)

@@ -1,6 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
-from protocols import Collection, SettingsSource # type: ignore
+from protocols import Collection, SettingsSource 
 from readers import SettingsReader
 
 from pandas import DataFrame, Series # type: ignore

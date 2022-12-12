@@ -1,5 +1,5 @@
 from .Parameter import Parameter, PARAMETER_NAME
-from protocols import SettingsSource
+from protocols import SettingsSource 
 from PyQt6.QtCore import pyqtSignal, QObject
 FrequencyParameters = tuple[Parameter, Parameter, Parameter, Parameter, Parameter]
 class Relaxation(QObject):

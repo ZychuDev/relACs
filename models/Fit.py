@@ -2,7 +2,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
 
 from .Relaxation import Relaxation
-from models import Measurement
+from models import Measurement 
 from .Parameter import Parameter
 
 from protocols import Collection, SettingsSource
@@ -28,7 +28,7 @@ class Fit(QObject):
             fit.relaxations.append(Relaxation(compound))
 
         return fit
-    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:SettingsSource, collection: Collection):
+    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:SettingsSource, collection: Collection|None):
         super().__init__()
         self._name: str = name
         self._df: DataFrame = df
@@ -39,7 +39,9 @@ class Fit(QObject):
         self.relaxations: list[Relaxation]
 
         self._compound: SettingsSource = compound
-        self._collection: Collection = collection
+        self._collection: Collection
+        if collection is not None:
+            self._collection = collection
 
     @property
     def name(self):

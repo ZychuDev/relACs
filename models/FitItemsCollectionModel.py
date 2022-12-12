@@ -3,6 +3,9 @@ from .Fit import Fit
 from PyQt6.QtCore import QObject, pyqtSignal, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
 
+from protocols import Collection
+from typing import cast
+
 class FitItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
     fit_added = pyqtSignal(Fit)
@@ -47,7 +50,7 @@ class FitItemsCollectionModel(QObject):
 
         self._fits.append(fit)
         self._names.add(fit.name)
-        fit._collection = self
+        fit._collection = cast(Collection, self)
         if not silent:
             self.fit_added.emit(fit)
         if display:
@@ -105,6 +108,6 @@ class FitItemsCollectionModel(QObject):
         else:
             return None
 
-    def get_names(self) -> list[str]: 
+    def get_names(self) -> set[str]: 
         return self._names
     

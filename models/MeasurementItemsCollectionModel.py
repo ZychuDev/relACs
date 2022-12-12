@@ -6,6 +6,9 @@ from .Compound import Compound
 
 from pandas import read_json # type: ignore
 
+from protocols import Collection
+from typing import cast
+
 class MeasurementItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
     measurement_added = pyqtSignal(Compound)
@@ -85,7 +88,7 @@ class MeasurementItemsCollectionModel(QObject):
 
     def from_json(self, measurements: list[dict]):
         for m in measurements:
-            new_model = Measurement(read_json(m["df"]), m["name"], m["tmp"], m["field"], self._compound, self)
+            new_model = Measurement(read_json(m["df"]), m["name"], m["tmp"], m["field"], self._compound, cast(Collection, self))
             self.append_measurement(new_model)
 
 

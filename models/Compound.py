@@ -1,6 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QTreeView
-from protocols import Collection, Displayer
+from protocols import Collection, Displayer 
 
 class Compound(QObject):
     name_changed = pyqtSignal(str)

@@ -47,12 +47,12 @@ class ParameterSlider(QWidget):
             self.line_edit.disconnect()
             self.blocked_check.disconnect()
 
-        self.parameter: Parameter = parameter
+        self.parameter = parameter
         validator: QDoubleValidator = QDoubleValidator(self.parameter.min, self.parameter.max, 8)
         l = QLocale(QLocale.c())
         l.setNumberOptions(QLocale.NumberOption.RejectGroupSeparator)
         validator.setLocale(l)
-        validator.fixup = self.fixup_line_edit
+        validator.fixup = self.fixup_line_edit # type: ignore
         self.line_edit.setValidator(validator)
         self.label.setText(self.parameter.symbol)
         self.set_edit_value_silent(round(self.parameter.value, 8))

@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from models import Measurement, Fit, TauFit
+from models import Measurement, Fit, TauFit 
 class Displayer(Protocol):
 
     def display_home_page(self):
