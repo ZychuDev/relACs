@@ -49,7 +49,7 @@ class Compound(QObject):
     def get_min(self, param_name: str):
         map = {"alpha" : 0.0, 
             "beta" : 0.0, 
-            "tau" : -10.0, 
+            "log10_tau" : -10.0, 
             "chi_t" : 0.0, 
             "chi_s" : 0.0
         }
@@ -59,7 +59,7 @@ class Compound(QObject):
     def get_max(self, param_name: str):
         map = {"alpha" : 1.0, 
             "beta" : 1.0, 
-            "tau" : 0.0, 
+            "log10_tau" : 0.0, 
             "chi_t" : 30.0, 
             "chi_s" : 30.0
         }

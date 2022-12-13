@@ -10,7 +10,7 @@ class Parameter(QObject):
     name_to_symbol:dict[PARAMETER_NAME, str] = {
         "alpha": "\u03B1",
         "beta": "\u03B2",
-        "tau": "\u03C4",
+        "log10_tau": "log\u2081\u2080\u03C4",
         "chi_t": "\u03C7\u209C",
         "chi_s": "\u03C7\u209B"
     }

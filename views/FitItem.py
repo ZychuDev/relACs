@@ -29,6 +29,9 @@ class FitItem(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
+        menu.addAction("Make fit", self._model.make_auto_fit)
+        menu.addAction("Save to file", self._model.save_to_file)
+        menu.addSeparator()
         menu.addAction("Rename", lambda: self._ctrl.rename())
         menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index()))
         menu.exec(menu_position)

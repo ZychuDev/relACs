@@ -20,19 +20,16 @@ from matplotlib.ticker import LinearLocator # type: ignore
 from matplotlib import use # type: ignore
 import matplotlib.colors as mcolors
 
-from numpy import ndarray, pi, power, add, subtract, append, finfo, diag, sum, sqrt
-from numpy import max as np_max
-from scipy.optimize import least_squares # type: ignore
-from scipy.linalg import svd #type: ignore
+from numpy import ndarray, power, add, append, sqrt
+
 
 from functools import partial
 use('Qt5Agg')
 
 from time import time
-from math import nextafter
 
-def model(logFrequency: ndarray, alpha: float, beta: float, tau: float, chi_t: float, chi_s: float) -> ndarray:
-    return chi_s + (chi_t - chi_s)/((1 + (10**logFrequency*2*pi * power(10, tau) * 1j )**(1- alpha))**beta)
+
+
 
 class MplCanvas(FigureCanvasQTAgg):
 
@@ -183,6 +180,7 @@ class FitPage(QWidget):
         super().__init__()
         self.fit: Fit = None
         self.picker_radius: int = 5
+        self.colors_names: list[str] = ["tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink"]
 
         vertical_layout: QVBoxLayout = QVBoxLayout()
 
@@ -281,10 +279,12 @@ class FitPage(QWidget):
         self.cycle_next.clicked.connect(self.on_cycle_next_clicked)
         self.cycle_previous.clicked.connect(self.on_cycle_previous_clicked)
 
+    def make_auto_fit(self):
+        self.fit.make_auto_fit()
+
     def on_cycle_next_clicked(self):
         c = self.fit._collection
         new_fit = c.get_item_model(c.get_next(self.fit.name))
-        print("next: ", new_fit.name)
         if self.remember_check_box.isChecked():
             for i, r in enumerate(new_fit.relaxations):
                 r.copy(self.fit.relaxations[i])
@@ -292,7 +292,7 @@ class FitPage(QWidget):
 
     def on_cycle_previous_clicked(self):
         c = self.fit._collection
-        fit = c.get_item_model(c.get_previous(self.fit.name))
+        fit: Fit = c.get_item_model(c.get_previous(self.fit.name))
         if self.remember_check_box.isChecked():
             for i, r in enumerate(fit.relaxations):
                 r.copy(self.fit.relaxations[i])
@@ -437,27 +437,28 @@ class FitPage(QWidget):
         relax_nr: int = len(self.fit.relaxations)
         frequency_log: ndarray = df["FrequencyLog"].values
 
-        total = []
-        total_s = []
+        total = None
+        total_s = None
         for r in range(relax_nr):
-            result: ndarray = model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
-            result_s: ndarray = model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
+            color = mcolors.TABLEAU_COLORS[self.colors_names[r]]
+            result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
+            result_s: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
 
-            self._chi_prime_c.append(self.canvas.ax1.plot(frequency_log, result.real, "--")[0])
-            self._chi_bis_c.append(self.canvas.ax2.plot(frequency_log, -result.imag, "--", label=f"Relaxation nr {r+1}")[0])
-            self._cole_cole_c.append(self.canvas.ax3.plot(result.real, -result.imag, "--")[0])
+            self._chi_prime_c.append(self.canvas.ax1.plot(frequency_log, result.real, "--", c=color)[0])
+            self._chi_bis_c.append(self.canvas.ax2.plot(frequency_log, -result.imag, "--", label=f"Relaxation nr {r+1}", c=color)[0])
+            self._cole_cole_c.append(self.canvas.ax3.plot(result.real, -result.imag, "--", c=color)[0])
             
-            self._chi_prime_s.append(self.canvas.ax1.plot(frequency_log, result_s.real, "-")[0])
-            self._chi_bis_s.append(self.canvas.ax2.plot(frequency_log, -result_s.imag, "-", label=f"Saved Relaxation nr {r+1}")[0])
-            self._cole_cole_s.append(self.canvas.ax3.plot(result_s.real, -result_s.imag, "-")[0])
+            self._chi_prime_s.append(self.canvas.ax1.plot(frequency_log, result_s.real, "-", c=color)[0])
+            self._chi_bis_s.append(self.canvas.ax2.plot(frequency_log, -result_s.imag, "-", label=f"Saved Relaxation nr {r+1}", c=color)[0])
+            self._cole_cole_s.append(self.canvas.ax3.plot(result_s.real, -result_s.imag, "-", c=color)[0])
 
             if relax_nr > 1:
-                if len(total) == 0:
+                if total is None:
                     total = result
                 else:
                     add(total, result, total)
 
-                if len(total_s) == 0:
+                if total_s is None:
                     total_s = result_s
                 else:
                     add(total_s, result_s, total_s)
@@ -488,18 +489,19 @@ class FitPage(QWidget):
             self._cole_cole_total_s = None
         
         if relax_nr > 1:
-            self._chi_prime_total = self.canvas.ax1.plot(frequency_log, total.real, "--")[0]
-            self._chi_bis_total = self.canvas.ax2.plot(frequency_log, -total.imag, "--", label="Sum of relaxations")[0]
-            self._cole_cole_total = self.canvas.ax3.plot(total.real, -total.imag, "--")[0]
-            self._chi_prime_total_s = self.canvas.ax1.plot(frequency_log, total_s.real, "-")[0]
-            self._chi_bis_total_s = self.canvas.ax2.plot(frequency_log, -total_s.imag, "-", label="Saved sum of relaxations")[0]
-            self._cole_cole_total_s = self.canvas.ax3.plot(total_s.real, -total_s.imag, "-")[0]
+            color = mcolors.TABLEAU_COLORS[self.colors_names[relax_nr]]
+            self._chi_prime_total = self.canvas.ax1.plot(frequency_log, total.real, "--", c=color)[0]
+            self._chi_bis_total = self.canvas.ax2.plot(frequency_log, -total.imag, "--", label="Sum of relaxations", c=color)[0]
+            self._cole_cole_total = self.canvas.ax3.plot(total.real, -total.imag, "--", c=color)[0]
+            self._chi_prime_total_s = self.canvas.ax1.plot(frequency_log, total_s.real, "-", c=color)[0]
+            self._chi_bis_total_s = self.canvas.ax2.plot(frequency_log, -total_s.imag, "-", label="Saved sum of relaxations", c=color)[0]
+            self._cole_cole_total_s = self.canvas.ax3.plot(total_s.real, -total_s.imag, "-", c=color)[0]
 
                 
     def _update_fit_plot_for_one_relax(self, r: int, redraw: bool=False): 
         df: DataFrame = self.fit._df
         frequency_log: ndarray = df["FrequencyLog"].values
-        result: ndarray = model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
+        result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
         self._cole_cole_c[r].set_xdata(result.real)
 
         self._cole_cole_c[r].set_ydata(-result.imag)
@@ -529,7 +531,7 @@ class FitPage(QWidget):
 
         df: DataFrame = self.fit._df
         frequency_log: ndarray = df["FrequencyLog"].values
-        result: ndarray = model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
+        result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
         self._cole_cole_s[r].set_xdata(result.real)
         self._cole_cole_s[r].set_ydata(-result.imag)
         self._chi_prime_s[r].set_ydata(result.real)
@@ -636,58 +638,5 @@ class FitPage(QWidget):
 
         self._last_event_time = time()
 
-    def cost_function(self, p):
-        rest = self.fit._df.loc[self.fit._df["Hidden"] == False]
-
-        sum_real = 0
-        sum_img = 0
-        i = 0
-        while i < len(self.fit.relaxations):
-            r = model(rest["FrequencyLog"].values, p[0+i*5], p[1+i*5], p[2+i*5], p[3+i*5], p[4+i*5])
-            sum_real += r.real
-            sum_img += -r.imag
-
-            i += 1
-
-        dif_real = power(sum_real - rest['ChiPrimeMol'], 2)
-        dif_img = power(sum_img - rest['ChiBisMol'], 2)
 
 
-        return  dif_real + dif_img
-
-    def make_auto_fit(self, auto: bool = False):
-        params: tuple = ()
-        min: list = []
-        max: list = []
-        for r_nr in range(len(self.fit.relaxations)):
-            relaxation = self.fit.relaxations[r_nr]
-            params = params + relaxation.get_parameters_values()
-            min = min + relaxation.get_parameters_min_bounds()
-            max = max + relaxation.get_parameters_max_bounds()
-
-        bounds: tuple[list[float], list[float]] = (min, max)
-        r: Relaxation
-        i: int
-        for i, r in enumerate(self.fit.relaxations):
-            for j, p in enumerate(r.parameters):
-                if p.is_blocked:
-                    min[j + i*len(r.parameters)] = nextafter(p.value, min[j + i*len(r.parameters)])
-                    max[j + i*len(r.parameters)] = nextafter(p.value, max[j + i*len(r.parameters)])
-
-        res = least_squares(self.cost_function, params, bounds=bounds)
-
-        for i, r in enumerate(self.fit.relaxations):
-            for j, p in enumerate(r.parameters):
-                p.set_value(res.x[j + i*len(r.parameters)])
-                
-        _, s, Vh = svd(res.jac, full_matrices=False)
-        tol = finfo(float).eps * s[0] * np_max(res.jac.shape)
-        w = s > tol
-        cov = (Vh.T/s[w]**2) @ Vh[w] # robust covariance matrix
-
-        chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
-        cov *= chi2dof
-
-        perr = sqrt(diag(cov))
-        for i, r in enumerate(self.fit.relaxations):
-            r.set_all_errors(res.cost, perr[i*5 : i*5+5])

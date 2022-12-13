@@ -1,6 +1,6 @@
 from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt
 from PyQt6.QtGui import QColor, QBrush
-from PyQt6.QtWidgets import QMenu
+from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget
 
 from models import FitItemsCollectionModel, Fit
 from controllers import FitItemsCollectionController, FitItemController
@@ -9,6 +9,8 @@ from .FitItem import FitItem
 
 from typing import Literal
 from functools import partial
+
+from pandas import DataFrame, concat # type: ignore
 
 class FitItemsCollection(StandardItem):
     def __init__(self, model: FitItemsCollectionModel, ctrl: FitItemsCollectionController):
@@ -32,7 +34,10 @@ class FitItemsCollection(StandardItem):
         menu.addAction("Uncheck all", self.uncheck_all)
         menu.addSeparator()
 
-        menu.addAction("Make auto fit for all checked", lambda: print("TO DO"))
+        menu.addAction("Make auto fit for all checked", self.make_fit_selected)
+        menu.addAction("Save all checked to file", self.save_to_file_selected)
+        menu.addSeparator()
+        
         menu.addAction("Remove checked", self.remove_selected)
         menu.exec(menu_position)
 
@@ -42,7 +47,6 @@ class FitItemsCollection(StandardItem):
 
     def on_displayed_item_changed(self, fit:Fit):
         self._model._compound._displayer.display_fit(fit)
-        print(fit.name)
 
     def on_fit_removed(self, index:QModelIndex):
         self.removeRow(index.row())
@@ -66,6 +70,29 @@ class FitItemsCollection(StandardItem):
             i += 1
 
         self.sortChildren(0)
+
+    def save_to_file_selected(self):
+        save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
+        if save_name is not None:
+            final_df: DataFrame() = DataFrame()
+            i: int = 0
+            nr_of_rows: int = self.rowCount()
+            while i < nr_of_rows:
+                child = self.child(i)
+                if child.checkState() == Qt.CheckState.Checked:
+                    concat([final_df, child._model_get_result()])
+                i += 1
+            with open(save_name + ".csv", "w") as f:
+                final_df.to_csv(f.name, index=False, sep = ";")
+
+    def make_fit_selected(self):
+        i: int = 0
+        nr_of_rows: int = self.rowCount()
+        while i < nr_of_rows:
+            child = self.child(i)
+            if child.checkState() == Qt.CheckState.Checked:
+                child._model.make_auto_fit(auto = True, next_fit=self.child(i+1)._model if i != nr_of_rows-1 else None)
+            i += 1
 
     def remove_selected(self):
         i: int = 0

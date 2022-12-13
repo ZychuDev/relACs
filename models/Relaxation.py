@@ -12,14 +12,14 @@ class Relaxation(QObject):
         self.parameters: FrequencyParameters  = (
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
             Parameter("beta", compound.get_min("beta"), compound.get_max("beta")),
-            Parameter("tau", compound.get_min("tau"), compound.get_max("tau"), is_log=True),
+            Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau"), is_log=True),
             Parameter("chi_t", compound.get_min("chi_t"), compound.get_max("chi_t")),
             Parameter("chi_s", compound.get_min("chi_s"), compound.get_max("chi_s")),
         )
         self.saved_parameters: FrequencyParameters = (
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
             Parameter("beta", compound.get_min("beta"), compound.get_max("beta")),
-            Parameter("tau", compound.get_min("tau"), compound.get_max("tau"), is_log=True),
+            Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau"), is_log=True),
             Parameter("chi_t", compound.get_min("chi_t"), compound.get_max("chi_t")),
             Parameter("chi_s", compound.get_min("chi_s"), compound.get_max("chi_s")),
         )

@@ -13,7 +13,8 @@ class ParameterSlider(QWidget):
 
         layout: QHBoxLayout = QHBoxLayout()
         self.label = QLabel("p_name")
-        self.label.setMinimumSize(QSize(25,22))
+        self.label.setMinimumSize(QSize(50,22))
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         font: QFont = self.label.font()
         font.setPixelSize(16)
         font.setBold(True)
