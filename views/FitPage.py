@@ -20,7 +20,7 @@ from matplotlib.ticker import LinearLocator # type: ignore
 from matplotlib import use # type: ignore
 import matplotlib.colors as mcolors
 
-from numpy import ndarray, power, add, append, sqrt
+from numpy import ndarray, power, add, append, sqrt, subtract
 
 
 from functools import partial
@@ -343,7 +343,7 @@ class FitPage(QWidget):
         self.fit.df_point_deleted.connect(self.on_point_deleted)
         self.fit.name_changed.connect(lambda new_name: self.title_label.setText(new_name))
         for i, r in enumerate(self.fit.relaxations):
-            r.parameters_saved.connect(partial(self._update_fit_plot_for_one_saved_relax, i, True))
+            r.parameters_saved.connect(self._recreate_and_draw)
             r.all_parameters_changed.connect(self._recreate_fit_plot)
             for p in r.parameters:
                 p.value_changed.connect(partial(self._update_fit_plot_for_one_relax, i, True))
@@ -411,6 +411,10 @@ class FitPage(QWidget):
             for r in range(relax_nr):
                 self._update_fit_plot_for_one_relax(r)
 
+    def _recreate_and_draw(self):
+        self._recreate_fit_plot()
+        self.canvas.draw()
+
     def _recreate_fit_plot(self):
         for l in self._chi_prime_c:
             l.remove()
@@ -433,37 +437,6 @@ class FitPage(QWidget):
         self._chi_bis_s = []
         self._cole_cole_s = []
 
-        df: DataFrame = self.fit._df
-        relax_nr: int = len(self.fit.relaxations)
-        frequency_log: ndarray = df["FrequencyLog"].values
-
-        total = None
-        total_s = None
-        for r in range(relax_nr):
-            color = mcolors.TABLEAU_COLORS[self.colors_names[r]]
-            result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
-            result_s: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
-
-            self._chi_prime_c.append(self.canvas.ax1.plot(frequency_log, result.real, "--", c=color)[0])
-            self._chi_bis_c.append(self.canvas.ax2.plot(frequency_log, -result.imag, "--", label=f"Relaxation nr {r+1}", c=color)[0])
-            self._cole_cole_c.append(self.canvas.ax3.plot(result.real, -result.imag, "--", c=color)[0])
-            
-            self._chi_prime_s.append(self.canvas.ax1.plot(frequency_log, result_s.real, "-", c=color)[0])
-            self._chi_bis_s.append(self.canvas.ax2.plot(frequency_log, -result_s.imag, "-", label=f"Saved Relaxation nr {r+1}", c=color)[0])
-            self._cole_cole_s.append(self.canvas.ax3.plot(result_s.real, -result_s.imag, "-", c=color)[0])
-
-            if relax_nr > 1:
-                if total is None:
-                    total = result
-                else:
-                    add(total, result, total)
-
-                if total_s is None:
-                    total_s = result_s
-                else:
-                    add(total_s, result_s, total_s)
-
-        
         if self._chi_prime_total is not None:
             self._chi_prime_total.remove()
             self._chi_prime_total = None
@@ -487,6 +460,36 @@ class FitPage(QWidget):
         if self._cole_cole_total_s is not None:
             self._cole_cole_total_s.remove()
             self._cole_cole_total_s = None
+
+        df: DataFrame = self.fit._df
+        relax_nr: int = len(self.fit.relaxations)
+        frequency_log: ndarray = df["FrequencyLog"].values
+
+        total = None
+        total_s = None
+        for r in range(relax_nr):
+            color = mcolors.TABLEAU_COLORS[self.colors_names[r]]
+            result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
+            result_s: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
+
+            self._chi_prime_c.append(self.canvas.ax1.plot(frequency_log, result.real, "--", c=color)[0])
+            self._chi_bis_c.append(self.canvas.ax2.plot(frequency_log, -result.imag, "--", c=color, label=f"Relaxation nr {r+1}")[0])
+            self._cole_cole_c.append(self.canvas.ax3.plot(result.real, -result.imag, "--", c=color)[0])
+            
+            self._chi_prime_s.append(self.canvas.ax1.plot(frequency_log, result_s.real, "-", c=color)[0])
+            self._chi_bis_s.append(self.canvas.ax2.plot(frequency_log, -result_s.imag, "-", label=f"Saved Relaxation nr {r+1}", c=color)[0])
+            self._cole_cole_s.append(self.canvas.ax3.plot(result_s.real, -result_s.imag, "-", c=color)[0])
+
+            if relax_nr > 1:
+                if total is None:
+                    total = result.copy()
+                else:
+                    add(total, result.copy(), total)
+
+                if total_s is None:
+                    total_s = result_s.copy()
+                else:
+                    add(total_s, result_s.copy(), total_s)
         
         if relax_nr > 1:
             color = mcolors.TABLEAU_COLORS[self.colors_names[relax_nr]]
@@ -496,65 +499,36 @@ class FitPage(QWidget):
             self._chi_prime_total_s = self.canvas.ax1.plot(frequency_log, total_s.real, "-", c=color)[0]
             self._chi_bis_total_s = self.canvas.ax2.plot(frequency_log, -total_s.imag, "-", label="Saved sum of relaxations", c=color)[0]
             self._cole_cole_total_s = self.canvas.ax3.plot(total_s.real, -total_s.imag, "-", c=color)[0]
-
-                
+ 
     def _update_fit_plot_for_one_relax(self, r: int, redraw: bool=False): 
         df: DataFrame = self.fit._df
         frequency_log: ndarray = df["FrequencyLog"].values
         result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
         self._cole_cole_c[r].set_xdata(result.real)
-
         self._cole_cole_c[r].set_ydata(-result.imag)
         self._chi_prime_c[r].set_ydata(result.real)
         self._chi_bis_c[r].set_ydata(-result.imag)
-        
+
         total = None
         if len(self.fit.relaxations) > 1:
-            total = result
+            total = result.copy()
             for other in range(len(self.fit.relaxations)):
                 if other != r:
                     src = self._cole_cole_c[other]
-                    add(total, src.get_xdata().astype(complex), total)
-                    add(total, -src.get_ydata().astype(complex), total)
+                    add(total, src.get_xdata().astype(complex).copy(), total)
+                    add(total, -src.get_ydata().astype(complex)*1j, total)
 
             self._cole_cole_total.set_xdata(total.real)
             self._cole_cole_total.set_ydata(-total.imag)
             self._chi_prime_total.set_ydata(total.real)
             self._chi_bis_total.set_ydata(-total.imag)
 
+
+
         if redraw:
             self._update_domains()
             self.canvas.draw()
 
-
-    def _update_fit_plot_for_one_saved_relax(self, r: int, redraw: bool = False):  
-
-        df: DataFrame = self.fit._df
-        frequency_log: ndarray = df["FrequencyLog"].values
-        result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_saved_parameters_values())
-        self._cole_cole_s[r].set_xdata(result.real)
-        self._cole_cole_s[r].set_ydata(-result.imag)
-        self._chi_prime_s[r].set_ydata(result.real)
-
-        self._chi_bis_s[r].set_ydata(-result.imag)
-
-        total = None
-        if len(self.fit.relaxations) > 1:
-            total = result
-            for other in range(len(self.fit.relaxations)):
-                if other != r:
-                    src = self._cole_cole_s[other]
-                    add(total, src.get_xdata().astype(complex), total)
-                    add(total, -src.get_ydata().astype(complex), total)
-
-            self._cole_cole_total_s.set_xdata(total.real)
-            self._cole_cole_total_s.set_ydata(-total.imag)
-            self._chi_prime_total_s.set_ydata(total.real)
-            self._chi_bis_total_s.set_ydata(-total.imag)
-
-        if redraw:
-            self._update_domains()
-            self.canvas.draw()
 
     def _update_domains(self, result=None, total=None):
         df: DataFrame = self.fit._df

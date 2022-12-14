@@ -215,3 +215,32 @@ class Fit(QObject):
     def copy_all_relxations(self, other: Self): #type: ignore
         for i, r in enumerate(other.relaxations): #type: ignore
                 r.copy(self.relaxations[i])
+
+    def get_jsonable(self) -> dict:
+        r_list: list[dict] = []
+        for r in self.relaxations:
+            r_list.append(r.get_jsonable())
+        jsonable = {
+         "name": self._name, 
+         "df": self._df.to_json(),
+         "tmp": self._tmp,
+         "field": self._field,
+         "relaxations": r_list
+        }
+        return jsonable
+
+    def update_relaxations_from_json(self, relaxations_json: list[dict]):
+        self.relaxations = []
+        for i, r_j in enumerate(relaxations_json):
+            r: Relaxation = Relaxation(self._compound)
+            r.residual_error = r_j["residual_error"]
+            r.saved_residual_error = r_j["saved_residual_error"]
+            r.was_saved = r_j["was_saved"]
+            
+            for j, p in enumerate(r.parameters):
+                p.update_from_json(r_j["parameters"][j])
+
+            for k, s_p in enumerate(r.saved_parameters):
+                s_p.update_from_json(r_j["saved_parameters"][k])
+
+            self.relaxations.append(r)

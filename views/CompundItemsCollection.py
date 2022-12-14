@@ -47,18 +47,18 @@ class CompoundItemsCollection(StandardItem):
         menu.exec(menu_position)
 
     def load_from_json(self):
-        # dlg: QFileDialog = QFileDialog()
-        # dlg.setFileMode(QFileDialog.FileMode.ExistingFile)
+        dlg: QFileDialog = QFileDialog()
+        dlg.setFileMode(QFileDialog.FileMode.ExistingFile)
 
-        # if dlg.exec():
-        #    filenames = dlg.selectedFiles()
-        # else:
-        #    return
+        if dlg.exec():
+           filenames = dlg.selectedFiles()
+        else:
+           return
 
-        # if len(filenames) != 1 :
-        #     return 
+        if len(filenames) != 1 :
+            return 
 
-        filepath = "C:\\Users\\wikto\\Desktop\\repos\\relACs\\data\\good_fit.json" #TMP filenames[0]    #
+        filepath = filenames[0]    #"C:\\Users\\wikto\\Desktop\\repos\\relACs\\data\\good_fit.json" #
         if not path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return
@@ -72,7 +72,7 @@ class CompoundItemsCollection(StandardItem):
         names_to_skip: set[str] = set()
         for compound in json["compounds"]:
             try:
-                self._model.append_existing_compound(Compound(compound["name"], compound["molar_mass"], cast(Collection, self), self._model._tree, self._model._displayer))
+                self._model.append_existing_compound(Compound(compound["name"], compound["molar_mass"], cast(Collection, self._model), self._model._tree, self._model._displayer))
             except ValueError as e:
                 names_to_skip.add(compound["name"])
                 print(e)
@@ -86,8 +86,8 @@ class CompoundItemsCollection(StandardItem):
 
             if compound_json["name"] not in names_to_skip:
                 compound_item.m_model.from_json(compound_json["measurements"])
-                # compound_item.f1_model.from_json(compound_json[""])
-                # compound_item.f2_model.from_json(compound_json[""])
+                compound_item.f1_model.from_json(compound_json["f1_fits"])
+                compound_item.f2_model.from_json(compound_json["f2_fits"])
                 # compound_item.t_model.from_json(compound_json[""])
 
             i = i + 1
@@ -104,9 +104,9 @@ class CompoundItemsCollection(StandardItem):
             compound_item: CompoundItem = cast(CompoundItem, self.child(i))
             jsonable: dict = compound_item._model.get_jsonable()
             jsonable.update({"measurements": compound_item.m_model.get_jsonable()})
-            # jsonable.update("f1_fits", compound_item.f1_model.get_jsonable())
-            # jsonable.update("f2_fits", compound_item.f2_model.get_jsonable())
-            # jsonable.update("tau_fits", compound_item.t_model.get_jsonable())
+            jsonable.update({"f1_fits": compound_item.f1_model.get_jsonable()})
+            jsonable.update({"f2_fits": compound_item.f2_model.get_jsonable()})
+            # jsonable.update({"tau_fits": compound_item.t_model.get_jsonable()})
             compounds.append(jsonable)
             i = i + 1
 

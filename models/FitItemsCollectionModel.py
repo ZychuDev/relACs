@@ -6,6 +6,8 @@ from PyQt6.QtGui import QColor, QBrush
 from protocols import Collection
 from typing import cast
 
+from pandas import read_json # type: ignore
+
 class FitItemsCollectionModel(QObject):
     name_changed = pyqtSignal(str)
     fit_added = pyqtSignal(Fit)
@@ -111,3 +113,12 @@ class FitItemsCollectionModel(QObject):
     def get_names(self) -> set[str]: 
         return self._names
     
+    def get_jsonable(self) -> list:
+        jsonable: list = [fit.get_jsonable() for fit in self._fits]
+        return jsonable
+
+    def from_json(self, fits: list[dict]):
+        for f in fits:
+            new_model = Fit(f["name"], read_json(f["df"]), f["tmp"], f["field"], self._compound, cast(Collection, self))
+            new_model.update_relaxations_from_json(f["relaxations"])
+            self.append_fit(new_model)

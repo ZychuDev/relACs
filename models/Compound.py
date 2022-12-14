@@ -51,7 +51,16 @@ class Compound(QObject):
             "beta" : 0.0, 
             "log10_tau" : -10.0, 
             "chi_t" : 0.0, 
-            "chi_s" : 0.0
+            "chi_s" : 0.0,
+            "a_dir" : -15,
+            "n_dir" : 0.0,
+            "b1" : -2.0,
+            "b2" : -9.0,
+            "b3" : -9.0,
+            "c_raman" : 0.0,
+            "n_raman" : 0.0,
+            "tau_0" : 0.0,
+            "delta_e" : 0.0
         }
         return map[param_name]
 
@@ -61,6 +70,15 @@ class Compound(QObject):
             "beta" : 1.0, 
             "log10_tau" : 0.0, 
             "chi_t" : 30.0, 
-            "chi_s" : 30.0
+            "chi_s" : 30.0,
+            "a_dir" : 2.0,
+            "n_dir" : 8.0,
+            "b1" : 11.0,
+            "b2" : 1.0,
+            "b3" : 1.0,
+            "c_raman" : 1.0,
+            "n_raman" : 15.0,
+            "tau_0" : 30.0,
+            "delta_e" : 3000.0
         }
         return map[param_name]

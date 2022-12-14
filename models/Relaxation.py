@@ -12,14 +12,14 @@ class Relaxation(QObject):
         self.parameters: FrequencyParameters  = (
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
             Parameter("beta", compound.get_min("beta"), compound.get_max("beta")),
-            Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau"), is_log=True),
+            Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau")),
             Parameter("chi_t", compound.get_min("chi_t"), compound.get_max("chi_t")),
             Parameter("chi_s", compound.get_min("chi_s"), compound.get_max("chi_s")),
         )
         self.saved_parameters: FrequencyParameters = (
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
             Parameter("beta", compound.get_min("beta"), compound.get_max("beta")),
-            Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau"), is_log=True),
+            Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau")),
             Parameter("chi_t", compound.get_min("chi_t"), compound.get_max("chi_t")),
             Parameter("chi_s", compound.get_min("chi_s"), compound.get_max("chi_s")),
         )
@@ -69,6 +69,9 @@ class Relaxation(QObject):
     def get_parameters_values(self) -> tuple[float, float, float, float, float]:
         return tuple(p.value for p in self.parameters) # type: ignore
 
+    def get_tau(self):
+        return self.saved_parameters[2].value
+        
     def get_parameters_min_bounds(self):
         return [p.min for p in self.parameters]
 
@@ -78,8 +81,23 @@ class Relaxation(QObject):
     def get_saved_parameters_values(self) -> tuple[float, float, float, float, float]:
         return tuple(p.value for p in self.saved_parameters) # type: ignore
 
-    def get_jsonable(self):
-        pass
+    def get_jsonable(self) -> dict:
+        p_list: list[dict] = []
+        for p in self.parameters:
+            p_list.append(p.get_jsonable())
+
+        s_p_list: list[dict] = []
+        for p in self.saved_parameters:
+            s_p_list.append(p.get_jsonable())
+
+        jsonable = {
+         "residual_error": self.residual_error , 
+         "saved_residual_error": self.saved_residual_error,
+         "was_saved": self.was_saved,
+         "parameters": p_list,
+         "saved_parameters": s_p_list
+        }
+        return jsonable
 
     def from_json(self, json):
         pass

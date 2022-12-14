@@ -28,7 +28,7 @@ class CompoundItem(StandardItem):
         self.appendRow(FitItemsCollection(self.f1_model, FitItemsCollectionController(self.f1_model)))
         self.f2_model = FitItemsCollectionModel("Frequency Fits Double Relaxation", self._model)
         self.appendRow(FitItemsCollection(self.f2_model, FitItemsCollectionController(self.f2_model)))
-        self.t_model = TauFitItemsCollectionModel("TauFits(3D)")
+        self.t_model = TauFitItemsCollectionModel("TauFits(3D)", self._model)
         self.appendRow(TauFitItemsCollection(self.t_model, TauFitItemsCollectionController(self.t_model)))
         self._model.name_changed.connect(self.on_name_changed)
         

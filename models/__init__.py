@@ -1,4 +1,5 @@
-from .Literals import PARAMETER_NAME
+from .Point import Point
+from .Literals import PARAMETER_NAME, TAU_PARAMETER_NAME
 from .MainModel import MainModel
 from .Compound import Compound
 from .Measurement import Measurement

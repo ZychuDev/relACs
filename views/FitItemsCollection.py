@@ -2,12 +2,12 @@ from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt
 from PyQt6.QtGui import QColor, QBrush
 from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget
 
-from models import FitItemsCollectionModel, Fit
+from models import FitItemsCollectionModel, Fit, TauFit
 from controllers import FitItemsCollectionController, FitItemController
 from .StandardItem import StandardItem
 from .FitItem import FitItem
 
-from typing import Literal
+from typing import Literal, cast
 from functools import partial
 
 from pandas import DataFrame, concat # type: ignore
@@ -25,6 +25,7 @@ class FitItemsCollection(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
+
         submenu = menu.addMenu("Sort")
         submenu.addAction("Sort by temperature", partial(self.sort, "temp"))
         submenu.addAction("Sort by field", partial(self.sort, "field"))
@@ -32,6 +33,9 @@ class FitItemsCollection(StandardItem):
 
         menu.addAction("Check all", self.check_all)
         menu.addAction("Uncheck all", self.uncheck_all)
+        menu.addSeparator()
+
+        menu.addAction("Make Tau fits from checked data", self.make_tau_fits_checked)
         menu.addSeparator()
 
         menu.addAction("Make auto fit for all checked", self.make_fit_selected)
@@ -105,3 +109,18 @@ class FitItemsCollection(StandardItem):
                 i -= 1
             i += 1
 
+    def make_tau_fits_checked(self):
+        i : int
+        points: list[tuple(float, float, float)] = []
+        for i in range(self.rowCount()):
+            item: FitItem = cast(FitItem, self.child(i))
+            for r in item._model.relaxations:
+                points.append((r.get_tau(), item._model._tmp, item._model._field))
+
+        if len(points) < 2:
+            return 
+
+        new_fit: TauFit = TauFit.from_fit(self._model._compound, self._model)
+        for p in points:
+            new_fit.append_point(*p)
+        self.parent().child(3)._model.append_tau_fit(new_fit, display=True)
