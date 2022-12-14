@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
  QStackedWidget, QPushButton, QCheckBox, QTableView, QTableWidget, QAbstractScrollArea,
- QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox)
+ QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox, QSplitter)
 from PyQt6.QtCore import QAbstractTableModel, QSize, QMetaObject, QObject, Qt
 from PyQt6.QtGui import QFont, QPalette, QBrush, QColor
 
@@ -10,23 +10,44 @@ from .ParameterSlider import ParameterSlider
 from matplotlib.figure import Figure # type: ignore
 from matplotlib.pyplot import figure # type: ignore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg # type: ignore
+from matplotlib.colors import CSS4_COLORS # type: ignore
+from matplotlib.ticker import LinearLocator # type: ignore
+import matplotlib.colors as mcolors # type: ignore
 
 from typing import get_args
 
 from time import time
 
+from numpy import log
+
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width: int=10, height: int=5, dpi: int=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(fig)
+        self.ax = fig.add_subplot()
+        self.ax.grid(True, linestyle='--', linewidth=1, color=CSS4_COLORS["silver"])
+        self.ax.xaxis.set_major_locator(LinearLocator(10))
+        self.ax.yaxis.set_major_locator(LinearLocator(8))
+        x_label = r"$\frac{K}{T}$" # x_label = r"$\frac{H}{Oe}$"
+        title = r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman}T^{N_{Raman}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}}$"
+        self.ax.set(xlabel=x_label, ylabel=r"$\ln{\frac{\tau}{s}}$",
+         title=title)
 
 class MplCanvas3D(FigureCanvasQTAgg):
     def __init__(self, parent=None, width: int=10, height: int=5, dpi: int=100):
         self.fig: Figure = figure(figsize=(1,1), dpi = int(100), constrained_layout=True)
-        self.fig.patch.set_facecolor("#f0f0f0")
+        self.fig.patch.set_facecolor("#ffffff")
         super().__init__(self.fig)
         self.axes = self.fig.add_subplot(projection='3d')
-        self.axes.set_facecolor("#f0f0f0")
+        self.axes.set_facecolor("#ffffff")
+
+        self.axes.set_xlabel(r'$\frac{1}{T}$', rotation = 0, fontsize=15)
+        self.axes.set_ylabel(r'$\frac{H}{Oe}$', rotation = 0, fontsize=15)
+        self.axes.set_zlabel(r'$\ln{\frac{\tau}{s}}$', rotation = 0, fontsize=15)
+
+        self.axes.xaxis.set_rotate_label(False) 
+        self.axes.yaxis.set_rotate_label(False) 
+        self.axes.zaxis.set_rotate_label(False) 
 
 
 class TauFitPage(QWidget):
@@ -36,6 +57,7 @@ class TauFitPage(QWidget):
         self.sliders: list[ParameterSlider] = []
 
         horizontal_layout: QHBoxLayout = QHBoxLayout()
+        horizontal_spliter: QSplitter = QSplitter()
 
         left_layout: QVBoxLayout = QVBoxLayout()
 
@@ -138,15 +160,50 @@ class TauFitPage(QWidget):
         self._last_event_time:float = time()
         right_layout.addWidget(self.canvas_slice)
 
-        horizontal_layout.addLayout(left_layout)
-        horizontal_layout.addLayout(right_layout)
+        left: QWidget() = QWidget()
+        left.setLayout(left_layout)
+        horizontal_spliter.addWidget(left)
+        right: QWidget = QWidget()
+        right.setLayout(right_layout)
+        horizontal_spliter.addWidget(right)
+
+        horizontal_layout.addWidget(horizontal_spliter)
         self.setLayout(horizontal_layout)
 
     def set_tau_fit(self, tau_fit:TauFit):
         if self.tau_fit is not None:
             pass
 
+
         self.tau_fit = tau_fit
         self.tau_fit.name_changed.connect(lambda new_name: self.title_label.setText(new_name))
 
+        
+        for i, p in enumerate(self.tau_fit.parameters):
+            self.sliders[i].set_parameter(p)
+
+        self.p_cid: list[QMetaObject.Connection] = []
+        # for p in self.tau_fit.parameters:
+        #     self.p_cid.append(p.value_changed.connect())
+
         self.title_label.setText(tau_fit.name)
+
+        self._update_measurements_plots()
+        self.canvas_3d.draw()
+        self.canvas_slice.draw()
+
+    def _update_measurements_plots(self):
+        if self.tau_fit is None:
+            return
+
+        hidden_tau, hidden_temp, hidden_field = self.tau_fit.get_hidden()
+        tau, temp, field = self.tau_fit.get_visible()
+
+        hidden_temp_invert = [1/t for t in hidden_temp]
+        self.canvas_3d.axes.scatter(hidden_temp_invert, hidden_field, log(hidden_tau), "o",
+         label='hidden points from fits', color=mcolors.TABLEAU_COLORS["tab:orange"])
+
+        temp_invert = [1/t for t in temp]
+        self.canvas_3d.axes.scatter(temp_invert, field, log(tau) , "o", color=mcolors.TABLEAU_COLORS["tab:blue"], label='points from fits')
+
+    

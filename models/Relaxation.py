@@ -1,6 +1,9 @@
 from .Parameter import Parameter, PARAMETER_NAME
 from protocols import SettingsSource 
 from PyQt6.QtCore import pyqtSignal, QObject
+
+from numpy import power
+
 FrequencyParameters = tuple[Parameter, Parameter, Parameter, Parameter, Parameter]
 class Relaxation(QObject):
     parameters_saved = pyqtSignal()
@@ -70,8 +73,8 @@ class Relaxation(QObject):
         return tuple(p.value for p in self.parameters) # type: ignore
 
     def get_tau(self):
-        return self.saved_parameters[2].value
-        
+        return power(10, self.saved_parameters[2].value)
+
     def get_parameters_min_bounds(self):
         return [p.min for p in self.parameters]
 

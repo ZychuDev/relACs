@@ -83,4 +83,29 @@ class TauFit(QObject):
         if not silent:
             self.points_changed.emit()
 
+    def get_hidden(self) -> tuple[list[float], list[float], list[float]]:
+        r_tau: list[float] = []
+        r_temp: list[float] = []
+        r_field: list[float] = []
+        for p in self._points:
+            if not p.is_hidden:
+                r_tau.append(p.tau)
+                r_temp.append(p.temp)
+                r_field.append(p.field)
+
+        return (r_tau, r_temp, r_field)
+
+
+    def get_visible(self) -> tuple[list[float], list[float], list[float]]:
+        r_tau: list[float] = []
+        r_temp: list[float] = []
+        r_field: list[float] = []
+        for p in self._points:
+            if not p.is_hidden:
+                r_tau.append(p.tau)
+                r_temp.append(p.temp)
+                r_field.append(p.field)
+
+        return (r_tau, r_temp, r_field)
+
     

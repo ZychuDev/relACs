@@ -114,8 +114,12 @@ class FitItemsCollection(StandardItem):
         points: list[tuple(float, float, float)] = []
         for i in range(self.rowCount()):
             item: FitItem = cast(FitItem, self.child(i))
-            for r in item._model.relaxations:
-                points.append((r.get_tau(), item._model._tmp, item._model._field))
+            if item.checkState() == Qt.CheckState.Checked:
+                for r in item._model.relaxations:
+                    df: DataFrame = item._model._df
+                    temp = round((df["Temperature"].max() + df["Temperature"].min())/2, 1)
+                    field = round((df["MagneticField"].max() + df["MagneticField"].min())/2, 0)
+                    points.append((r.get_tau(), temp, field))
 
         if len(points) < 2:
             return 

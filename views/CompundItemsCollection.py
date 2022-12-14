@@ -47,18 +47,18 @@ class CompoundItemsCollection(StandardItem):
         menu.exec(menu_position)
 
     def load_from_json(self):
-        dlg: QFileDialog = QFileDialog()
-        dlg.setFileMode(QFileDialog.FileMode.ExistingFile)
+        # dlg: QFileDialog = QFileDialog()
+        # dlg.setFileMode(QFileDialog.FileMode.ExistingFile)
 
-        if dlg.exec():
-           filenames = dlg.selectedFiles()
-        else:
-           return
+        # if dlg.exec():
+        #    filenames = dlg.selectedFiles()
+        # else:
+        #    return
 
-        if len(filenames) != 1 :
-            return 
+        # if len(filenames) != 1 :
+        #     return 
 
-        filepath = filenames[0]    #"C:\\Users\\wikto\\Desktop\\repos\\relACs\\data\\good_fit.json" #
+        filepath = "C:\\Users\\wikto\\Desktop\\repos\\relACs\\data\\all_fits.json" # filenames[0]    #
         if not path.isfile(filepath):
             print("File path {} does not exist. Exiting...".format(filepath))
             return
