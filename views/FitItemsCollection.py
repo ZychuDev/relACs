@@ -1,6 +1,6 @@
 from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt
 from PyQt6.QtGui import QColor, QBrush
-from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget
+from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget, QInputDialog, QMessageBox
 
 from models import FitItemsCollectionModel, Fit, TauFit
 from controllers import FitItemsCollectionController, FitItemController
@@ -123,8 +123,20 @@ class FitItemsCollection(StandardItem):
 
         if len(points) < 2:
             return 
+        name, ok = QInputDialog.getText(QWidget(), 'Creating new Tau fit', 'Enter name of Tau fit:')
 
-        new_fit: TauFit = TauFit.from_fit(self._model._compound, self._model)
+        if not ok:
+            return
+
+        if len(name) == 0:
+            msg: QMessageBox = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("Tau fit's name must consist of at least one character!")
+            msg.setWindowTitle("Tau fit creation cancelation")
+            msg.exec()
+            return
+
+        new_fit: TauFit = TauFit.from_fit(name, self._model._compound, self._model)
         for p in points:
             new_fit.append_point(*p)
         self.parent().child(3)._model.append_tau_fit(new_fit, display=True)

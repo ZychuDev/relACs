@@ -5,7 +5,7 @@ from .Fit import Fit
 
 from protocols import Collection, SettingsSource
 
-from typing import get_args
+from typing import get_args, Literal
 
 from numpy import power, exp
 
@@ -16,6 +16,8 @@ class TauFit(QObject):
     parameter_changed = pyqtSignal()
     fit_changed = pyqtSignal()
     points_changed = pyqtSignal()
+    varying_changed = pyqtSignal(str)
+    constant_changed = pyqtSignal(float)
 
     @staticmethod
     def direct(temp:float, field:float, a_dir:float, n_dir:float):
@@ -42,16 +44,16 @@ class TauFit(QObject):
             + tau_0 *exp(-delta_e/(temp))
 
     @staticmethod
-    def from_fit(compound: SettingsSource, collection=None):
-        t_fit: TauFit = TauFit("abc", compound, collection)
+    def from_fit(name:str, compound: SettingsSource, collection=None):
+        t_fit: TauFit = TauFit(name, compound, collection)
 
         return t_fit
 
     def __init__(self, name: str, compound: SettingsSource, collection: Collection|None):
         super().__init__()
         self._name: str = name
-        self._residual_error: float = 0.0
-        self._saved_residual_erro: float = 0.0
+        self.residual_error: float = 0.0
+        self.saved_residual_erro: float = 0.0
         self.parameters: TauParameters  = tuple( 
             Parameter(name, compound.get_min(name), compound.get_max(name)) for name in get_args(TAU_PARAMETER_NAME)
         )
@@ -61,6 +63,9 @@ class TauFit(QObject):
         )
 
         self._points: list[Point] = []
+
+        self.varying: Literal["Field", "Temperature"] = "Field"
+        self.constant: float = 0
 
         self._collection: Collection
         if collection is not None:
@@ -107,5 +112,13 @@ class TauFit(QObject):
                 r_field.append(p.field)
 
         return (r_tau, r_temp, r_field)
+
+    def set_varying(self, txt: Literal["Field","Temperature"]):
+        self.varying = txt
+        self.varying_changed.emit(self.varying)
+
+    def set_constant(self, value: float):
+        self.constant = value
+        self.constant_changed.emit(value)
 
     

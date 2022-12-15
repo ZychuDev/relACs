@@ -7,6 +7,7 @@ from controllers import TauFitItemController
 from .StandardItem import StandardItem
 
 from typing import Literal
+
 class TauFitItem(StandardItem):
     def __init__(self, model: TauFit, ctrl: TauFitItemController):
         super().__init__(model._name, 14, False)

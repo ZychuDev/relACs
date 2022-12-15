@@ -77,5 +77,9 @@ class TauFitItemsCollectionModel(QObject):
         if display:
             self.change_displayed_item(fit.name)
 
-
-    
+    def check_if_is_selected(self, index: QModelIndex) -> bool:
+        selected: list[QModelIndex] = self.tree.selectedIndexes()
+        for selected_index in selected:
+            if selected_index == index:
+                return True
+        return False
