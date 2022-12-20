@@ -163,6 +163,9 @@ class TauFitPage(QWidget):
         self.canvas_3d: MplCanvas3D = MplCanvas3D(self, width=5, height=4, dpi=100)
         right_layout.addWidget(self.canvas_3d)
 
+        self.picker_radius = 25
+        self._slice_m = None
+        self._slice_hidden_m = None
         self._direct = None
         self._orbach = None
         self._raman = None
@@ -170,6 +173,7 @@ class TauFitPage(QWidget):
         self._sum = None
         self._saved_sum = None
         self.canvas_slice: MplCanvas = MplCanvas(self, width=5, height=4, dpi=100)
+        self.canvas_slice.mpl_connect('pick_event', self.on_click)
         self._last_event_time:float = time()
         right_layout.addWidget(self.canvas_slice)
 
@@ -188,8 +192,30 @@ class TauFitPage(QWidget):
         self.varying_slice_combo_box.currentTextChanged.connect(self.set_model_varying)
         self.constant_value_slice.currentTextChanged.connect(self.set_model_constant)
 
+    def on_click(self, event):
+        mouse = event.mouseevent
+
+        tmp_time:float = time()
+        if tmp_time - self._last_event_time < 0.1:
+            return
+        try:
+            x_data = event.artist.get_xdata().values.tolist()
+        except AttributeError:
+            x_data = event.artist.get_xdata()
+
+        ind = event.ind[0]
+        if mouse.button == mouse.button.LEFT:
+            self.tau_fit.hide_point(x_data[ind])
+
+        if mouse.button == mouse.button.RIGHT:
+            self.tau_fit.delete_point(x_data[ind])
+
+        self._last_event_time = time()
+
+
     def on_constant_value_changed(self):
         self._update_plot_varying()
+        self._update_measurements_plots()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
 
@@ -201,8 +227,9 @@ class TauFitPage(QWidget):
         if len(s.split()) == 2:
             self.tau_fit.set_constant(float(s.split()[0]))
         else:
-            print("Error")
-            print("S: ", s)
+            ...
+            # print("Error")
+            # print("S: ", s)
 
     def set_tau_fit(self, tau_fit:TauFit):
         if self.tau_fit is not None:
@@ -211,7 +238,7 @@ class TauFitPage(QWidget):
 
 
         self.tau_fit = tau_fit
-        self.tau_fit.name_changed.connect(lambda new_name: self.title_label.setText(new_name))
+        
 
         i: int
         for i, p in enumerate(self.tau_fit.parameters):
@@ -219,19 +246,27 @@ class TauFitPage(QWidget):
 
         self.cids: list[QMetaObject.Connection] = []
 
+        self.cids.append(self.tau_fit.name_changed.connect(lambda new_name: self.title_label.setText(new_name)))
         self.cids.append(self.tau_fit.varying_changed.connect(self._update_slice_varying))
         self.cids.append(self.tau_fit.constant_changed.connect(self.on_constant_value_changed))
+        self.cids.append(self.tau_fit.points_changed.connect(self.on_points_changed))
         
         # for p in self.tau_fit.parameters:
         #     self.p_cid.append(p.value_changed.connect())
 
         self.title_label.setText(tau_fit.name)
 
-        self._update_slice_varying()
-
         self._update_errors()
-        self._update_saved__errors()
+        self._update_saved_errors()
 
+        self._update_measurements_plots()
+        self._update_slice_varying()
+        self.canvas_3d.draw()
+        self.canvas_slice.draw()
+
+    def on_points_changed(self):
+        for p in self.tau_fit._points:
+            print(p.temp, p.field)
         self._update_measurements_plots()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
@@ -254,6 +289,7 @@ class TauFitPage(QWidget):
         unique_strs: list[str] = [f"{v} {unit}" for v in tmp]
         self.constant_value_slice.addItems(unique_strs)
 
+        self._update_measurements_plots()
         self._update_plot_varying()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
@@ -264,17 +300,20 @@ class TauFitPage(QWidget):
             self._surface.remove()
 
         const: float = self.tau_fit.constant
-        if self.tau_fit.varying == "field":
+        if self.tau_fit.varying == "Temperature":
             xx, zz = meshgrid(c3.axes.get_xlim(), c3.axes.get_zlim())
             yy = ones(xx.shape) * const
         else:
             yy, zz = meshgrid(c3.axes.get_ylim(), c3.axes.get_zlim())
-            xx = ones(yy.shape) * 1/const
-        self._surface = c3.axes.plot_surface(xx, yy, zz, color="y", alpha=0.2, label='slice') 
+            if const == 0:
+                xx = ones(yy.shape) * 0
+            else:
+                xx = ones(yy.shape) * 1/const
+
+        self._surface = c3.axes.plot_surface(xx, yy, zz, color="y", alpha=0.2, label='slice')
 
         c: MplCanvas = self.canvas_slice
         c.ax.set_xlabel(c.field_label if self.tau_fit.varying == "Field" else c.temp_label)
-        c.draw()
 
     def _update_measurements_plots(self):
         if self.tau_fit is None:
@@ -294,6 +333,65 @@ class TauFitPage(QWidget):
 
         self._m = self.canvas_3d.axes.scatter(temp_invert, field, log(tau), "o", color=mcolors.TABLEAU_COLORS["tab:blue"], label='points from fits')
 
+        if self._slice_m is None or self._slice_hidden_m is None:
+            print("Generating XX")
+            xx: list[float]
+            zz, temp, field = self.tau_fit.get_visible_s()
+            if self.tau_fit.varying == "Field":
+                xx = field
+            else:
+                xx = [1/t for t in temp]
+            self._slice_m = self.canvas_slice.ax.plot(xx, log(zz), "o", c=mcolors.TABLEAU_COLORS["tab:blue"], picker=self.picker_radius)[0]
+
+            zz, temp, field = self.tau_fit.get_hidden_s()
+            if self.tau_fit.varying == "Field":
+                xx = field
+            else:
+                xx = [1/t for t in temp]
+            self._slice_hidden_m = self.canvas_slice.ax.plot(xx, log(zz), "o", c=mcolors.TABLEAU_COLORS["tab:orange"], picker=self.picker_radius)[0]
+        else:
+            zz, temp, field = self.tau_fit.get_visible_s()
+            zz_h, temp_h, field_h = self.tau_fit.get_hidden_s()
+            if self.tau_fit.varying == "Field":
+                xx = field
+                xx_h = field_h
+            else:
+                xx = [1/t for t in temp]
+                xx_h = [1/t for t in temp_h]
+
+            zz = log(zz)
+            zz_h = log(zz_h)
+            self._slice_m.set_xdata(xx)
+            self._slice_m.set_ydata(zz)
+            
+            self._slice_hidden_m.set_xdata(xx_h)
+            self._slice_hidden_m.set_ydata(zz_h)
+
+            min_x:float = None
+            max_x:float = None
+            if len(xx) != 0:
+                min_x = min(xx)
+                max_x = max(xx)
+            if len(xx_h) != 0:
+                if min_x is not None:
+                    min_x = min(min_x, min(xx_h))
+                    max_x = max(max_x, max(xx_h))
+            if min_x is not None and max_x is not None:
+                span_x: float = max_x - min_x
+                self.canvas_slice.ax.set_xbound(min_x - span_x*0.05 , max_x + span_x*0.05)
+
+            min_z:float = None
+            max_z:float = None
+            if len(zz) != 0:
+                min_z = min(zz)
+                max_z = max(zz)
+            if len(zz_h) != 0:
+                if min_z is not None:
+                    min_z = min(min_z, min(zz_h))
+                    max_z = max(max_z, max(zz_h))
+            if min_z is not None and max_z is not None:
+                span_z: float = max_z - min_z
+                self.canvas_slice.ax.set_ybound(min_z - span_z*0.05, max_z + span_z*0.05)
        
     def _update_errors(self):
         i:int
@@ -301,7 +399,7 @@ class TauFitPage(QWidget):
             self.fit_error.setItem(1, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))
         self.fit_error.setItem(1, i+1, QTableWidgetItem(str(round(self.tau_fit.residual_error, 8))))
     
-    def _update_saved__errors(self):
+    def _update_saved_errors(self):
         i:int
         for i, p in enumerate(self.tau_fit.saved_parameters):
             self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))

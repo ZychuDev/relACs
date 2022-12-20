@@ -93,7 +93,7 @@ class TauFit(QObject):
         r_temp: list[float] = []
         r_field: list[float] = []
         for p in self._points:
-            if not p.is_hidden:
+            if p.is_hidden:
                 r_tau.append(p.tau)
                 r_temp.append(p.temp)
                 r_field.append(p.field)
@@ -113,6 +113,42 @@ class TauFit(QObject):
 
         return (r_tau, r_temp, r_field)
 
+    def get_visible_s(self) -> tuple[list[float], list[float], list[float]]:
+        r_tau: list[float] = []
+        r_temp: list[float] = []
+        r_field: list[float] = []
+        for p in self._points:
+            if not p.is_hidden:
+                c:float
+                if self.varying == "Field":
+                    c = p.temp
+                else:
+                    c = p.field
+                if c == self.constant:
+                    r_tau.append(p.tau)
+                    r_temp.append(p.temp)
+                    r_field.append(p.field)
+
+        return (r_tau, r_temp, r_field)
+
+    def get_hidden_s(self) -> tuple[list[float], list[float], list[float]]:
+        r_tau: list[float] = []
+        r_temp: list[float] = []
+        r_field: list[float] = []
+        for p in self._points:
+            if p.is_hidden:
+                c:float
+                if self.varying == "Field":
+                    c = p.temp
+                else:
+                    c = p.field
+                if c == self.constant:
+                    r_tau.append(p.tau)
+                    r_temp.append(p.temp)
+                    r_field.append(p.field)
+
+        return (r_tau, r_temp, r_field)
+
     def set_varying(self, txt: Literal["Field","Temperature"]):
         self.varying = txt
         self.varying_changed.emit(self.varying)
@@ -120,5 +156,26 @@ class TauFit(QObject):
     def set_constant(self, value: float):
         self.constant = value
         self.constant_changed.emit(value)
+
+    def hide_point(self, v: float):
+        print("hidding")
+        for p in self._points:
+            if self.varying == "Field":
+                if p.field == v and p.temp == self.constant:
+                    p.is_hidden = not p.is_hidden
+                    break
+            else:
+                if p.temp == 1/v and p.field == self.constant:
+                    p.is_hidden = not p.is_hidden
+                    break
+        self.points_changed.emit()
+
+    def delete_point(self, v: float):
+        if self.varying == "Field":
+            self._points = [p for p in self._points if (p.field, p.temp) != (v, self.constant)]
+            print("points: ", self._points)
+        else:
+            self._points = [p for p in self._points if (p.temp,  p.field) != (1/v, self.constant)]
+        self.points_changed.emit()
 
     

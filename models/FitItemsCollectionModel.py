@@ -61,7 +61,7 @@ class FitItemsCollectionModel(QObject):
     def remove(self, fit_name: str, index: QModelIndex):
         if fit_name in self._names:
             self._names.remove(fit_name)
-            self._measurements = [fit for fit in self._fits if fit.name in self._names]
+            self._fits = [fit for fit in self._fits if fit.name in self._names]
             self.fit_removed.emit(index)
 
     def check_name(self, name: str) -> bool:

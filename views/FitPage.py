@@ -552,6 +552,7 @@ class FitPage(QWidget):
                 values_bis = append(values_bis, self._chi_bis_total_s.get_ydata())
             lower_bis = min(values_bis)
             upper_bis = max(values_bis)
+            print("max", upper_bis)
 
             values_prime = self._chi_prime_m.get_ydata()
             for l in self._chi_prime_c:
