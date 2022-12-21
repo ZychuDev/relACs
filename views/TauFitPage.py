@@ -200,15 +200,17 @@ class TauFitPage(QWidget):
             return
         try:
             x_data = event.artist.get_xdata().values.tolist()
+            y_data = event.artist.get_ydata().values.tolist()
         except AttributeError:
             x_data = event.artist.get_xdata()
+            y_data = event.artist.get_ydata()
 
         ind = event.ind[0]
         if mouse.button == mouse.button.LEFT:
-            self.tau_fit.hide_point(x_data[ind])
+            self.tau_fit.hide_point(x_data[ind], y_data[ind])
 
         if mouse.button == mouse.button.RIGHT:
-            self.tau_fit.delete_point(x_data[ind])
+            self.tau_fit.delete_point(x_data[ind], y_data[ind])
 
         self._last_event_time = time()
 
@@ -265,8 +267,6 @@ class TauFitPage(QWidget):
         self.canvas_slice.draw()
 
     def on_points_changed(self):
-        for p in self.tau_fit._points:
-            print(p.temp, p.field)
         self._update_measurements_plots()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
@@ -334,7 +334,6 @@ class TauFitPage(QWidget):
         self._m = self.canvas_3d.axes.scatter(temp_invert, field, log(tau), "o", color=mcolors.TABLEAU_COLORS["tab:blue"], label='points from fits')
 
         if self._slice_m is None or self._slice_hidden_m is None:
-            print("Generating XX")
             xx: list[float]
             zz, temp, field = self.tau_fit.get_visible_s()
             if self.tau_fit.varying == "Field":

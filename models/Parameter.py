@@ -1,6 +1,7 @@
 from PyQt6.QtCore import pyqtSignal, QObject
 
 from .Literals import PARAMETER_NAME, TAU_PARAMETER_NAME
+from numpy import log10
 
 class Parameter(QObject):
     value_changed = pyqtSignal(float)
@@ -13,14 +14,14 @@ class Parameter(QObject):
         "log10_tau": "log\u2081\u2080\u03C4",
         "chi_t": "\u03C7\u209C",
         "chi_s": "\u03C7\u209B",
-        "a_dir" : "A dir",
-        "n_dir" : "N dir",
+        "a_dir" : "A<span style=\" vertical-align:sub;\">dir</span></p>",
+        "n_dir" : "N<span style=\" vertical-align:sub;\">dir</span></p>",
         "b1" : "B\u2081",
         "b2" : "B\u2082",
         "b3" : "B\u2083",
-        "c_raman" : "C raman",
-        "n_raman" : "N raman",
-        "tau_0" : "tau\u2080",
+        "c_raman" : "C<span style=\" vertical-align:sub;\">raman</span></p>",
+        "n_raman" : "N<span style=\" vertical-align:sub;\">raman</span></p>",
+        "tau_0" : "&tau;<span style=\" vertical-align:sub;\">0</span><span style=\" vertical-align:super;\">-1</span></p>",
         "delta_e" : "\u0394E"
     }
 
@@ -29,9 +30,9 @@ class Parameter(QObject):
         super().__init__()
         self.name: str = name
         self.symbol: str = Parameter.name_to_symbol[name]
-        self.min: float = min
-        self.max: float = max
-        self.value: float = (max+min)/2
+        self.min: float = min 
+        self.max: float = max 
+        self.value: float = (max+min)/2 
         self.error: float = 0.0
         self.is_blocked: bool = is_blocked
         self.is_log: bool = is_log
@@ -52,7 +53,7 @@ class Parameter(QObject):
     def update_from_json(self, j: dict):
         self.name = j["name"] 
         self.symbol = j["symbol"]
-        self.min = j["min"]
+        self.min = j["min"] 
         self.max = j["max"]
         self.value = j["value"]
         self.error = j["error"]
@@ -63,12 +64,24 @@ class Parameter(QObject):
         return (self.min, self.max)
 
     def set_value(self, v: float, silent: bool=False):
-        if v < self.min or v > self.max:
-            raise ValueError(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
+        if self.is_log:
+            v = 10 ** v
+
+        if v < self.min:
+            print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
+            v = self.min
+
+        if v > self.max:
+            print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
+            v = self.max
+
         self.value = v
         self.set_error(0)
         if not silent:
             self.value_changed.emit(v)
+
+    def get_value(self):
+        return self.value
 
     def set_error(self, v: float, silent=False):
         self.error = v

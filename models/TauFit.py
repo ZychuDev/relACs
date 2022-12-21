@@ -7,7 +7,7 @@ from protocols import Collection, SettingsSource
 
 from typing import get_args, Literal
 
-from numpy import power, exp
+from numpy import power, exp, log
 
 TauParameters = tuple[Parameter, ...]
 
@@ -54,12 +54,13 @@ class TauFit(QObject):
         self._name: str = name
         self.residual_error: float = 0.0
         self.saved_residual_erro: float = 0.0
+        logaritmic = ["a_dir", "b1", "b2", "b3", "tau_0"]
         self.parameters: TauParameters  = tuple( 
-            Parameter(name, compound.get_min(name), compound.get_max(name)) for name in get_args(TAU_PARAMETER_NAME)
+            Parameter(name, compound.get_min(name), compound.get_max(name), is_log = name in logaritmic) for name in get_args(TAU_PARAMETER_NAME)
         )
 
         self.saved_parameters: TauParameters = tuple( 
-            Parameter(name, compound.get_min(name), compound.get_max(name)) for name in get_args(TAU_PARAMETER_NAME)
+            Parameter(name, compound.get_min(name), compound.get_max(name), is_log = name in logaritmic) for name in get_args(TAU_PARAMETER_NAME)
         )
 
         self._points: list[Point] = []
@@ -157,25 +158,23 @@ class TauFit(QObject):
         self.constant = value
         self.constant_changed.emit(value)
 
-    def hide_point(self, v: float):
-        print("hidding")
+    def hide_point(self, v: float, z: float):
         for p in self._points:
             if self.varying == "Field":
-                if p.field == v and p.temp == self.constant:
+                if p.field == v and p.temp == self.constant and log(p.tau) == z:
                     p.is_hidden = not p.is_hidden
                     break
             else:
-                if p.temp == 1/v and p.field == self.constant:
+                if p.temp == 1/v and p.field == self.constant and log(p.tau) == z:
                     p.is_hidden = not p.is_hidden
                     break
         self.points_changed.emit()
 
-    def delete_point(self, v: float):
+    def delete_point(self, v: float, z: float):
         if self.varying == "Field":
-            self._points = [p for p in self._points if (p.field, p.temp) != (v, self.constant)]
-            print("points: ", self._points)
+            self._points = [p for p in self._points if (p.field, p.temp, log(p.tau)) != (v, self.constant, z)]
         else:
-            self._points = [p for p in self._points if (p.temp,  p.field) != (1/v, self.constant)]
+            self._points = [p for p in self._points if (p.temp,  p.field, log(p.tau)) != (1/v, self.constant, z)]
         self.points_changed.emit()
 
     
