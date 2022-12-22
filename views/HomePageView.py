@@ -18,7 +18,7 @@ class HomePageUi(QWidget):
         super().__init__()
         self.vertical_layout = QVBoxLayout()
         
-        title_label = ResizableLabel(self, QPixmap("assets/img/relacs.tif"))
+        title_label = ResizableLabel(self, QPixmap("assets/img/relacs.jpg"))
         title_label.setScaledContents(True)
         title_label.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum))
 
@@ -87,7 +87,7 @@ class HomePageUi(QWidget):
         information_table.setItem(8, 1, item)
         information_table.setItem(9, 1, QTableWidgetItem("mikolaj.zychowicz@uj.edu.pl"))
         
-        group_logo_label = ResizableLabel(self, QPixmap("assets/img/logo-2.tif"))
+        group_logo_label = ResizableLabel(self, QPixmap("assets/img/logo-2.jpg"))
         group_logo_label.setScaledContents(True)
 
         self.lower_horizontal_layout.addWidget(information_table, stretch=1)

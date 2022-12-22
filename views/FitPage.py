@@ -20,7 +20,7 @@ from matplotlib.ticker import LinearLocator # type: ignore
 from matplotlib import use # type: ignore
 import matplotlib.colors as mcolors
 
-from numpy import ndarray, power, add, append, sqrt, subtract
+from numpy import ndarray, power, add, append, sqrt, subtract, linspace
 
 
 from functools import partial
@@ -180,6 +180,7 @@ class FitPage(QWidget):
         super().__init__()
         self.fit: Fit = None
         self.picker_radius: int = 5
+        self.resolution: int = 100
         self.colors_names: list[str] = ["tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink"]
 
         vertical_layout: QVBoxLayout = QVBoxLayout()
@@ -464,6 +465,7 @@ class FitPage(QWidget):
         df: DataFrame = self.fit._df
         relax_nr: int = len(self.fit.relaxations)
         frequency_log: ndarray = df["FrequencyLog"].values
+        frequency_log = linspace(frequency_log.min(), frequency_log.max(), self.resolution)
 
         total = None
         total_s = None
@@ -503,6 +505,7 @@ class FitPage(QWidget):
     def _update_fit_plot_for_one_relax(self, r: int, redraw: bool=False): 
         df: DataFrame = self.fit._df
         frequency_log: ndarray = df["FrequencyLog"].values
+        frequency_log = linspace(frequency_log.min(), frequency_log.max(), self.resolution)
         result: ndarray = Fit.model(frequency_log, *self.fit.relaxations[r].get_parameters_values())
         self._cole_cole_c[r].set_xdata(result.real)
         self._cole_cole_c[r].set_ydata(-result.imag)
