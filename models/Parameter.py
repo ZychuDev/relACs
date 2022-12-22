@@ -6,6 +6,7 @@ from numpy import log10
 class Parameter(QObject):
     value_changed = pyqtSignal(float)
     block_state_changed = pyqtSignal(bool)
+    block_0_state_changed = pyqtSignal(bool)
     error_changed = pyqtSignal(float)
 
     name_to_symbol:dict[PARAMETER_NAME|TAU_PARAMETER_NAME, str] = {
@@ -35,6 +36,7 @@ class Parameter(QObject):
         self.value: float = (max+min)/2 
         self.error: float = 0.0
         self.is_blocked: bool = is_blocked
+        self.is_blocked_on_0: bool = False
         self.is_log: bool = is_log
 
     def get_jsonable(self) -> dict:
@@ -64,16 +66,13 @@ class Parameter(QObject):
         return (self.min, self.max)
 
     def set_value(self, v: float, silent: bool=False):
-        if self.is_log:
-            v = 10 ** v
+        # if v < self.min:
+        #     print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
+        #     v = self.min
 
-        if v < self.min:
-            print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
-            v = self.min
-
-        if v > self.max:
-            print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
-            v = self.max
+        # if v > self.max:
+        #     print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
+        #     v = self.max
 
         self.value = v
         self.set_error(0)
@@ -91,3 +90,7 @@ class Parameter(QObject):
     def set_blocked(self, block: bool):
         self.is_blocked = block
         self.block_state_changed.emit(self.is_blocked)
+
+    def set_blocked_0(self, block: bool):
+        self.is_blocked_on_0 = block
+        self.block_0_state_changed.emit(self.is_blocked_on_0)

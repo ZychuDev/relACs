@@ -18,7 +18,7 @@ from typing import get_args, cast, Literal
 
 from time import time
 
-from numpy import log, meshgrid, ones
+from numpy import log, meshgrid, ones, linspace
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width: int=10, height: int=5, dpi: int=100):
@@ -56,6 +56,7 @@ class TauFitPage(QWidget):
     def __init__(self):
         super().__init__()
         self.tau_fit: TauFit = None
+        self.resolution = 50
         self.sliders: list[ParameterSlider] = []
 
         horizontal_layout: QHBoxLayout = QHBoxLayout()
@@ -191,6 +192,18 @@ class TauFitPage(QWidget):
 
         self.varying_slice_combo_box.currentTextChanged.connect(self.set_model_varying)
         self.constant_value_slice.currentTextChanged.connect(self.set_model_constant)
+        self.fit_button.clicked.connect(self.make_auto_fit)
+        self.save_button.clicked.connect(self.save)
+        self.reset_button.clicked.connect(self.reset)
+
+    def make_auto_fit(self):
+        self.tau_fit.make_auto_fit()
+
+    def save(self):
+        self.tau_fit.save()
+
+    def reset(self):
+        self.tau_fit.reset()
 
     def on_click(self, event):
         mouse = event.mouseevent
@@ -252,22 +265,31 @@ class TauFitPage(QWidget):
         self.cids.append(self.tau_fit.varying_changed.connect(self._update_slice_varying))
         self.cids.append(self.tau_fit.constant_changed.connect(self.on_constant_value_changed))
         self.cids.append(self.tau_fit.points_changed.connect(self.on_points_changed))
+        self.cids.append(self.tau_fit.parameters_saved.connect(self.on_parameters_saved))
+        self.cids.append(self.tau_fit.all_parameters_changed.connect(self._update_errors))
         
-        # for p in self.tau_fit.parameters:
-        #     self.p_cid.append(p.value_changed.connect())
+        for p in self.tau_fit.parameters:
+            self.cids.append(p.value_changed.connect(self._update_fit_plot))
+            self.cids.append(p.value_changed.connect(self._update_errors))
 
         self.title_label.setText(tau_fit.name)
 
         self._update_errors()
         self._update_saved_errors()
 
+        self._update_fit_plot()
         self._update_measurements_plots()
         self._update_slice_varying()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
 
+    def on_parameters_saved(self):
+        self._update_fit_plot()
+        self._update_saved_errors()
+
     def on_points_changed(self):
         self._update_measurements_plots()
+        self._update_fit_plot()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
 
@@ -315,22 +337,44 @@ class TauFitPage(QWidget):
         c: MplCanvas = self.canvas_slice
         c.ax.set_xlabel(c.field_label if self.tau_fit.varying == "Field" else c.temp_label)
 
+    def _update_fit_plot(self):
+
+        tau, temp, field = self.tau_fit.get_all()
+
+        temp_domain = linspace(min(temp), max(temp), self.resolution)
+        field_domain = linspace(min(field), max(field), self.resolution)
+        X, Y = meshgrid(temp_domain, field_domain)
+        Z = -log(TauFit.model(X, Y, *self.tau_fit.get_parameters_values()))
+        S = -log(TauFit.model(X, Y, *self.tau_fit.get_saved_parameters_values()))
+
+        if self._current is not None:
+            self._current.remove()
+
+        if self._saved is not None:
+            self._saved.remove()
+
+        temp_domain = tuple(1/t for t in temp_domain)
+        X, Y = meshgrid(temp_domain, field_domain)
+        self._saved = self.canvas_3d.axes.plot_wireframe(X, Y, S, rstride=1, cstride=1, color='k', label='saved', alpha=0.5)
+        self._current = self.canvas_3d.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1, label='current', linestyles=':', color=mcolors.TABLEAU_COLORS["tab:green"], alpha=0.4)
+        self.canvas_3d.draw()
+
     def _update_measurements_plots(self):
         if self.tau_fit is None:
             return
-
-        hidden_tau, hidden_temp, hidden_field = self.tau_fit.get_hidden()
-        tau, temp, field = self.tau_fit.get_visible()
-        temp_invert = [1/t for t in temp]
-        hidden_temp_invert = [1/t for t in hidden_temp]
 
         if not(self._hidden_m is None or self._m is None):
             self._hidden_m.remove()
             self._m.remove()
 
-        self._hidden_m = self.canvas_3d.axes.scatter(hidden_temp_invert, hidden_field, log(hidden_tau), "o",
-             label='hidden points from fits', color=mcolors.TABLEAU_COLORS["tab:orange"])
+        hidden_tau, hidden_temp, hidden_field = self.tau_fit.get_hidden()
+        hidden_temp_invert = [1/t for t in hidden_temp]
+        self._hidden_m = self.canvas_3d.axes.scatter(hidden_temp_invert, hidden_field, -log(hidden_tau), "o",
+            label='hidden points from fits', color=mcolors.TABLEAU_COLORS["tab:orange"])
 
+
+        tau, temp, field = self.tau_fit.get_visible()
+        temp_invert = [1/t for t in temp]
         self._m = self.canvas_3d.axes.scatter(temp_invert, field, log(tau), "o", color=mcolors.TABLEAU_COLORS["tab:blue"], label='points from fits')
 
         if self._slice_m is None or self._slice_hidden_m is None:

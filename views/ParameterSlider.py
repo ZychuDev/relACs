@@ -53,6 +53,7 @@ class ParameterSlider(QWidget):
             self.slider.disconnect()
             self.line_edit.disconnect()
             self.blocked_check.disconnect()
+            self.blocked_on_0.disconnect()
 
         self.parameter = parameter
         v_min: float
@@ -77,27 +78,41 @@ class ParameterSlider(QWidget):
         self.set_edit_value_silent(round(self.parameter.value, 8))
         self.set_slider_value_silent(self.parameter.value)
         self.set_blocked_silent(self.parameter.is_blocked)
+        self.set_blocked_0_silent(self.parameter.is_blocked_on_0)
 
 
         self.slider.valueChanged.connect(lambda: self.parameter.set_value(self.slider_to_param())) #lambda: self.set_edit_value_silent()
-        self.line_edit.editingFinished.connect(lambda: self.parameter.set_value(round(float(self.line_edit.text()), 8))) #lambda: self.set_slider_value_silent(self.edit_to_slider())
+        self.line_edit.editingFinished.connect(lambda: self.parameter.set_value(round(float(self.line_edit.text()), 8) if not self.parameter.is_log else 10 ** round(float(self.line_edit.text()), 8)))#lambda: self.set_slider_value_silent(self.edit_to_slider())
         self.blocked_check.stateChanged.connect(self.on_checkbox_clicked)
+        self.blocked_on_0.stateChanged.connect(self.on_0_checkbox_clicked)
 
         self.parameter.value_changed.connect(self.set_slider_value_silent)
         self.parameter.value_changed.connect(self.set_edit_value_silent)
         self.parameter.block_state_changed.connect(self.set_blocked_silent)
-        
+        self.parameter.block_0_state_changed.connect(self.set_blocked_0_silent)
 
     def on_checkbox_clicked(self):
         self.parameter.set_blocked(self.blocked_check.isChecked())
+
+    def on_0_checkbox_clicked(self):
+        self.parameter.set_blocked_0(self.blocked_on_0.isChecked())
 
     def set_blocked_silent(self, v: bool):
         self.blocked_check.blockSignals(True)
         self.blocked_check.setChecked(v)
         self.blocked_check.blockSignals(False)
 
+    def set_blocked_0_silent(self, v: bool):
+        self.blocked_on_0.blockSignals(True)
+        self.blocked_on_0.setChecked(v)
+        self.blocked_on_0.blockSignals(False)
+
     def set_slider_value_silent(self, v: float):
         self.slider.blockSignals(True)
+        if(v < self.parameter.min):
+            self.slider.setEnabled(False)
+            return
+        self.slider.setEnabled(True)
         if self.parameter.is_log:
             self.slider.setValue(int(interp1d([log10(self.parameter.min), log10(self.parameter.max)], [self.slider.minimum(), self.slider.maximum()])(log10(v))))
         else:
@@ -117,6 +132,7 @@ class ParameterSlider(QWidget):
         result: float
         if self.parameter.is_log:
             result = float(interp1d([self.slider.minimum(), self.slider.maximum()], [log10(self.parameter.min), log10(self.parameter.max)])(v))
+            return 10**result
         else:
             result = float(interp1d([self.slider.minimum(), self.slider.maximum()], [self.parameter.min, self.parameter.max])(v))
         return round(result, 8)
