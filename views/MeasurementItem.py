@@ -28,11 +28,11 @@ class MeasurementItem(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
-        menu.addAction("Rename", lambda: self._ctrl.rename())
-        menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index()))
-        menu.addSeparator()
         menu.addAction("Make fit with 1 relaxation", lambda: self.make_fit())
         menu.addAction("Make fit with 2 relaxations", lambda: self.make_fit(2))
+        menu.addSeparator()
+        menu.addAction("Rename", lambda: self._ctrl.rename())
+        menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index()))
         menu.exec(menu_position)
 
     # def get_jsonable(self):

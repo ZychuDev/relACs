@@ -155,7 +155,10 @@ class TauFit(QObject):
 
     def get_all_s(self) -> tuple[list[float], list[float], list[float]]:
         tmp: list = list(zip(*[(p.tau, p.temp, p.field) for p in self._points if self.get_constant_from_point(p) == self.constant]))
-        return (tmp[0], tmp[1], tmp[2])
+        try:
+            return (tmp[0], tmp[1], tmp[2])
+        except Exception:
+            return ([], [], [])
 
     def get_constant_from_point(self, p:Point):
         if self.varying == "Field":

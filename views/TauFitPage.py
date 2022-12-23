@@ -193,11 +193,19 @@ class TauFitPage(QWidget):
         self.varying_slice_combo_box.currentTextChanged.connect(self.set_model_varying)
         self.constant_value_slice.currentTextChanged.connect(self.set_model_constant)
         self.fit_button.clicked.connect(self.make_auto_fit)
+        self.fit_for_slice_button.clicked.connect(self.make_auto_fit_for_slice)
         self.save_button.clicked.connect(self.save)
         self.reset_button.clicked.connect(self.reset)
+        self.copy_parameters_button.clicked.connect(self.copy_parameters)
 
     def make_auto_fit(self):
         self.tau_fit.make_auto_fit()
+
+    def make_auto_fit_for_slice(self):
+        if len(self.tau_fit.get_all_s()[0]) == 0:
+            return
+
+        self.tau_fit.make_auto_fit(slice_flag=True)
 
     def save(self):
         self.tau_fit.save()
@@ -448,4 +456,23 @@ class TauFitPage(QWidget):
             self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))
         self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(self.tau_fit.saved_residual_erro, 8))))
 
-    
+    def copy_parameters(self):
+        dlg: QDialog = QDialog()
+        dlg.setWindowTitle("Choose tau fit item to copy from")
+        layout = QHBoxLayout()
+        button = QPushButton("Copy")
+        combo_box: QComboBox = QComboBox()
+        layout.addWidget(combo_box)
+        layout.addWidget(button)
+        dlg.setLayout(layout)
+
+        for n in self.tau_fit._collection.get_names():
+            combo_box.addItem(n)
+
+        button.clicked.connect(lambda: self.copy(combo_box.currentText(), dlg))
+        dlg.exec()
+
+    def copy(self, src_name: str, dlg: QDialog):
+        other = self.tau_fit._collection.get_item_model(src_name)
+        self.tau_fit.copy(other)
+        dlg.close()

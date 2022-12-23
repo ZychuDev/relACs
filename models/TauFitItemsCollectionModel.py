@@ -49,7 +49,7 @@ class TauFitItemsCollectionModel(QObject):
     def remove(self, tau_fit_name: str, index: QModelIndex):
         if tau_fit_name in self._names:
             self._names.remove(tau_fit_name)
-            self._measurements = [fit for fit in self._tau_fits if fit.name in self._names]
+            self._tau_fits = [fit for fit in self._tau_fits if fit.name in self._names]
             self.fit_removed.emit(index)
 
     def update_names(self, old_name: str, new_name: str):
@@ -83,3 +83,13 @@ class TauFitItemsCollectionModel(QObject):
             if selected_index == index:
                 return True
         return False
+
+    def get_names(self) -> set[str]: 
+        return self._names
+
+    def get_item_model(self, name: str):
+        for f in self._tau_fits:
+            if f.name == name:
+                return f
+        else:
+            return None

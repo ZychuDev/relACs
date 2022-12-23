@@ -320,13 +320,14 @@ class FitPage(QWidget):
         for n in self.fit._collection.get_names():
             combo_box.addItem(n)
 
-        button.clicked.connect(lambda: self.copy_all_relaxations(combo_box.itemData(combo_box.currentIndex())))
+        button.clicked.connect(lambda: self.copy_all_relaxations(combo_box.currentText(), dlg))
         dlg.exec()
 
-    def copy_all_relaxations(self, src_name: str):
+    def copy_all_relaxations(self, src_name: str, dlg: QDialog):
         other = self.fit._collection.get_item_model(src_name)
         for i, r in enumerate(self.fit.relaxations):
             r.copy(other.relaxations[i])
+        dlg.close()
 
     def set_fit(self, fit:Fit):
         if self.fit is not None:
