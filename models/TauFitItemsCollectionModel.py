@@ -93,3 +93,13 @@ class TauFitItemsCollectionModel(QObject):
                 return f
         else:
             return None
+
+    def get_jsonable(self) -> list:
+        jsonable: list = [f.get_jsonable() for f in self._tau_fits]
+        return jsonable
+
+    def from_json(self, fits: list[dict]):
+        for f in fits:
+            new_model: TauFit = TauFit(f["name"], self._compound, cast(Collection, self))
+            new_model.update_from_json(f)
+            self.append_tau_fit(new_model)

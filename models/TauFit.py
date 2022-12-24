@@ -1,4 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtWidgets import QMessageBox, QFileDialog, QWidget
+
 from .Parameter import Parameter, TAU_PARAMETER_NAME
 from .Point import Point
 from .Fit import Fit
@@ -11,12 +13,12 @@ from functools import partial
 from scipy.optimize import least_squares # type: ignore
 from scipy.linalg import svd #type: ignore
 
-from numpy import power, exp, log, finfo, sqrt, diag
+from numpy import power, exp, log, finfo, sqrt, diag, linspace, meshgrid
 from numpy import max as np_max
 
 from math import nextafter
 
-from pandas import Series #type: ignore
+from pandas import Series, DataFrame, concat #type: ignore
 
 TauParameters = tuple[Parameter, ...]
 
@@ -64,7 +66,7 @@ class TauFit(QObject):
         super().__init__()
         self._name: str = name
         self.residual_error: float = 0.0
-        self.saved_residual_erro: float = 0.0
+        self.saved_residual_error: float = 0.0
         logaritmic = ["a_dir", "b1", "b2", "b3", "tau_0"]
         self.parameters: TauParameters  = tuple( 
             Parameter(name, compound.get_min(name), compound.get_max(name), is_log = name in logaritmic) for name in get_args(TAU_PARAMETER_NAME)
@@ -198,10 +200,10 @@ class TauFit(QObject):
 
         self.points_changed.emit()
 
-    def get_parameters_values(self) -> tuple[float, float, float, float, float]:
+    def get_parameters_values(self) -> tuple[float, float, float, float, float, float, float, float, float, float]:
         return tuple(p.value for p in self.parameters) # type: ignore
 
-    def get_saved_parameters_values(self) -> tuple[float, float, float, float, float]:
+    def get_saved_parameters_values(self) -> tuple[float, float, float, float, float, float, float, float, float, float]:
         return tuple(p.value for p in self.saved_parameters) # type: ignore
 
     def get_parameters_min_bounds(self):
@@ -297,3 +299,126 @@ class TauFit(QObject):
             p.set_error(o.error)
 
         self.all_parameters_changed.emit()
+
+    def save_to_file(self):
+        save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
+        if save_name is not None:
+            try:
+                with open(save_name + ".csv", "w") as f:
+                    self.get_result().to_csv(f.name, index=False, sep = ";")
+            except Exception as e:
+                print(e)
+                return
+
+    def get_result(self):
+        df_param: DataFrame = DataFrame(columns=["Name", "Value", "Error"])
+        p:Parameter
+        for p in self.parameters:
+            row = {"Name": p.name, "Value": p.value, "Error":p.error}
+            df_param = df_param.append(row, ignore_index=True)
+        
+        tau, tmp, field = self.get_all()
+        df_experimental:DataFrame = DataFrame(list(zip(tmp, field, tau)), columns=["T", "H", "tau"])
+
+        x = linspace(min(tmp), max(tmp), 50)
+        y = linspace(min(field), max(field), 50)
+        X, Y = meshgrid(x,y)
+        Z = 1/TauFit.model(X,Y, *self.get_saved_parameters_values())
+
+        temp = []
+        for x in X:
+            for t in x:
+                temp.append(t)
+
+        fields = []
+        for y in Y:
+            for h in y:
+                fields.append(h)
+
+        tau = []
+        for z in Z:
+            for v in z:
+                tau.append(v)
+
+        df_model: DataFrame = DataFrame(list(zip(temp, fields, tau)), columns=["TempModel", "FieldModel", "TauModel"])
+
+        all_temp = set()
+        for t in tmp:
+            all_temp.add(t)
+        final_series_tmp = [Series()]*7
+        for t in list(all_temp):
+            field = linspace(min(field), max(field), 50)
+            field = Series(field)
+            tmp = Series([t] * 50)
+            partial_result = self.partial_result(tmp, field , return_df=False)
+            one_point_series = [tmp, field] + partial_result
+            for s in range(len(final_series_tmp)):
+               final_series_tmp[s] = final_series_tmp[s].append(one_point_series[s], ignore_index=True)
+
+        df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=["Temp", "Field", "Orbach", "Raman", "QTM", "Direct", "Tau"])
+
+        final_series_field = [Series()]*7
+        all_field = set()
+        for f in field:
+            all_field.add(f)
+
+        for f in list(all_field):
+            tmp = linspace(min(tmp), max(tmp), 50)
+            tmp = Series(tmp)
+            field = Series([f]*50)
+            partial_result = self.partial_result(tmp, field, return_df=False)
+            one_point_series = [tmp, field] + partial_result
+            for s in range(len(final_series_field)):
+                final_series_field[s] = final_series_field[s].append(one_point_series[s], ignore_index=True)
+
+        df_field: DataFrame = DataFrame(list(zip(*final_series_field)), columns=["Temp", "Field", "Orbach", "Raman", "QTM", "Direct", "Tau"])
+        return concat([df_param, df_experimental, df_model, df_tmp, df_field], axis=1)
+
+    def partial_result(self, temp, field, return_df = True):
+        p = self.get_saved_parameters_values()
+        orbach= 1/TauFit.Orbach(temp, p[7], p[8])
+        raman = 1/TauFit.Raman(temp, p[5], p[6])
+        qtm = 1/TauFit.qtm(field, p[2], p[3], p[4])
+        direct = 1/TauFit.direct(temp, field, p[0], p[1])
+        sum = 1/TauFit.model(temp, field, *p)
+
+        if return_df:
+            return DataFrame(list(zip(orbach, raman, qtm, direct, sum)), columns=["Orbach Tau", "Raman Tau", "QTM Tau", "Direct Tau", "Tau"])
+        else:
+            return [orbach, raman, qtm, direct, sum]
+
+    def get_jsonable(self) -> dict:
+        p_list: list[dict] = []
+        for p in self.parameters:
+            p_list.append(p.get_jsonable())
+
+        s_p_list: list[dict] = []
+        for p in self.saved_parameters:
+            s_p_list.append(p.get_jsonable())
+
+        jsonable = {
+         "residual_error": self.residual_error , 
+         "saved_residual_error": self.saved_residual_error,
+         "parameters": p_list,
+         "saved_parameters": s_p_list,
+         "name": self._name,
+         "constant": self.constant,
+         "varying": self.varying,
+         "points": [p.get_jsonable() for p in self._points]
+        }
+
+        return jsonable
+
+    def update_from_json(self, f: dict):
+        self.residual_error = f["residual_error"]
+        self.saved_residual_error = f["saved_residual_error"]
+        self.constant = f["constant"]
+        self.varying = f["varying"]
+        for i, p in enumerate(self.parameters):
+            p.update_from_json(f["parameters"][i])
+
+        for j, s_p in enumerate(self.saved_parameters):
+            s_p.update_from_json(f["saved_parameters"][j])
+
+        for point in f["points"]:
+            self.append_point(point["tau"], point["temp"], point["field"], point["is_hidden"])

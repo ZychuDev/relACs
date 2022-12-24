@@ -18,13 +18,10 @@ class TauFitItemsCollection(StandardItem):
         self._model.fit_removed.connect(self.on_fit_removed)
         self._model.displayed_item_changed.connect(self.on_displayed_item_changed)
 
-
-
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
-        menu.addAction("Save all to file", self._ctrl.add_tau_fit)
+        menu.addAction("Save all to file", self._ctrl.save_all_to_file)
         menu.exec(menu_position)
-
 
     def on_displayed_item_changed(self, tau_fit:TauFit):
         self._model._compound._displayer.display_tau_fit(tau_fit)
@@ -35,4 +32,6 @@ class TauFitItemsCollection(StandardItem):
     def on_fit_added(self, new:TauFit):
         self.appendRow(TauFitItem(new, TauFitItemController(new)))
         self._model.tree.expandAll()
+
+    
 

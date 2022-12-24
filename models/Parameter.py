@@ -27,7 +27,7 @@ class Parameter(QObject):
     }
 
     def __init__(self, name:PARAMETER_NAME, min:float, max:float,
-     is_blocked: bool=False, is_log: bool = False):
+     is_blocked: bool=False, is_log: bool = False, is_blocked_on_0: bool = False):
         super().__init__()
         self.name: str = name
         self.symbol: str = Parameter.name_to_symbol[name]
@@ -36,7 +36,7 @@ class Parameter(QObject):
         self.value: float = (max+min)/2 
         self.error: float = 0.0
         self.is_blocked: bool = is_blocked
-        self.is_blocked_on_0: bool = False
+        self.is_blocked_on_0: bool = is_blocked_on_0
         self.is_log: bool = is_log
 
     def get_jsonable(self) -> dict:
@@ -49,6 +49,7 @@ class Parameter(QObject):
          "error": self.error,
          "is_blocked": self.is_blocked,
          "is_log": self.is_log,
+         "is_blocked_on_0": self.is_blocked_on_0
         }
         return jsonable
 
@@ -61,6 +62,7 @@ class Parameter(QObject):
         self.error = j["error"]
         self.is_blocked = j["is_blocked"]
         self.is_log = j["is_log"]
+        self.is_blocked_on_0 = j["is_blocked_on_0"]
 
     def get_range(self) -> tuple[float, float]:
         return (self.min, self.max)

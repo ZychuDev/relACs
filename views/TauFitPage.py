@@ -19,6 +19,7 @@ from typing import get_args, cast, Literal
 from time import time
 
 from numpy import log, meshgrid, ones, linspace
+from pandas import Series
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width: int=10, height: int=5, dpi: int=100):
@@ -240,7 +241,10 @@ class TauFitPage(QWidget):
         self._update_plot_varying()
         self._update_measurements_plots()
         self.canvas_3d.draw()
+
         self.canvas_slice.draw()
+        l = self.canvas_slice.ax.legend()
+        l.set_draggable(True)
 
     def set_model_varying(self, s: str):
         if s == "Field" or s == "Temperature":
@@ -290,16 +294,24 @@ class TauFitPage(QWidget):
         self._update_slice_varying()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
+        l = self.canvas_slice.ax.legend()
+        l.set_draggable(True)
 
     def on_parameters_saved(self):
+        self._update_plot_varying()
         self._update_fit_plot()
         self._update_saved_errors()
 
     def on_points_changed(self):
+
+        self._update_plot_varying()
+        self.canvas_3d.draw()
         self._update_measurements_plots()
         self._update_fit_plot()
-        self.canvas_3d.draw()
+
         self.canvas_slice.draw()
+        l = self.canvas_slice.ax.legend()
+        l.set_draggable(True)
 
     def _update_slice_varying(self):
         j: int
@@ -321,20 +333,34 @@ class TauFitPage(QWidget):
 
         self._update_measurements_plots()
         self._update_plot_varying()
+        self._update_fit_slice()
         self.canvas_3d.draw()
         self.canvas_slice.draw()
+        l = self.canvas_slice.ax.legend()
+        l.set_draggable(True)
 
     def _update_plot_varying(self):
+        tau, tmp, field = self.tau_fit.get_all()
+        tau = log(tau)
+        tmp = [1/t for t in tmp]
+
         c3: MplCanvas = self.canvas_3d
         if self._surface is not None:
             self._surface.remove()
 
         const: float = self.tau_fit.constant
         if self.tau_fit.varying == "Temperature":
-            xx, zz = meshgrid(c3.axes.get_xlim(), c3.axes.get_zlim())
+            range = (min(tmp), max(tmp))
+            if range[0] == range[1]:
+                range = c3.axes.get_xlim()
+            xx, zz = meshgrid(range, (min(tau), max(tau)))
             yy = ones(xx.shape) * const
         else:
-            yy, zz = meshgrid(c3.axes.get_ylim(), c3.axes.get_zlim())
+            range = (min(field), max(field))
+            if range[0] == range[1]:
+                range = c3.axes.get_ylim()
+
+            yy, zz = meshgrid(range, (min(tau), max(tau)))
             if const == 0:
                 xx = ones(yy.shape) * 0
             else:
@@ -364,9 +390,105 @@ class TauFitPage(QWidget):
         temp_domain = tuple(1/t for t in temp_domain)
         X, Y = meshgrid(temp_domain, field_domain)
         self._saved = self.canvas_3d.axes.plot_wireframe(X, Y, S, rstride=1, cstride=1, color='k', label='saved', alpha=0.5)
-        self._current = self.canvas_3d.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1, label='current', linestyles=':', color=mcolors.TABLEAU_COLORS["tab:green"], alpha=0.4)
+        self._current = self.canvas_3d.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1, label='current', linestyles='-', color=mcolors.TABLEAU_COLORS["tab:green"], alpha=0.4)
+        self.canvas_3d.axes.set_zlim3d(min(Z.min(), S.min(), min(log(tau))), max(Z.max(),S.max(), max(log(tau))))
         self.canvas_3d.draw()
+        self._update_fit_slice()
 
+    def _update_fit_slice(self):
+        _, tmp, field = self.tau_fit.get_all_s()
+
+
+
+        if len(tmp) < 2:
+            if self._direct is not None:
+                self._direct.remove()
+
+            if self._orbach is not None:
+                self._orbach.remove()
+
+            if self._raman is not None:
+                self._raman.remove()
+
+            if self._qtm is not None:
+                self._qtm.remove()
+
+            if self._sum is not None:
+                self._sum.remove()
+
+            if self._saved_sum is not None:
+                self._saved_sum.remove()
+
+            self._direct = None
+            self._orbach = None
+            self._raman = None
+            self._qtm = None
+            self._sum = None
+            self._saved_sum = None
+
+            self.canvas_slice.draw()
+            l = self.canvas_slice.ax.legend()
+            l.set_draggable(True)
+            return
+
+        if self.tau_fit.varying == "Field":
+            xx = linspace(min(field), max(field), self.resolution)
+        else:
+            xx = linspace(min(tmp), max(tmp), self.resolution)
+            xx = [1/x for x in xx]
+
+        tmp = Series(linspace(min(tmp), max(tmp), self.resolution))
+        field = Series(linspace(min(field), max(field), self.resolution))
+
+        p: tuple[float, ...] = self.tau_fit.get_parameters_values()
+        direct = -log(TauFit.direct(tmp, field, p[0], p[1]))
+        orbach = -log(TauFit.Orbach(tmp, p[7], p[8]))
+        raman = -log(TauFit.Raman(tmp, p[5], p[6]))
+        qtm = -log(TauFit.qtm(field, p[2], p[3], p[4]))
+        sum = -log(TauFit.model(tmp, field, *p))
+        sum_saved = -log(TauFit.model(tmp, field, *self.tau_fit.get_saved_parameters_values()))
+
+        if self._direct is None:
+            self._direct = self.canvas_slice.ax.plot(xx, direct, "y--", label="Direct process")[0]
+        else:
+            self._direct.set_xdata(xx)
+            self._direct.set_ydata(direct)
+
+        if self._orbach is None:
+            self._orbach = self.canvas_slice.ax.plot(xx, orbach, "m--", label="Orbach")[0]
+        else:
+            self._orbach.set_xdata(xx)
+            self._orbach.set_ydata(orbach)
+
+        if self._raman is None:
+            self._raman = self.canvas_slice.ax.plot(xx, raman, "r--", label="Raman")[0]
+        else:
+            self._raman.set_xdata(xx)
+            self._raman.set_ydata(raman)
+
+        if self._qtm is None:
+            self._qtm = self.canvas_slice.ax.plot(xx, qtm, "g--", label="QTM")[0]
+        else:
+            self._qtm.set_xdata(xx)
+            self._qtm.set_ydata(qtm)
+
+        if self._sum is None:
+            self._sum = self.canvas_slice.ax.plot(xx, sum, "b-", label="Current sum")[0]
+        else:
+            self._sum.set_xdata(xx)
+            self._sum.set_ydata(sum)
+
+        if self._saved_sum is None:
+            self._saved_sum = self.canvas_slice.ax.plot(xx, sum_saved, "k-", label="Saved sum")[0]
+        else:
+            self._saved_sum.set_xdata(xx)
+            self._saved_sum.set_ydata(sum_saved)
+
+        self.canvas_slice.draw()
+        l = self.canvas_slice.ax.legend()
+        l.set_draggable(True)
+        return
+        
     def _update_measurements_plots(self):
         if self.tau_fit is None:
             return
@@ -377,7 +499,7 @@ class TauFitPage(QWidget):
 
         hidden_tau, hidden_temp, hidden_field = self.tau_fit.get_hidden()
         hidden_temp_invert = [1/t for t in hidden_temp]
-        self._hidden_m = self.canvas_3d.axes.scatter(hidden_temp_invert, hidden_field, -log(hidden_tau), "o",
+        self._hidden_m = self.canvas_3d.axes.scatter(hidden_temp_invert, hidden_field, log(hidden_tau), "o",
             label='hidden points from fits', color=mcolors.TABLEAU_COLORS["tab:orange"])
 
 
@@ -443,7 +565,8 @@ class TauFitPage(QWidget):
             if min_z is not None and max_z is not None:
                 span_z: float = max_z - min_z
                 self.canvas_slice.ax.set_ybound(min_z - span_z*0.05, max_z + span_z*0.05)
-       
+
+
     def _update_errors(self):
         i:int
         for i, p in enumerate(self.tau_fit.parameters):
@@ -454,7 +577,7 @@ class TauFitPage(QWidget):
         i:int
         for i, p in enumerate(self.tau_fit.saved_parameters):
             self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))
-        self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(self.tau_fit.saved_residual_erro, 8))))
+        self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(self.tau_fit.saved_residual_error, 8))))
 
     def copy_parameters(self):
         dlg: QDialog = QDialog()
