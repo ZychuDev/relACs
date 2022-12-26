@@ -1,7 +1,10 @@
 from typing import Protocol
 from PyQt6.QtCore import QModelIndex
+from protocols import Displayer
 
 class Collection(Protocol):
+    _displayer: Displayer
+    
     def check_name(self, new_name:str) -> bool: ...
 
     def update_names(self, old_name: str, new_name:str) -> None: ...

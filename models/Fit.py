@@ -5,7 +5,7 @@ from .Relaxation import Relaxation
 from models import Measurement 
 from .Parameter import Parameter
 
-from protocols import Collection, SettingsSource
+import protocols
 
 from pandas import DataFrame, Series, concat # type: ignore
 from numpy import ndarray, pi, power, finfo, diag, sum, sqrt, pi, power, logspace
@@ -28,7 +28,7 @@ class Fit(QObject):
         return chi_s + (chi_t - chi_s)/((1 + (10**logFrequency*2*pi * power(10, tau) * 1j )**(1- alpha))**beta)
 
     @staticmethod
-    def from_measurement(measurement: Measurement, compound:SettingsSource, nr_of_relaxations: int = 1):
+    def from_measurement(measurement: Measurement, compound:protocols.SettingsSource, nr_of_relaxations: int = 1):
         fit_name: str = measurement._name + "_Fit_Frequency"
         fit: Fit =  Fit(fit_name, measurement._df.copy(), measurement._tmp, measurement._field, compound, None)
 
@@ -38,7 +38,7 @@ class Fit(QObject):
             fit.relaxations.append(Relaxation(compound))
 
         return fit
-    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:SettingsSource, collection: Collection|None):
+    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:protocols.SettingsSource, collection):
         super().__init__()
         self._name: str = name
         self._df: DataFrame = df
@@ -48,8 +48,8 @@ class Fit(QObject):
 
         self.relaxations: list[Relaxation]
 
-        self._compound: SettingsSource = compound
-        self._collection: Collection
+        self._compound: protocols.SettingsSource = compound
+        self._collection: protocols.Collection
         if collection is not None:
             self._collection = collection
 

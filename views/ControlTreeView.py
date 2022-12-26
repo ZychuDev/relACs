@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QWidget, QTreeView, QSizePolicy, QFrame, QAbstractScrollArea, QAbstractItemView
-from PyQt6.QtGui import QStandardItemModel, QStandardItem
+from PyQt6.QtWidgets import QTreeView, QSizePolicy, QFrame, QAbstractScrollArea, QAbstractItemView
+from PyQt6.QtGui import QStandardItem
 from PyQt6.QtCore import pyqtSlot, Qt, QPoint
 from models import ControlTreeModel
  
