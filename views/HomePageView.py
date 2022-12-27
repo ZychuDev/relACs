@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QVBoxLayout, QTableWidget, QTableWidgetItem, QSizePolicy, QFrame, QAbstractItemView
-from PyQt6.QtGui import QPixmap, QPaintEvent, QPainter, QFont, QBrush, QColor
+from PyQt6.QtGui import QPixmap, QPaintEvent, QPainter, QFont, QBrush, QColor, QPalette
 from PyQt6.QtCore import Qt
 
 from controllers import HomePageController
@@ -22,6 +22,11 @@ class HomePageUi(QWidget):
         title_label.setScaledContents(True)
         title_label.setSizePolicy(QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum))
 
+
+        p: QPalette = self.palette()
+        p.setColor(self.backgroundRole(), Qt.GlobalColor.white)
+        self.setPalette(p)
+        self.setAutoFillBackground(True)
 
         self.lower_horizontal_layout = QHBoxLayout()
 

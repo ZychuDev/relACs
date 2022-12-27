@@ -1,6 +1,6 @@
 from typing import Protocol
 from PyQt6.QtCore import QModelIndex
-from protocols import Displayer
+from .Displayer import Displayer
 
 class Collection(Protocol):
     _displayer: Displayer

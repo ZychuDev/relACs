@@ -2,10 +2,10 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox, QFileDialog, QWidget
 
 from .Relaxation import Relaxation
-from models import Measurement 
+from .Measurement import Measurement 
 from .Parameter import Parameter
 
-import protocols
+from protocols import SettingsSource, Collection
 
 from pandas import DataFrame, Series, concat # type: ignore
 from numpy import ndarray, pi, power, finfo, diag, sum, sqrt, pi, power, logspace
@@ -17,18 +17,56 @@ from math import nextafter
 from typing import Self 
 
 class Fit(QObject):
-    name_changed = pyqtSignal(str)
-    df_changed= pyqtSignal()
-    df_point_deleted = pyqtSignal()
-    parameter_changed = pyqtSignal()
-    fit_changed = pyqtSignal()
+    """Represent one fit for Havriliak-Negami model with n-relaxation
+
+    Args:
+        name (str): Name of fit.
+        df (DataFrame): Measurement data(processed data from magnetometer).
+        temp (float): Temperature measured during the measurement.
+        field (float): Magnetic field strength during measurement.
+        compound (SettingsSource): Examined compound.
+        collection (Collection | None): The collection to which it belongs.
+
+    Attributes:
+        name_changed: Emitted when name change. Contains new name.
+        df_changed: Emitted when atleast one row in df changed.
+        df_point_deleted: Emitted when row in df is removed.
+    """
+
+    name_changed: pyqtSignal = pyqtSignal(str)
+    df_changed: pyqtSignal = pyqtSignal()
+    df_point_deleted: pyqtSignal = pyqtSignal()
 
     @staticmethod
     def model(logFrequency: ndarray, alpha: float, beta: float, tau: float, chi_t: float, chi_s: float) -> ndarray:
+        """Implemntation of Havriliak-Negami model
+
+        Args:
+            logFrequency (ndarray): Logarytm of frequency.
+            alpha (float): Alpha parameter
+            beta (float): Beta parameter
+            tau (float): Time of relaxation.
+            chi_t (float): 
+            chi_s (float): 
+
+        Returns:
+            ndarray: Model predictions for each point in domain
+        """
         return chi_s + (chi_t - chi_s)/((1 + (10**logFrequency*2*pi * power(10, tau) * 1j )**(1- alpha))**beta)
 
     @staticmethod
-    def from_measurement(measurement: Measurement, compound:protocols.SettingsSource, nr_of_relaxations: int = 1):
+    def from_measurement(measurement: Measurement, compound:SettingsSource, nr_of_relaxations: int = 1):
+        """ Create new Fit from Measurement and append it to the collection.
+
+
+        Args:
+            measurement (Measurement): Measurement from which Fit will be created.
+            compound (SettingsSource): Source of boundarie for parameters.
+            nr_of_relaxations (int, optional): Number of relaxations in Havriliak-Negami model. Defaults to 1.
+
+        Returns:
+            Fit: Created Fit
+        """
         fit_name: str = measurement._name + "_Fit_Frequency"
         fit: Fit =  Fit(fit_name, measurement._df.copy(), measurement._tmp, measurement._field, compound, None)
 
@@ -38,7 +76,7 @@ class Fit(QObject):
             fit.relaxations.append(Relaxation(compound))
 
         return fit
-    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:protocols.SettingsSource, collection):
+    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:SettingsSource, collection: Collection|None):
         super().__init__()
         self._name: str = name
         self._df: DataFrame = df
@@ -48,8 +86,8 @@ class Fit(QObject):
 
         self.relaxations: list[Relaxation]
 
-        self._compound: protocols.SettingsSource = compound
-        self._collection: protocols.Collection
+        self._compound: SettingsSource = compound
+        self._collection: Collection | None
         if collection is not None:
             self._collection = collection
 
@@ -63,7 +101,8 @@ class Fit(QObject):
     def name(self, val:str):
         if len(val) < 1:
             raise ValueError("Compund name must be at least one character long")
-        self._collection.update_names(self._name, val)
+        if self._collection is not None:
+            self._collection.update_names(self._name, val)
         self._name = val
         self.name_changed.emit(val)
 
@@ -79,12 +118,23 @@ class Fit(QObject):
         self._molar_mass = val
 
     def hide_point(self, x: float, x_str: str):
+        """Hide point 
+
+        Args:
+            x (float): Value of point for domain column.
+            x_str (str): Name of domain column.
+        """
         actual: bool = bool(self._df.loc[self._df[x_str] == x]['Hidden'].values[0])
         self._df.loc[self._df[x_str] == x, "Hidden"] = not actual
         self.df_changed.emit()
-        # self.dataChanged.emit() #type: ignore
 
     def delete_point(self, x: float, x_str: str):
+        """Delete point 
+
+        Args:
+            x (float): Value of point for domain column.
+            x_str (str): Name of domain column.
+        """
         if self._df.shape[0] == 2:
             msg: QMessageBox = QMessageBox()
             msg.setIcon(QMessageBox.Icon.Warning)
@@ -99,6 +149,14 @@ class Fit(QObject):
 
 
     def cost_function(self, p):
+        """Cost function minimalized in least_square method in fitting process.
+
+        Args:
+            p (_type_): Parameters for all relaxations.
+
+        Returns:
+            _type_: Cost of fit.
+        """
         rest = self._df.loc[self._df["Hidden"] == False]
 
         sum_real = 0
@@ -118,6 +176,12 @@ class Fit(QObject):
         return  dif_real + dif_img
 
     def make_auto_fit(self, auto: bool = False, next_fit: Self = None): # type: ignore
+        """Solve a nonlinear least-squares problem with bounds on the variables.
+
+        Args:
+            auto (bool, optional): Determines whether fit was explicitly call by user. Defaults to False.
+            next_fit (Self, optional): Fit to transfer parameters value in case of performing automated fit process for mutiple Fits. Defaults to None.
+        """
         params: tuple = ()
         min: list = []
         max: list = []
@@ -161,6 +225,7 @@ class Fit(QObject):
                 self.copy_all_relxations(next_fit)
 
     def save_to_file(self):
+        """Savig result to .csv file"""
         save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
         if save_name is not None:
             try:
@@ -170,7 +235,13 @@ class Fit(QObject):
                 print(e)
                 return
 
-    def get_result(self):
+    def get_result(self) -> DataFrame:
+        """Get DataFrame with results of fitting process.
+
+        Returns:
+            DataFrame: Result of fit in DataFrame format.
+        """
+
         df_param: DataFrame = DataFrame([['T', self._tmp, 0], ['H', self._field, 0]], columns=['Name', 'Value','Error'])
         df_model_final: DataFrame = DataFrame()
         for i, r in enumerate(self.relaxations):
@@ -209,14 +280,23 @@ class Fit(QObject):
         return df
 
     def save_all_relaxations(self):
+        """Save current parameters of all relaxations.
+        """
         for r in self.relaxations:
             r.save()
 
     def copy_all_relxations(self, other: Self): #type: ignore
+        """Copy saved parameters for all relaxations"""
         for i, r in enumerate(other.relaxations): #type: ignore
                 r.copy(self.relaxations[i])
 
     def get_jsonable(self) -> dict:
+        """Marshal object to python dictionary.
+
+        Returns:
+            dict: Dictionary ready to save as .json
+        """
+
         r_list: list[dict] = []
         for r in self.relaxations:
             r_list.append(r.get_jsonable())
@@ -230,6 +310,11 @@ class Fit(QObject):
         return jsonable
 
     def update_relaxations_from_json(self, relaxations_json: list[dict]):
+        """From given dictionary recreate saved state of relaxations.
+
+        Args:
+            relaxations_json (list[dict]): Result of self.get_jsonable()
+        """
         self.relaxations = []
         for i, r_j in enumerate(relaxations_json):
             r: Relaxation = Relaxation(self._compound)

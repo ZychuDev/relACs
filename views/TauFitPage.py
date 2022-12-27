@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
- QStackedWidget, QPushButton, QCheckBox, QTableView, QTableWidget, QAbstractScrollArea,
- QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox, QSplitter)
-from PyQt6.QtCore import QAbstractTableModel, QSize, QMetaObject, QObject, Qt
-from PyQt6.QtGui import QFont, QPalette, QBrush, QColor
+ QPushButton, QTableWidget, QAbstractScrollArea,
+ QAbstractItemView, QTableWidgetItem, QDialog, QComboBox, QSplitter)
+from PyQt6.QtCore import QSize, QMetaObject, QObject, Qt
+from PyQt6.QtGui import QFont, QPalette
 
-from models import TauFit, TAU_PARAMETER_NAME, Point
+from models import TauFit, TAU_PARAMETER_NAME
 from .ParameterSlider import ParameterSlider
 
 from matplotlib.figure import Figure # type: ignore
@@ -19,7 +19,7 @@ from typing import get_args, cast, Literal
 from time import time
 
 from numpy import log, meshgrid, ones, linspace
-from pandas import Series
+from pandas import Series # type: ignore
 
 class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, width: int=10, height: int=5, dpi: int=100):
@@ -62,6 +62,11 @@ class TauFitPage(QWidget):
 
         horizontal_layout: QHBoxLayout = QHBoxLayout()
         horizontal_spliter: QSplitter = QSplitter()
+
+        p: QPalette = self.palette()
+        p.setColor(self.backgroundRole(), Qt.GlobalColor.white)
+        self.setPalette(p)
+        self.setAutoFillBackground(True)
 
         left_layout: QVBoxLayout = QVBoxLayout()
 

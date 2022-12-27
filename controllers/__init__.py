@@ -1,4 +1,3 @@
-from .MainController import MainController
 from .ControlTreeController import ControlTreeController
 
 from .HomePageController import HomePageController

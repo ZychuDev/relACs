@@ -1,18 +1,19 @@
 from PyQt6.QtWidgets import QTreeView, QSizePolicy, QFrame, QAbstractScrollArea, QAbstractItemView
-from PyQt6.QtGui import QStandardItem
+from PyQt6.QtGui import QStandardItem, QStandardItemModel
 from PyQt6.QtCore import pyqtSlot, Qt, QPoint
-from models import ControlTreeModel
  
 
 from controllers import ControlTreeController, CompoundItemsCollectionController
-from models import CompoundItemsCollectionModel, ControlTreeModel
+from models import CompoundItemsCollectionModel
 from .CompundItemsCollection import CompoundItemsCollection
 from .StandardItem import StandardItem
+from protocols import Displayer
+from typing import cast
 
 class ControlTreeView(QTreeView):
-    def __init__(self, working_space):
+    def __init__(self, working_space: Displayer):
         super().__init__()
-        self._model = ControlTreeModel(working_space)
+        self._model = QStandardItemModel()
         self._ctr = ControlTreeController(self._model)
         self.setModel(self._model)
         self.setObjectName("Control tree")
@@ -37,13 +38,13 @@ class ControlTreeView(QTreeView):
         header.setVisible(False)
 
         self.setAnimated(True)
-        tree_model = CompoundItemsCollectionModel("relACs", self, self._model._working_space)
+        tree_model = CompoundItemsCollectionModel("relACs", self, working_space)
         self.compounds = CompoundItemsCollection(tree_model, CompoundItemsCollectionController(tree_model))
         rootNode:QStandardItem  = self.model().invisibleRootItem() # type: ignore
         rootNode.appendRow(self.compounds)
         self.expandAll()
 
     def show_item_menu(self, position: QPoint):
-        item: StandardItem = self._model.itemFromIndex(self.indexAt(position))
+        item: StandardItem = cast(StandardItem, self._model.itemFromIndex(self.indexAt(position)))
         if item:
             item.show_menu(self.window().mapToGlobal(position))

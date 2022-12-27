@@ -5,7 +5,7 @@ from .Parameter import Parameter, TAU_PARAMETER_NAME
 from .Point import Point
 from .Fit import Fit
 
-import protocols
+from protocols import SettingsSource, Collection
 
 from typing import get_args, Literal
 from functools import partial
@@ -57,12 +57,12 @@ class TauFit(QObject):
             + tau_0 *exp(-delta_e/(temp))
 
     @staticmethod
-    def from_fit(name:str, compound: protocols.SettingsSource, collection=None):
+    def from_fit(name:str, compound: SettingsSource, collection=None):
         t_fit: TauFit = TauFit(name, compound, collection)
 
         return t_fit
 
-    def __init__(self, name: str, compound: protocols.SettingsSource, collection):
+    def __init__(self, name: str, compound: SettingsSource, collection):
         super().__init__()
         self._name: str = name
         self.residual_error: float = 0.0
@@ -81,7 +81,7 @@ class TauFit(QObject):
         self.varying: Literal["Field", "Temperature"] = "Field"
         self.constant: float = 0
 
-        self._collection: protocols.Collection
+        self._collection: Collection
         if collection is not None:
             self._collection = collection
 

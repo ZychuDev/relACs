@@ -33,7 +33,7 @@ class StandardItem(QStandardItem):
         self.setForeground(color)
         self.setFont(fnt)
         self.setText(txt)
-        #self.setIcon(jakasTam.png)
+        #self.setIcon(someIcon.png)
        
         self.setCheckable(False)
         self.setAutoTristate(False)

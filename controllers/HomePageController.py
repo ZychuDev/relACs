@@ -1,5 +1,4 @@
 from webbrowser import open
-from models import HomePageModel
 
 class HomePageController():
     @staticmethod

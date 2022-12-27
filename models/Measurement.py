@@ -1,6 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
-from protocols import Collection, SettingsSource 
+from protocols import SettingsSource, Collection
 from readers import SettingsReader
 
 from pandas import DataFrame, Series # type: ignore
@@ -8,10 +8,10 @@ from math import log10, floor
 from numpy import zeros
 
 class Measurement(QObject):
-    name_changed = pyqtSignal(str)
-    df_changed= pyqtSignal()
+    name_changed: pyqtSignal = pyqtSignal(str)
+    df_changed:pyqtSignal = pyqtSignal()
     
-    columns_headers = ["Temperature","MagneticField","ChiPrime","ChiBis","Frequency"]
+    columns_headers: list[str] = ["Temperature","MagneticField","ChiPrime","ChiBis","Frequency"]
 
     @staticmethod
     def from_data_frame(df: DataFrame, sufix:str, compound:SettingsSource, collection: Collection):

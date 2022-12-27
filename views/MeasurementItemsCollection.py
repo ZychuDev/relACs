@@ -1,6 +1,6 @@
 from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt
 from PyQt6.QtGui import QColor, QBrush
-from PyQt6.QtWidgets import QMenu, QTreeView
+from PyQt6.QtWidgets import QMenu
 from models import MeasurementItemsCollectionModel, Measurement, Fit
 from controllers import MeasurementItemsCollectionController, MeasurementItemController
 

@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
- QStackedWidget, QPushButton, QCheckBox, QTableView, QTableWidget, QAbstractScrollArea,
+ QPushButton, QCheckBox, QTableWidget, QAbstractScrollArea,
  QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox)
-from PyQt6.QtCore import QAbstractTableModel, QSize, QMetaObject, QObject, Qt
+from PyQt6.QtCore import QSize, QMetaObject, QObject, Qt
 from PyQt6.QtGui import QFont, QPalette, QBrush, QColor
 
 from models import Fit, PARAMETER_NAME, Relaxation
@@ -9,10 +9,9 @@ from typing import get_args
 
 from .ParameterSlider import ParameterSlider
 
-from pandas import DataFrame, Series # type: ignore
+from pandas import DataFrame # type: ignore
 
 from matplotlib.figure import Figure # type: ignore
-from matplotlib.artist import Artist # type: ignore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg # type: ignore
 from matplotlib.colors import CSS4_COLORS # type: ignore
 from matplotlib.ticker import LinearLocator # type: ignore
@@ -20,7 +19,7 @@ from matplotlib.ticker import LinearLocator # type: ignore
 from matplotlib import use # type: ignore
 import matplotlib.colors as mcolors
 
-from numpy import ndarray, power, add, append, sqrt, subtract, linspace
+from numpy import ndarray, add, append, linspace
 
 
 from functools import partial
@@ -182,6 +181,11 @@ class FitPage(QWidget):
         self.picker_radius: int = 5
         self.resolution: int = 100
         self.colors_names: list[str] = ["tab:green", "tab:red", "tab:purple", "tab:brown", "tab:pink"]
+
+        p: QPalette = self.palette()
+        p.setColor(self.backgroundRole(), Qt.GlobalColor.white)
+        self.setPalette(p)
+        self.setAutoFillBackground(True)
 
         vertical_layout: QVBoxLayout = QVBoxLayout()
 

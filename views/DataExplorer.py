@@ -4,11 +4,10 @@ from PyQt6.QtGui import QFont
 
 from models import Measurement
 
-from pandas import DataFrame, Series # type: ignore
+from pandas import DataFrame # type: ignore
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg # type: ignore
 from matplotlib.figure import Figure # type: ignore
-from matplotlib.artist import Artist # type: ignore
 from matplotlib import use # type: ignore
 use('Qt5Agg')
 

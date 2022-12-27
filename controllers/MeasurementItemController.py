@@ -1,7 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSlot
 from PyQt6.QtWidgets import QInputDialog, QMessageBox, QWidget
 from models import Measurement
-# from protocols import Displayer
 
 class MeasurementItemController(QObject):
     def __init__(self, model:Measurement):

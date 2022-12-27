@@ -38,8 +38,8 @@ class CompoundItem(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
-        menu.addAction("Rename", lambda : self._ctrl.rename())
-        menu.addAction("Delete", lambda : self._model._collection.remove(self._model.name, self.index()) )
+        menu.addAction("Rename", self._ctrl.rename)
+        menu.addAction("Delete", lambda :  self._model._collection.remove(self._model.name, self.index()) if self._model._collection is not None else print("Item is not in collection") )
         menu.exec(menu_position)
 
 

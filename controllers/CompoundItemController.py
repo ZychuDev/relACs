@@ -5,6 +5,7 @@ from models import Compound
 
 class CompoundItemController(QObject):
     def __init__(self, model:Compound):
+        super().__init__()
         self._model: Compound = model
 
 

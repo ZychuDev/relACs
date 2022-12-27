@@ -1,6 +1,6 @@
 from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
-from PyQt6.QtWidgets import QMenu, QTreeView, QFileDialog, QWidget
+from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget
 
 from models import CompoundItemsCollectionModel, Compound 
 from controllers import CompoundItemsCollectionController, CompoundItemController
@@ -20,7 +20,6 @@ class CompoundItemsCollection(StandardItem):
         self.setBackground(QBrush(QColor(255,122,0)))
         self._model: CompoundItemsCollectionModel = model
         self._ctrl: CompoundItemsCollectionController = ctrl
-        # self._model.name_changed.connect(lambda a,b: self.on_name_changed(a,b))
         self._model.compound_added.connect(self.on_compound_added)
         self._model.compound_removed.connect(self.on_compound_removed)
 
