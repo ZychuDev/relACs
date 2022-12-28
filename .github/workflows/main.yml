@@ -27,7 +27,14 @@ jobs:
     - name: build application
       run: | 
         pyinstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
-        ls
+        
+    - name: deploy release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./desc/relACs.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
     
     
     
