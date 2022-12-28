@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
  QPushButton, QTableWidget, QAbstractScrollArea,
  QAbstractItemView, QTableWidgetItem, QDialog, QComboBox, QSplitter)
 from PyQt6.QtCore import QSize, QMetaObject, QObject, Qt
-from PyQt6.QtGui import QFont, QPalette
+from PyQt6.QtGui import QFont, QPalette, QBrush, QColor
 
 from models import TauFit, TAU_PARAMETER_NAME
 from .ParameterSlider import ParameterSlider
@@ -119,7 +119,20 @@ class TauFitPage(QWidget):
 
         left_layout.addLayout(control_layout)
 
+        palette: QPalette = QPalette()
+        brush = QBrush(QColor(255, 244, 244))
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Active, QPalette.ColorRole.Base, brush)
+        brush = QBrush(QColor(255, 244, 244))
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Inactive, QPalette.ColorRole.Base, brush)
+        brush = QBrush(QColor(240, 240, 240))
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+        palette.setBrush(QPalette.ColorGroup.Disabled, QPalette.ColorRole.Base, brush)
+
         fit_error: QTableWidget = QTableWidget()
+        fit_error.setPalette(palette)
+        fit_error.setAutoFillBackground(True)
         fit_error.setMinimumSize(QSize(255, 100))
         fit_error.setMaximumSize(QSize(16777215, 100))
         fit_error.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)

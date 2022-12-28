@@ -421,6 +421,7 @@ class FitPage(QWidget):
 
     def _recreate_and_draw(self):
         self._recreate_fit_plot()
+        self._update_domains()
         self.canvas.draw()
 
     def _recreate_fit_plot(self):
@@ -508,6 +509,8 @@ class FitPage(QWidget):
             self._chi_prime_total_s = self.canvas.ax1.plot(frequency_log, total_s.real, "-", c=color)[0]
             self._chi_bis_total_s = self.canvas.ax2.plot(frequency_log, -total_s.imag, "-", label="Saved sum of relaxations", c=color)[0]
             self._cole_cole_total_s = self.canvas.ax3.plot(total_s.real, -total_s.imag, "-", c=color)[0]
+
+        
  
     def _update_fit_plot_for_one_relax(self, r: int, redraw: bool=False): 
         df: DataFrame = self.fit._df

@@ -11,3 +11,12 @@ class SettingsReader():
 
     def get_epsilons(self) -> tuple[float, float]:
         return (float(self.config['Epsilons']['Field']), float(self.config['Epsilons']['Temp']))
+
+    def get_ranges(self) -> dict[str, tuple[float, float]]:
+        tmp: dict[str, str] = dict(self.config["Ranges"])
+        result: dict[str, tuple[float, float]] = dict()
+        for key, val in tmp.items():
+            s: list[str] = val.split(',')
+            result[key] = float(s[0]), float(s[1])
+
+        return result

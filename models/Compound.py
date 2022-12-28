@@ -2,6 +2,8 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QTreeView
 from protocols import Collection, Displayer 
 from models import PARAMETER_NAME, TAU_PARAMETER_NAME
+from readers import SettingsReader
+
 class Compound(QObject):
     """Represent examined Compound
 
@@ -25,6 +27,10 @@ class Compound(QObject):
         self._collection: Collection|None = collection
         self._tree: QTreeView = tree
         self._displayer: Displayer = displayer
+
+        settings: SettingsReader = SettingsReader()
+        self._ranges: dict[str, tuple[float, float]] = settings.get_ranges()
+
 
     @property
     def name(self):
@@ -70,22 +76,8 @@ class Compound(QObject):
         Returns:
             float: Lower boundry on parameter value.
         """
-        map = {"alpha" : 0.0, 
-            "beta" : 0.0, 
-            "log10_tau" : -10.0, 
-            "chi_t" : 0.0, 
-            "chi_s" : 0.0,
-            "a_dir" : 0.000_000_000_000_001,
-            "n_dir" : 0.0,
-            "b1" : 0.000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_001,
-            "b2" : 0.000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_001,
-            "b3" : 0.000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_000_001,
-            "c_raman" : 0.0,
-            "n_raman" : 0.0,
-            "tau_0" : 0.1,
-            "delta_e" : 0.0
-        }
-        return map[param_name]
+
+        return self._ranges[param_name][0]
 
 # TO DO
     def get_max(self, param_name: str) -> float:
@@ -97,19 +89,5 @@ class Compound(QObject):
         Returns:
             float: Upper boundry on parameter value.
         """
-        map = {"alpha" : 1.0, 
-            "beta" : 1.0, 
-            "log10_tau" : 0.0, 
-            "chi_t" : 30.0, 
-            "chi_s" : 30.0,
-            "a_dir" : 100,
-            "n_dir" : 8.0,
-            "b1" : 11_000_000_000_000.0,
-            "b2" : 10.0,
-            "b3" : 10.0,
-            "c_raman" : 1.0,
-            "n_raman" : 15.0,
-            "tau_0" : 100_000_000_000_000_000_000_000_000.0,
-            "delta_e" : 3000.0
-        }
-        return map[param_name]
+
+        return self._ranges[param_name][1]
