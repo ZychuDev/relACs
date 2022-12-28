@@ -8,24 +8,24 @@ from typing import cast
 
 from pandas import read_json # type: ignore
 
-class FitItemsCollectionModel(QObject):
+class FitItemsCollectionModel(QObject):    
+    """Aggregation of fits
+
+        Args:
+            name (str): Name of collection.
+            compound (Compound): Parent.
+
+        Attributes:
+            name_changed: Emitted when collection name is changed. Contains new name.
+            fit_added: Emitted when new Fit is added to collection. Contains new Fit.
+            fit_removed: Emitted when Fit is removed from collection. Contains removed Fit's Index in controll tree. 
+            displayed_item_changed: Emitted when displayed Fit is replaced.
+    """
+
     name_changed: pyqtSignal = pyqtSignal(str)
     fit_added: pyqtSignal = pyqtSignal(Fit)
     fit_removed: pyqtSignal = pyqtSignal(QModelIndex)
     displayed_item_changed: pyqtSignal = pyqtSignal(Fit)
-    
-    """Aggregation of fits
-
-    Args:
-        name (str): Name of collection.
-        compound (Compound): Parent.
-
-    Attributes:
-        name_changed: Emitted when collection name is changed. Contains new name.
-        fit_added: Emitted when new fit is added to collection. Contains new Fit.
-        fit_removed: Emitted when fit is removed from collection. Contains Fit's Index in controll tree. 
-        displayed_item_change: Emitted when displayed fit is replaced.
-    """
 
     def __init__(self, name: str, compound: Compound):
         super().__init__()
@@ -83,7 +83,7 @@ class FitItemsCollectionModel(QObject):
 
         Args:
             fit_name (str): Name of Fit to remove.
-            index (QModelIndex): Fit's index in controll tree.
+            index (QModelIndex): Removed Fit's index in controll tree.
         """
         if fit_name in self._names:
             self._names.remove(fit_name)
@@ -127,7 +127,7 @@ class FitItemsCollectionModel(QObject):
         return False
 
     def change_displayed_item(self, name: str):
-        """Replace currently displayed fit.
+        """Replace currently displayed Fit.
 
         Args:
             name (str): Name of the Fit to display.
@@ -176,7 +176,7 @@ class FitItemsCollectionModel(QObject):
         """Get Fit of given name
 
         Args:
-            name (str): Name of Fit to retrive.
+            name (str): Name of Fit to retrieve.
 
         Returns:
             Fit | None: Fit with given name or None if it is not part of collection.
@@ -205,7 +205,7 @@ class FitItemsCollectionModel(QObject):
         return jsonable
 
     def from_json(self, fits: list[dict]):
-        """Append new Fits created from result of get_jsonable()"""
+        """Append new Fits created from result of get_jsonable()."""
         for f in fits:
             new_model = Fit(f["name"], read_json(f["df"]), f["tmp"], f["field"], self._compound, cast(Collection, self))
             new_model.update_relaxations_from_json(f["relaxations"])

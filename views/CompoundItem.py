@@ -32,7 +32,6 @@ class CompoundItem(StandardItem):
         self.appendRow(TauFitItemsCollection(self.t_model, TauFitItemsCollectionController(self.t_model)))
         self._model.name_changed.connect(self.on_name_changed)
         
-    pyqtSlot(str)
     def on_name_changed(self, new_name:str):
         self.setText(new_name)
 

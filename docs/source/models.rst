@@ -38,7 +38,7 @@ models.FitItemsCollectionModel module
    :members:
    :undoc-members:
    :show-inheritance: 
-   :exclude-members: name_changed, fit_added, fit_removed, displayed_item_change
+   :exclude-members: name_changed, fit_added, fit_removed, displayed_item_changed
 
 models.Literals module
 ----------------------
@@ -64,6 +64,7 @@ models.MeasurementItemsCollectionModel module
    :members:
    :undoc-members:
    :show-inheritance:
+   :exclude-members: name_changed, measurement_added, measurement_removed, displayed_item_changed
 
 models.Parameter module
 -----------------------
@@ -89,15 +90,8 @@ models.Relaxation module
    :members:
    :undoc-members:
    :show-inheritance:
-
-models.SettingsSource module
-----------------------------
-
-.. automodule:: models.SettingsSource
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
+   :exclude-members: parameters_saved, all_parameters_changed, all_error_changed
+   
 models.TauFit module
 --------------------
 
@@ -105,6 +99,7 @@ models.TauFit module
    :members:
    :undoc-members:
    :show-inheritance:
+   :exclude-members: name_changed, all_parameters_changed, points_changed, varying_changed, constant_changed, parameters_saved
 
 models.TauFitItemsCollectionModel module
 ----------------------------------------
@@ -113,6 +108,7 @@ models.TauFitItemsCollectionModel module
    :members:
    :undoc-members:
    :show-inheritance:
+   :exclude-members: name_changed, fit_added, fit_removed, displayed_item_changed
 
 Module contents
 ---------------

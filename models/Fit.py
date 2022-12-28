@@ -19,18 +19,18 @@ from typing import Self
 class Fit(QObject):
     """Represent one fit for Havriliak-Negami model with n-relaxation
 
-    Args:
-        name (str): Name of fit.
-        df (DataFrame): Measurement data(processed data from magnetometer).
-        temp (float): Temperature measured during the measurement.
-        field (float): Magnetic field strength during measurement.
-        compound (SettingsSource): Examined compound.
-        collection (Collection | None): The collection to which it belongs.
+        Args:
+            name (str): Name of fit.
+            df (DataFrame): Measurement data(processed data from magnetometer).
+            temp (float): Temperature measured during the measurement.
+            field (float): Magnetic field strength during measurement.
+            compound (SettingsSource): Examined compound.
+            collection (Collection | None): The collection to which it belongs.
 
-    Attributes:
-        name_changed: Emitted when name change. Contains new name.
-        df_changed: Emitted when atleast one row in df changed.
-        df_point_deleted: Emitted when row in df is removed.
+        Attributes:
+            name_changed: Emitted when name change. Contains new name.
+            df_changed: Emitted when at least one row in df changed.
+            df_point_deleted: Emitted when row in df is removed.
     """
 
     name_changed: pyqtSignal = pyqtSignal(str)
@@ -61,7 +61,7 @@ class Fit(QObject):
 
         Args:
             measurement (Measurement): Measurement from which Fit will be created.
-            compound (SettingsSource): Source of boundarie for parameters.
+            compound (SettingsSource): Source of boundaries for parameters.
             nr_of_relaxations (int, optional): Number of relaxations in Havriliak-Negami model. Defaults to 1.
 
         Returns:
@@ -176,7 +176,7 @@ class Fit(QObject):
         return  dif_real + dif_img
 
     def make_auto_fit(self, auto: bool = False, next_fit: Self = None): # type: ignore
-        """Solve a nonlinear least-squares problem with bounds on the variables.
+        """Solve a nonlinear least-squares problem with bounds on the variables for cost_function().
 
         Args:
             auto (bool, optional): Determines whether fit was explicitly call by user. Defaults to False.

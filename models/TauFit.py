@@ -1,9 +1,8 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QMessageBox, QFileDialog, QWidget
+from PyQt6.QtWidgets import QFileDialog, QWidget
 
 from .Parameter import Parameter, TAU_PARAMETER_NAME
 from .Point import Point
-from .Fit import Fit
 
 from protocols import SettingsSource, Collection
 
@@ -23,46 +22,116 @@ from pandas import Series, DataFrame, concat #type: ignore
 TauParameters = tuple[Parameter, ...]
 
 class TauFit(QObject):
-    name_changed = pyqtSignal(str)
-    parameter_changed = pyqtSignal()
-    all_parameters_changed = pyqtSignal()
-    fit_changed = pyqtSignal()
-    points_changed = pyqtSignal()
-    varying_changed = pyqtSignal(str)
-    constant_changed = pyqtSignal(float)
-    parameters_saved = pyqtSignal()
+    """_summary_
+
+        Args:
+            name (str): Name of TauFit.
+            compound (SettingsSource): Examined compound.
+            collection (_type_): The collection to which it belongs.
+
+        Attributes:
+            name_changed: Emitted when TauFit name change. Contains new name.
+            all_parameters_changed: Emitted when multiple parameters change. 
+            points_changed: Emitted when multiple points change.
+            varying_changed: Emitted when varying ax in slice change. Contains name of new varying ax.
+            constant_changed: Emitted when constant ax in slice chang. Contains value of new constant ax.
+            parameters_saved: Emitted when saved parameters change.
+    """
+
+    name_changed: pyqtSignal = pyqtSignal(str)
+    all_parameters_changed: pyqtSignal = pyqtSignal()
+    points_changed: pyqtSignal = pyqtSignal()
+    varying_changed: pyqtSignal = pyqtSignal(str)
+    constant_changed: pyqtSignal = pyqtSignal(float)
+    parameters_saved: pyqtSignal = pyqtSignal()
 
     @staticmethod
-    def direct(temp:float, field:float, a_dir:float, n_dir:float):
+    def direct(temp:float, field:float, a_dir:float, n_dir:float) -> float:
+        """Direct part of model
+
+        Args:
+            temp (float): Temperature.
+            field (float): Magnetic field strange.
+            a_dir (float): 
+            n_dir (float): 
+
+        Returns:
+            float: Direct
+        """
         return a_dir * temp * power(field, n_dir)
 
     @staticmethod
-    def qtm(field:float, b1:float, b2:float, b3:float):
+    def qtm(field:float, b1:float, b2:float, b3:float) -> float:
+        """QTM(Quantum) part of model
+
+        Args:
+            field (float): Magnetic field strange.
+            b1 (float): 
+            b2 (float): 
+            b3 (float): 
+
+        Returns:
+            float: QTM
+        """
         return b1*(1+b3*field*field)/(1+b2*field*field)
 
     @staticmethod
-    def Raman(temp:float, c_raman:float, n_raman:float):
+    def Raman(temp:float, c_raman:float, n_raman:float) -> float:
+        """Raman part of model
+
+        Args:
+            temp (float): Temperature.
+            c_raman (float): 
+            n_raman (float): 
+
+        Returns:
+            float: Raman
+        """
         return c_raman* power(temp, n_raman)
 
     @staticmethod
     def Orbach(temp:float, tau_0:float, delta_e:float):
+        """Orbahc part of model
+
+        Args:
+            temp (float): Temperature.
+            tau_0 (float): 
+            delta_e (float): 
+
+        Returns:
+            float: Orbach
+        """
         return tau_0 * exp(-delta_e/temp)
 
     @staticmethod
     def model(temp:float, field:float, a_dir:float, n_dir:float, b1:float, b2:float,
-     b3: float, c_raman:float, n_raman:float, tau_0:float, delta_e:float):
+     b3: float, c_raman:float, n_raman:float, tau_0:float, delta_e:float) -> float:
+        """Relaxation time model
+
+        Args:
+            temp (float): Temperature.
+            field (float): Magnetic field strange.
+            a_dir (float): 
+            n_dir (float): 
+            b1 (float): 
+            b2 (float): 
+            b3 (float): 
+            c_raman (float): 
+            n_raman (float): 
+            tau_0 (float): 
+            delta_e (float): 
+
+        Returns:
+            float: Inverse of relaxation time
+        """
         return a_dir*temp*(field**n_dir) \
             + b1*(1+b3*field*field)/(1+b2*field*field) \
             + c_raman * power(temp, n_raman) \
             + tau_0 *exp(-delta_e/(temp))
 
-    @staticmethod
-    def from_fit(name:str, compound: SettingsSource, collection=None):
-        t_fit: TauFit = TauFit(name, compound, collection)
-
-        return t_fit
 
     def __init__(self, name: str, compound: SettingsSource, collection):
+
         super().__init__()
         self._name: str = name
         self.residual_error: float = 0.0
@@ -97,12 +166,25 @@ class TauFit(QObject):
         self.name_changed.emit(val)
 
     def append_point(self, tau:float, temp:float, field:float, silent=False):
+        """Append new point to TauFit.
+
+        Args:
+            tau (float): Relaxation time.
+            temp (float): Temperature
+            field (float): Magnetic field strength
+            silent (bool, optional): Determined whether signal point_changed is emitted. Defaults to False.
+        """
         point: Point = Point(tau, temp, field)
         self._points.append(point)
         if not silent:
             self.points_changed.emit()
 
     def get_hidden(self) -> tuple[list[float], list[float], list[float]]:
+        """Get all hidden points
+
+        Returns:
+            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength. 
+        """
         r_tau: list[float] = []
         r_temp: list[float] = []
         r_field: list[float] = []
@@ -116,6 +198,11 @@ class TauFit(QObject):
 
 
     def get_visible(self) -> tuple[list[float], list[float], list[float]]:
+        """Get all visible points.
+
+        Returns:
+            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.
+        """
         r_tau: list[float] = []
         r_temp: list[float] = []
         r_field: list[float] = []
@@ -128,10 +215,20 @@ class TauFit(QObject):
         return (r_tau, r_temp, r_field)
 
     def get_all(self) -> tuple[list[float], list[float], list[float]]:
+        """Get all points.
+
+        Returns:
+            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.
+        """
         tmp: list = list(zip(*[(p.tau, p.temp, p.field) for p in self._points]))
         return (tmp[0], tmp[1], tmp[2])
 
     def get_visible_s(self) -> tuple[list[float], list[float], list[float]]:
+        """Get all visible points in actual slice.
+
+        Returns:
+            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.
+        """
         r_tau: list[float] = []
         r_temp: list[float] = []
         r_field: list[float] = []
@@ -144,6 +241,11 @@ class TauFit(QObject):
         return (r_tau, r_temp, r_field)
 
     def get_hidden_s(self) -> tuple[list[float], list[float], list[float]]:
+        """Get all hidden points in actual slice.
+
+        Returns:
+            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.
+        """
         r_tau: list[float] = []
         r_temp: list[float] = []
         r_field: list[float] = []
@@ -156,27 +258,56 @@ class TauFit(QObject):
         return (r_tau, r_temp, r_field)
 
     def get_all_s(self) -> tuple[list[float], list[float], list[float]]:
+        """Get all points in actual slice.
+
+        Returns:
+            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.
+        """
         tmp: list = list(zip(*[(p.tau, p.temp, p.field) for p in self._points if self.get_constant_from_point(p) == self.constant]))
         try:
             return (tmp[0], tmp[1], tmp[2])
         except Exception:
             return ([], [], [])
 
-    def get_constant_from_point(self, p:Point):
+    def get_constant_from_point(self, p:Point) -> float:
+        """Extravt value of actual constant ax from point.
+
+        Args:
+            p (Point): Actual point.
+
+        Returns:
+            float: Temperature or magnetic field strength depending on actual constant ax in slice.
+        """
         if self.varying == "Field":
             return p.temp
         else:
             return p.field
 
     def set_varying(self, txt: Literal["Field","Temperature"]):
+        """Set new varying ax in slice.
+
+        Args:
+            txt (Literal[&quot;Field&quot;,&quot;Temperature&quot;]): New varying ax in slice.
+        """
         self.varying = txt
         self.varying_changed.emit(self.varying)
 
     def set_constant(self, value: float):
+        """Set new constant ax in slice.
+
+        Args:
+            value (float): New constant ax in slice.
+        """
         self.constant = value
         self.constant_changed.emit(value)
 
     def hide_point(self, v: float, z: float):
+        """Hide point.
+
+        Args:
+            v (float): Value of actual varying ax of Point to hide.
+            z (float): Relaxation time of Point to hide.
+        """
         for p in self._points:
             if self.varying == "Field":
                 if p.field == v and p.temp == self.constant and log(p.tau) == z:
@@ -189,6 +320,12 @@ class TauFit(QObject):
         self.points_changed.emit()
 
     def delete_point(self, v: float, z: float):
+        """Delete point
+
+        Args:
+            v (float): Value of actual varying ax of Point ro delete.
+            z (float): Relaxation time of Point to delete.
+        """
         old_points: list[Point] = self._points
         if self.varying == "Field":
             self._points = [p for p in self._points if (p.field, p.temp, log(p.tau)) != (v, self.constant, z)]
@@ -201,21 +338,46 @@ class TauFit(QObject):
         self.points_changed.emit()
 
     def get_parameters_values(self) -> tuple[float, float, float, float, float, float, float, float, float, float]:
+        """Get all parameters value.
+
+        Returns:
+            tuple[float, float, float, float, float, float, float, float, float, float]: Values of all parameters.
+        """
         return tuple(p.value for p in self.parameters) # type: ignore
 
     def get_saved_parameters_values(self) -> tuple[float, float, float, float, float, float, float, float, float, float]:
+        """Get all saved parameters value.
+
+        Returns:
+            tuple[float, float, float, float, float, float, float, float, float, float]: Values of all saved parameters.
+        """
         return tuple(p.value for p in self.saved_parameters) # type: ignore
 
-    def get_parameters_min_bounds(self):
+    def get_parameters_min_bounds(self) -> list[float]:
+        """Get lower boundaries of all parameters.
+
+        Returns:
+            list[float]: Values of lower boundaries.
+        """
         return [p.min for p in self.parameters]
 
-    def get_parameters_max_bounds(self):
+    def get_parameters_max_bounds(self) -> list[float]:
+        """Get upper boundaries of all parameters.
+
+        Returns:
+            list[float]: Values of upper boundaries.
+        """
         return [p.max for p in self.parameters]
 
     def make_auto_fit(self, slice_flag=False):
+        """Solve a nonlinear least-squares problem with bounds on the variables for cost_function().
+
+        Args:
+            slice_flag (bool, optional): Determines whether take into account only Points in actual slice. Defaults to False.
+        """
         params = self.get_parameters_values()
-        min = self.get_parameters_min_bounds()
-        max = self.get_parameters_max_bounds()
+        min: list[float] = self.get_parameters_min_bounds()
+        max: list[float] = self.get_parameters_max_bounds()
 
         p:Parameter
         for i, p in enumerate(self.parameters):
@@ -255,6 +417,15 @@ class TauFit(QObject):
         self.set_all_errors(res.cost, perr)
 
     def cost_function(self, p, slice=False):
+        """Cost function minimalized in least_square method in fitting process.
+
+        Args:
+            p (_type_): All parameters.
+            slice (bool, optional): Determines whether take into account only Points in actual slice. Defaults to False.
+
+        Returns:
+            _type_: Cost of fit.
+        """
         if slice:
             tau, temp, field = self.get_all_s()
         else:
@@ -265,6 +436,12 @@ class TauFit(QObject):
         return power(log(TauFit.model(temp, field, *p)) - log(1/tau), 2)
 
     def set_all_errors(self, residual_error: float, params_error: list[float]):
+        """Set all parameters error to new values.
+
+        Args:
+            residual_error (float): Residual error of least square problem.
+            params_error (list[float]): Invidual parameters errors of least square problem.
+        """
         self.residual_error = residual_error
         p: Parameter
         for i, p in enumerate(self.parameters):
@@ -272,6 +449,8 @@ class TauFit(QObject):
         self.all_parameters_changed.emit()
 
     def save(self):
+        """Set all current parameters as saved.
+        """
         for i, p in enumerate(self.parameters):
             s = self.saved_parameters[i]
             s.set_value(p.value)
@@ -281,6 +460,8 @@ class TauFit(QObject):
         self.parameters_saved.emit()
 
     def reset(self):
+        """Set all current parameters values to saved ones.
+        """
         for i, p in enumerate(self.parameters):
             s = self.saved_parameters[i]
             p.set_value(s.value)
@@ -291,6 +472,11 @@ class TauFit(QObject):
         self.all_parameters_changed.emit()
 
     def copy(self, other):
+        """Set saved parameters of other as current parameters of self.
+
+        Args:
+            other (Relaxation): Relaxation to copy.
+        """
         for i, p in enumerate(self.parameters):
             o = other.saved_parameters[i]
             p.set_value(o.value)
@@ -301,6 +487,7 @@ class TauFit(QObject):
         self.all_parameters_changed.emit()
 
     def save_to_file(self):
+        """Savig result to .csv file"""
         save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
         if save_name is not None:
             try:
@@ -311,6 +498,11 @@ class TauFit(QObject):
                 return
 
     def get_result(self):
+        """Get DataFrame with results of fitting process.
+
+        Returns:
+            DataFrame: Result of fit in DataFrame format.
+        """
         df_param: DataFrame = DataFrame(columns=["Name", "Value", "Error"])
         p:Parameter
         for p in self.parameters:
@@ -388,6 +580,12 @@ class TauFit(QObject):
             return [orbach, raman, qtm, direct, sum]
 
     def get_jsonable(self) -> dict:
+        """Marshal object to python dictionary.
+
+        Returns:
+            dict: Dictionary ready to save as .json
+        """
+
         p_list: list[dict] = []
         for p in self.parameters:
             p_list.append(p.get_jsonable())
@@ -410,6 +608,11 @@ class TauFit(QObject):
         return jsonable
 
     def update_from_json(self, f: dict):
+        """From given dictionary recreate saved state of TauFit.
+
+        Args:
+            f (list[dict]): Result of self.get_jsonable()
+        """
         self.residual_error = f["residual_error"]
         self.saved_residual_error = f["saved_residual_error"]
         self.constant = f["constant"]

@@ -136,7 +136,7 @@ class FitItemsCollection(StandardItem):
             msg.exec()
             return
 
-        new_fit: TauFit = TauFit.from_fit(name, self._model._compound, self._model)
+        new_fit: TauFit = TauFit(name, self._model._compound, self._model)
         for p in points:
             new_fit.append_point(*p)
         self.parent().child(3)._model.append_tau_fit(new_fit, display=True)

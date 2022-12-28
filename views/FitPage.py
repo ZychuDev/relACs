@@ -328,6 +328,8 @@ class FitPage(QWidget):
         dlg.exec()
 
     def copy_all_relaxations(self, src_name: str, dlg: QDialog):
+        if self.fit._collection is None:
+            return
         other = self.fit._collection.get_item_model(src_name)
         for i, r in enumerate(self.fit.relaxations):
             r.copy(other.relaxations[i])

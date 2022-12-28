@@ -6,11 +6,23 @@ from numpy import power
 
 FrequencyParameters = tuple[Parameter, Parameter, Parameter, Parameter, Parameter]
 class Relaxation(QObject):
-    parameters_saved = pyqtSignal()
-    all_parameters_changed = pyqtSignal()
-    all_error_changed = pyqtSignal(float)
+    """Represent singular relaxation in Havriliak-Negami model
+
+        Args:
+            compound (SettingsSource): Settings source.
+
+        Attributes:
+            parameters_saved: Emitted when saved parameters change.
+            all_parameters_changed: Emitted when more multiple parameters change at once.
+            all_error_changed: Emitted when residual error change. Contains new error value.
+    """
+
+    parameters_saved: pyqtSignal = pyqtSignal()
+    all_parameters_changed: pyqtSignal = pyqtSignal()
+    all_error_changed: pyqtSignal = pyqtSignal(float)
 
     def __init__(self, compound: SettingsSource):
+
         super().__init__()
         self.parameters: FrequencyParameters  = (
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
@@ -32,6 +44,8 @@ class Relaxation(QObject):
         self.was_saved: bool = False
 
     def save(self):
+        """Set all current parameters as saved.
+        """
         for i, p in enumerate(self.parameters):
             s = self.saved_parameters[i]
             s.set_value(p.value)
@@ -41,6 +55,8 @@ class Relaxation(QObject):
         self.parameters_saved.emit()
 
     def reset(self):
+        """Set all current parameters values to saved ones.
+        """
         for i, p in enumerate(self.parameters):
             s = self.saved_parameters[i]
             p.set_value(s.value)
@@ -50,6 +66,11 @@ class Relaxation(QObject):
         self.all_parameters_changed.emit()
 
     def copy(self, other):
+        """Set saved parameters of other as current parameters of self.
+
+        Args:
+            other (Relaxation): Relaxation to copy.
+        """
         for i, p in enumerate(self.parameters):
             o = other.saved_parameters[i]
             p.set_value(o.value)
@@ -59,32 +80,74 @@ class Relaxation(QObject):
         self.all_parameters_changed.emit()
 
     def set_all_errors(self, residual_error: float, params_error: list[float]):
+        """Set all parameters error to new values.
+
+        Args:
+            residual_error (float): Residual error of least square problem.
+            params_error (list[float]): Invidual parameters errors of least square problem.
+        """
         self.residual_error = residual_error
         for i, er in enumerate(params_error):
             self.parameters[i].set_error(er, silent=True)
         self.all_parameters_changed.emit()
 
     def set_all_values(self, values: list[float]):
+        """Set all parameters values to new one.
+
+        Args:
+            values (list[float]): Invidual parameters new values.
+        """
         for i, v in enumerate(values):
             self.parameters[i].set_value(v, silent=True)
         self.all_parameters_changed.emit()
 
     def get_parameters_values(self) -> tuple[float, float, float, float, float]:
+        """Get all parameters values.
+
+        Returns:
+            tuple[float, float, float, float, float]: Values in order: alpha, beta, tau, chi_t, chi_s.
+        """
         return tuple(p.value for p in self.parameters) # type: ignore
 
-    def get_tau(self):
+    def get_tau(self) -> float:
+        """Get relaxation time.
+
+        Returns:
+            float: Relaxation time in seconds.
+        """
         return power(10, self.saved_parameters[2].value)
 
-    def get_parameters_min_bounds(self):
+    def get_parameters_min_bounds(self) -> list[float]:
+        """Get all lower boundaries.
+
+        Returns:
+            list[float]: Lower boundaries in order: alpha, beta, tau, chi_t, chi_s.
+        """
         return [p.min for p in self.parameters]
 
-    def get_parameters_max_bounds(self):
+    def get_parameters_max_bounds(self) -> list[float]:
+        """Get all upper boundaries.
+
+        Returns:
+            list[float]: Upper boundaries in order: alpha, beta, tau, chi_t, chi_s.
+        """
         return [p.max for p in self.parameters]
 
     def get_saved_parameters_values(self) -> tuple[float, float, float, float, float]:
+        """Get all saved parameters values.
+
+        Returns:
+            tuple[float, float, float, float, float]: Values in order: alpha, beta, tau, chi_t, chi_s.
+        """
         return tuple(p.value for p in self.saved_parameters) # type: ignore
 
     def get_jsonable(self) -> dict:
+        """Marshal object to python dictionary.
+
+        Returns:
+            dict: Dictionary ready to save as .json
+        """
+
         p_list: list[dict] = []
         for p in self.parameters:
             p_list.append(p.get_jsonable())
@@ -101,6 +164,3 @@ class Relaxation(QObject):
          "saved_parameters": s_p_list
         }
         return jsonable
-
-    def from_json(self, json):
-        pass
