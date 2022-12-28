@@ -26,7 +26,7 @@ jobs:
         
     - name: build application
       run: | 
-        pyinstaller --onefile --noconsole --icon="assets\img\relac-fin.ico" --name="relACs" --uac-admin main.py
+        pyinstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
         ls
     
     
