@@ -56,8 +56,8 @@ jobs:
         
     - name: Inno Setup
       run: |
-        cd dist
         iscc ".\relACs.iss"
+        cd dist
         ls
  
  
