@@ -53,6 +53,12 @@ jobs:
       with:
         name: relACs.exe
         path: ./dist/relACs.exe
+        
+    - name: Inno Setup
+      run: |
+        iscc ".\relACs.iss"
+        cd dist
+        ls
  
  
  
