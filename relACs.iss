@@ -20,11 +20,11 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-LicenseFile=C:\Users\wikto\Desktop\ACMA\dist\license.txt
+LicenseFile=.\license.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 PrivilegesRequired=admin
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=C:\Users\wikto\Desktop\ACMA\dist
+OutputDir=.\dist
 OutputBaseFilename=relACs_setup
 Compression=lzma
 SolidCompression=yes
@@ -63,8 +63,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "settings\*"; DestDir: "{app}\settings"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "license.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "default_settings.ini"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
