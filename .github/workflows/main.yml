@@ -24,9 +24,14 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
         
-    - name: build application
+    - name: build application and run Inno Setup
       run: | 
         python -m PyInstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
+        ls
+        ls dist
+        iscc ".\relACs.iss"
+        cd dist
+        ls
         
 #     - name: Create Release
 #       id: create_release
@@ -54,13 +59,13 @@ jobs:
 #         name: relACs.exe
 #         path: ./dist/relACs.exe
         
-    - name: Inno Setup
-      run: |
-        ls
-        ls dist
-        iscc ".\relACs.iss"
-        cd dist
-        ls
+#     - name: Inno Setup
+#       run: |
+#         ls
+#         ls dist
+#         iscc ".\relACs.iss"
+#         cd dist
+#         ls
  
  
  
