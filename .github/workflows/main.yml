@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
         python-version: 3.11
@@ -54,10 +54,10 @@ jobs:
 #         asset_name: relACs.exe
 #         asset_content_type: application/x-msdownload
 
-#     - uses: actions/upload-artifact@v2
-#       with:
-#         name: relACs.exe
-#         path: ./dist/relACs.exe
+    - uses: actions/upload-artifact@v2
+      with:
+        name: relACs_setup.exe
+        path: ./dist/relACs_setup.exe
         
 #     - name: Inno Setup
 #       run: |
