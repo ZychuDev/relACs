@@ -27,11 +27,7 @@ jobs:
     - name: build application and run Inno Setup
       run: | 
         python -m PyInstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
-        ls
-        ls dist
         iscc ".\relACs.iss"
-        cd dist
-        ls
         
 #     - name: Create Release
 #       id: create_release
@@ -39,8 +35,8 @@ jobs:
 #       env:
 #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #       with:
-#         tag_name: ${{ github.ref }}
-#         release_name: Release ${{ github.ref }}
+#         tag_name: ${{ github.ref }} DO ZMIANY
+#         release_name: Release ${{ github.ref }}  DO ZMIANY
 #         draft: false
 #         prerelease: false
 #     - name: Upload Release Asset
@@ -50,8 +46,8 @@ jobs:
 #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #       with:
 #         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-#         asset_path: ./dist/relACs.exe
-#         asset_name: relACs.exe
+#         asset_path: ./dist/relACs_setup.exe
+#         asset_name: relACs_setup.exe
 #         asset_content_type: application/x-msdownload
 
     - uses: actions/upload-artifact@v2
@@ -59,33 +55,3 @@ jobs:
         name: relACs_setup.exe
         path: ./dist/relACs_setup.exe
         
-#     - name: Inno Setup
-#       run: |
-#         ls
-#         ls dist
-#         iscc ".\relACs.iss"
-#         cd dist
-#         ls
- 
- 
- 
-#     - name: deploy release
-#       uses: softprops/action-gh-release@v1
-#       with:
-#         files: ./desc/relACs.exe
-#       env:
-#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    
-    
-    
-
-#     - name: Package Application
-#       uses: JackMcKew/pyinstaller-action-windows@main
-#       with:
-#         path: src
-
-#     - uses: actions/upload-artifact@v2
-#       with:
-#         name: name-of-artifact
-#         path: src/dist/windows
