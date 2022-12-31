@@ -49,10 +49,10 @@ jobs:
 #         asset_name: relACs.exe
 #         asset_content_type: application/x-msdownload
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: relACs.exe
-        path: ./dist/relACs.exe
+#     - uses: actions/upload-artifact@v2
+#       with:
+#         name: relACs.exe
+#         path: ./dist/relACs.exe
         
     - name: Inno Setup
       run: |
