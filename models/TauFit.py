@@ -1,5 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QFileDialog, QWidget
+from PyQt6.QtGui import QUndoStack, QUndoCommand
 
 from .Parameter import Parameter, TAU_PARAMETER_NAME
 from .Point import Point
@@ -12,7 +13,7 @@ from functools import partial
 from scipy.optimize import least_squares # type: ignore
 from scipy.linalg import svd #type: ignore
 
-from numpy import power, exp, log, finfo, sqrt, diag, linspace, meshgrid
+from numpy import power, exp, log, finfo, sqrt, diag, linspace, meshgrid, setdiff1d
 from numpy import max as np_max
 
 from math import nextafter
@@ -22,7 +23,7 @@ from pandas import Series, DataFrame, concat #type: ignore
 TauParameters = tuple[Parameter, ...]
 
 class TauFit(QObject):
-    """_summary_
+    """Represent results of fitting process permorfmed on multiple Measurements.
 
         Args:
             name (str): Name of TauFit.
@@ -154,6 +155,8 @@ class TauFit(QObject):
         if collection is not None:
             self._collection = collection
 
+        self._undo_stack: QUndoStack = QUndoStack()
+
     @property
     def name(self):
         return self._name
@@ -164,6 +167,68 @@ class TauFit(QObject):
             raise ValueError("Tau fit name must be at least one character long")
         self._name = val
         self.name_changed.emit(val)
+
+    class Rename(QUndoCommand):
+        def __init__(self, tau_fit: "TauFit", new_name:str):
+            super().__init__()
+            self.tau_fit = tau_fit
+            self.new_name = new_name
+            self.old_name = tau_fit.name
+            
+        def redo(self) -> None:
+            self.tau_fit.name = self.new_name
+
+        def undo(self) -> None:
+            self.tau_fit.name = self.old_name
+
+    class HidePoint(QUndoCommand):
+        def __init__(self, tau_fit: "TauFit", v: float, z: float):
+            super().__init__()
+            self.tau_fit: TauFit = tau_fit
+            self.v: float = v
+            self.z: float = z
+
+        def redo(self) -> None:
+            self.tau_fit._hide_point(self.v, self.z)
+
+        def undo(self) -> None:
+            self.tau_fit._hide_point(self.v, self.z)
+
+    class DeletePoint(QUndoCommand):
+        def __init__(self, tau_fit: "TauFit", v: float, z: float):
+            super().__init__()
+            self.tau_fit: TauFit = tau_fit
+            self.v: float = v
+            self.z: float = z
+            self.point:Point = Point(1.0,1.0,1.0)
+
+        def redo(self) -> None:
+            self.point = self.tau_fit._delete_point(self.v, self.z)
+
+        def undo(self) -> None:
+            self.tau_fit._points.append(self.point)
+            self.tau_fit.points_changed.emit()
+
+    def set_name(self, new_name: str):
+        self._undo_stack.push(self.Rename(self, new_name))
+
+    def hide_point(self, v: float, z: float):
+        """Hide point that can be undone.
+
+        Args:
+            v (float): Value of actual varying ax of Point to hide.
+            z (float): Relaxation time of Point to hide.
+        """
+        self._undo_stack.push(self.HidePoint(self, v, z))
+
+    def delete_point(self, v: float, z: float):
+        """Delete point that can be undone.
+
+        Args:
+            v (float): Value of actual varying ax of Point ro delete.
+            z (float): Relaxation time of Point to delete.
+        """
+        self._undo_stack.push(self.DeletePoint(self, v, z))
 
     def append_point(self, tau:float, temp:float, field:float, silent=False):
         """Append new point to TauFit.
@@ -301,7 +366,7 @@ class TauFit(QObject):
         self.constant = value
         self.constant_changed.emit(value)
 
-    def hide_point(self, v: float, z: float):
+    def _hide_point(self, v: float, z: float):
         """Hide point.
 
         Args:
@@ -319,23 +384,30 @@ class TauFit(QObject):
                     break
         self.points_changed.emit()
 
-    def delete_point(self, v: float, z: float):
+    def _delete_point(self, v: float, z: float):
         """Delete point
 
         Args:
             v (float): Value of actual varying ax of Point ro delete.
             z (float): Relaxation time of Point to delete.
         """
-        old_points: list[Point] = self._points
-        if self.varying == "Field":
-            self._points = [p for p in self._points if (p.field, p.temp, log(p.tau)) != (v, self.constant, z)]
-        else:
-            self._points = [p for p in self._points if (p.temp,  p.field, log(p.tau)) != (1/v, self.constant, z)]
 
-        if len(self._points) < 2:
-            self._points = old_points
+        tmp: list[Point]
+        if self.varying == "Field":
+            tmp = [p for p in self._points if (p.field, p.temp, log(p.tau)) != (v, self.constant, z)]
+
+        else:
+            tmp = [p for p in self._points if (p.temp,  p.field, log(p.tau)) != (1/v, self.constant, z)]
+
+
+        if len(tmp) < 2:
+            return
+
+        point: Point = list(set(self._points) - set(tmp))[0]
+        self._points = tmp
 
         self.points_changed.emit()
+        return point
 
     def get_parameters_values(self) -> tuple[float, float, float, float, float, float, float, float, float, float]:
         """Get all parameters value.
@@ -625,3 +697,9 @@ class TauFit(QObject):
 
         for point in f["points"]:
             self.append_point(point["tau"], point["temp"], point["field"], point["is_hidden"])
+
+    def undo(self):
+        self._undo_stack.undo()
+
+    def redo(self):
+        self._undo_stack.redo()

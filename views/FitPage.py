@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
  QPushButton, QCheckBox, QTableWidget, QAbstractScrollArea,
  QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox)
 from PyQt6.QtCore import QSize, QMetaObject, QObject, Qt
-from PyQt6.QtGui import QFont, QPalette, QBrush, QColor
+from PyQt6.QtGui import QFont, QPalette, QBrush, QColor, QKeySequence, QShortcut
 
 from models import Fit, PARAMETER_NAME, Relaxation
 from typing import get_args
@@ -146,12 +146,12 @@ class RelaxationTab(QWidget):
     def update_errors(self):
         i:int
         for i, p in enumerate(self.relaxation.parameters):
-            self.fit_error.setItem(1, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))
+            self.fit_error.setItem(1, i, QTableWidgetItem(f"{round(p.value, 8)} \u00b1 {str(round(p.error, 8))}"))
         self.fit_error.setItem(1, i+1, QTableWidgetItem(str(round(self.relaxation.residual_error, 8))))
 
     def update_saved_errors(self):
         for i, p in enumerate(self.relaxation.saved_parameters):
-            self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))
+            self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} \u00b1 {str(round(p.error, 8))}"))
         self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(p.error, 8))))
 
 class ParametersControl(QTabWidget):
@@ -283,6 +283,20 @@ class FitPage(QWidget):
         self.copy_parameters_button.clicked.connect(self.copy_parameters)
         self.cycle_next.clicked.connect(self.on_cycle_next_clicked)
         self.cycle_previous.clicked.connect(self.on_cycle_previous_clicked)
+
+        self.shortcut: QShortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
+        self.shortcut.activated.connect(self.on_undo)
+
+        self.shortcut_redo: QShortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
+        self.shortcut_redo.activated.connect(self.on_redo)
+
+    def on_undo(self):
+        if self.fit is not None:
+            self.fit.undo()
+
+    def on_redo(self):
+        if self.fit is not None:
+            self.fit.redo()
 
     def make_auto_fit(self):
         self.fit.make_auto_fit()

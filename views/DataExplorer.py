@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableView, QHeaderView
 from PyQt6.QtCore import QAbstractTableModel, QSize, Qt
-from PyQt6.QtGui import QFont
+from PyQt6.QtGui import QFont, QKeySequence, QShortcut
 
 from models import Measurement
 
@@ -107,6 +107,20 @@ class DataExplorer(QWidget):
 
         self.cid:int = self.sc.mpl_connect('pick_event', self.on_click)
         self._last_event_time:float = time()
+
+        self.shortcut: QShortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
+        self.shortcut.activated.connect(self.on_undo)
+
+        self.shortcut_redo: QShortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
+        self.shortcut_redo.activated.connect(self.on_redo)
+
+    def on_undo(self):
+        if self.measurement is not None:
+            self.measurement.undo()
+
+    def on_redo(self):
+        if self.measurement is not None:
+            self.measurement.redo()
 
     def set_measurement(self, measurement:Measurement):
         if self.measurement is not None:

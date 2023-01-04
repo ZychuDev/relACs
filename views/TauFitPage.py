@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
  QPushButton, QTableWidget, QAbstractScrollArea,
  QAbstractItemView, QTableWidgetItem, QDialog, QComboBox, QSplitter)
 from PyQt6.QtCore import QSize, QMetaObject, QObject, Qt
-from PyQt6.QtGui import QFont, QPalette, QBrush, QColor
+from PyQt6.QtGui import QFont, QPalette, QBrush, QColor, QKeySequence, QShortcut
 
 from models import TauFit, TAU_PARAMETER_NAME
 from .ParameterSlider import ParameterSlider
@@ -216,6 +216,20 @@ class TauFitPage(QWidget):
         self.save_button.clicked.connect(self.save)
         self.reset_button.clicked.connect(self.reset)
         self.copy_parameters_button.clicked.connect(self.copy_parameters)
+
+        self.shortcut: QShortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
+        self.shortcut.activated.connect(self.on_undo)
+
+        self.shortcut_redo: QShortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
+        self.shortcut_redo.activated.connect(self.on_redo)
+
+    def on_undo(self):
+        if self.tau_fit is not None:
+            self.tau_fit.undo()
+
+    def on_redo(self):
+        if self.tau_fit is not None:
+            self.tau_fit.redo()
 
     def make_auto_fit(self):
         self.tau_fit.make_auto_fit()
@@ -588,13 +602,13 @@ class TauFitPage(QWidget):
     def _update_errors(self):
         i:int
         for i, p in enumerate(self.tau_fit.parameters):
-            self.fit_error.setItem(1, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))
+            self.fit_error.setItem(1, i, QTableWidgetItem(f"{round(p.value, 8)} \u00b1 {str(round(p.error, 8))}"))
         self.fit_error.setItem(1, i+1, QTableWidgetItem(str(round(self.tau_fit.residual_error, 8))))
     
     def _update_saved_errors(self):
         i:int
         for i, p in enumerate(self.tau_fit.saved_parameters):
-            self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} += {str(round(p.error, 8))}"))
+            self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} \u00b1 {str(round(p.error, 8))}"))
         self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(self.tau_fit.saved_residual_error, 8))))
 
     def copy_parameters(self):

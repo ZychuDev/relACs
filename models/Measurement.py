@@ -1,14 +1,17 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtGui import QUndoStack, QUndoCommand
 from protocols import SettingsSource, Collection
 from readers import SettingsReader
 
-from pandas import DataFrame, Series # type: ignore
+from pandas import DataFrame, Series, concat # type: ignore
 from math import log10, floor
 from numpy import zeros
 
+
+
 class Measurement(QObject):
-    """_summary_
+    """Represent one cluster of Measurements performed on probe of Compound.
 
         Args:
             df (DataFrame): Processed data from magnetometr.
@@ -77,9 +80,49 @@ class Measurement(QObject):
         self._compound: SettingsSource = compound
         self._collection: Collection = collection
 
-    # @property
-    # def df(self):
-    #     return self._df
+        self._undo_stack: QUndoStack = QUndoStack()
+
+    class Rename(QUndoCommand):
+        def __init__(self, measurement: "Measurement", new_name:str):
+            super().__init__()
+            self._measurement = measurement
+            self.new_name = new_name
+            self.old_name = measurement.name
+            
+        def redo(self) -> None:
+            self._measurement.name = self.new_name
+
+        def undo(self) -> None:
+            self._measurement.name = self.old_name
+        
+    class HidePoint(QUndoCommand):
+        def __init__(self, measurement: "Measurement", x: float, x_str: str):
+            super().__init__()
+            self._measurement = measurement
+            self.x: float = x
+            self.x_str: str = x_str
+
+        def redo(self) -> None:
+            self._measurement._hide_point(self.x, self.x_str)
+
+        def undo(self) -> None:
+            self._measurement._hide_point(self.x, self.x_str)
+
+    class DeletePoint(QUndoCommand):
+        def __init__(self, measurement: "Measurement", x: float, x_str: str):
+
+            super().__init__()
+            self._measurement: Measurement = measurement
+            self.x: float = x
+            self.x_str: str = x_str
+            self.point: DataFrame = DataFrame()
+
+        def redo(self) -> None:
+            self.point = self._measurement._delete_point(self.x, self.x_str)
+
+        def undo(self) -> None:
+            self._measurement._df = concat([self._measurement._df, self.point])
+            self._measurement.df_changed.emit()
 
     @property
     def name(self):
@@ -91,9 +134,19 @@ class Measurement(QObject):
             raise ValueError("Compund name must be at least one character long")
         self._collection.update_names(self._name, val)
         self._name = val
+
         self.name_changed.emit(val)
 
+    def set_name(self, new_name: str):
+        self._undo_stack.push(self.Rename(self, new_name))
+    
     def hide_point(self, x: float, x_str: str):
+        self._undo_stack.push(self.HidePoint(self, x, x_str))
+
+    def delete_point(self, x: float, x_str: str):
+        self._undo_stack.push(self.DeletePoint(self, x, x_str))
+
+    def _hide_point(self, x: float, x_str: str):
         """Hide point 
 
         Args:
@@ -105,7 +158,7 @@ class Measurement(QObject):
         self.df_changed.emit()
         # self.dataChanged.emit() #type: ignore
 
-    def delete_point(self, x: float, x_str: str):
+    def _delete_point(self, x: float, x_str: str):
         """Delete point 
 
         Args:
@@ -120,9 +173,10 @@ class Measurement(QObject):
             msg.exec()
             return
 
+        point: DataFrame = self._df.loc[self._df[x_str] == x]
         self._df.drop(self._df.loc[self._df[x_str] == x].index, inplace=True)
         self.df_changed.emit()
-        # self.dataChanged.emit() #type: ignore
+        return point
 
     def get_jsonable(self) -> dict:
         """Marshal object to python dictionary.
@@ -137,3 +191,9 @@ class Measurement(QObject):
          "field": self._field,
         }
         return jsonable
+
+    def undo(self):
+        self._undo_stack.undo()
+
+    def redo(self):
+        self._undo_stack.redo()

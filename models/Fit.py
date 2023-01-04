@@ -1,9 +1,9 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QMessageBox, QFileDialog, QWidget
+from PyQt6.QtGui import QUndoStack, QUndoCommand
 
 from .Relaxation import Relaxation
 from .Measurement import Measurement 
-from .Parameter import Parameter
 
 from protocols import SettingsSource, Collection
 
@@ -17,7 +17,7 @@ from math import nextafter
 from typing import Self 
 
 class Fit(QObject):
-    """Represent one fit for Havriliak-Negami model with n-relaxation
+    """Represent one fit for Havriliak-Negami model with n-relaxation.
 
         Args:
             name (str): Name of fit.
@@ -91,6 +91,7 @@ class Fit(QObject):
         if collection is not None:
             self._collection = collection
 
+        self._undo_stack: QUndoStack = QUndoStack()
         self.resolution = 50 # TO::DO 
 
     @property
@@ -106,6 +107,48 @@ class Fit(QObject):
         self._name = val
         self.name_changed.emit(val)
 
+    class Rename(QUndoCommand):
+        def __init__(self, fit: "Fit", new_name:str):
+            super().__init__()
+            self._fit = fit
+            self.new_name = new_name
+            self.old_name = fit.name
+            
+        def redo(self) -> None:
+            self._fit.name = self.new_name
+
+        def undo(self) -> None:
+            self._fit.name = self.old_name
+
+    class HidePoint(QUndoCommand):
+        def __init__(self, fit: "Fit", x: float, x_str: str):
+            super().__init__()
+            self.fit: Fit = fit
+            self.x: float = x
+            self.x_str: str = x_str
+
+        def redo(self) -> None:
+            self.fit._hide_point(self.x, self.x_str)
+
+        def undo(self) -> None:
+            self.fit._hide_point(self.x, self.x_str)
+
+    class DeletePoint(QUndoCommand):
+        def __init__(self, fit: "Fit", x: float, x_str: str):
+
+            super().__init__()
+            self.fit: Fit = fit
+            self.x: float = x
+            self.x_str: str = x_str
+            self.point: DataFrame = DataFrame()
+
+        def redo(self) -> None:
+            self.point = self.fit._delete_point(self.x, self.x_str)
+
+        def undo(self) -> None:
+            self.fit._df = concat([self.fit._df, self.point])
+            self.fit.df_changed.emit()
+
     @property
     def molar_mass(self):
         return self._molar_mass
@@ -117,7 +160,16 @@ class Fit(QObject):
 
         self._molar_mass = val
 
+    def set_name(self, new_name: str):
+        self._undo_stack.push(self.Rename(self, new_name))
+    
     def hide_point(self, x: float, x_str: str):
+        self._undo_stack.push(self.HidePoint(self, x, x_str))
+
+    def delete_point(self, x: float, x_str: str):
+        self._undo_stack.push(self.DeletePoint(self, x, x_str))
+
+    def _hide_point(self, x: float, x_str: str):
         """Hide point 
 
         Args:
@@ -128,7 +180,7 @@ class Fit(QObject):
         self._df.loc[self._df[x_str] == x, "Hidden"] = not actual
         self.df_changed.emit()
 
-    def delete_point(self, x: float, x_str: str):
+    def _delete_point(self, x: float, x_str: str):
         """Delete point 
 
         Args:
@@ -143,9 +195,10 @@ class Fit(QObject):
             msg.exec()
             return
 
+        point: DataFrame = self._df.loc[self._df[x_str] == x]
         self._df.drop(self._df.loc[self._df[x_str] == x].index, inplace=True)
         self.df_point_deleted.emit()
-
+        return point
 
 
     def cost_function(self, p):
@@ -329,3 +382,9 @@ class Fit(QObject):
                 s_p.update_from_json(r_j["saved_parameters"][k])
 
             self.relaxations.append(r)
+
+    def undo(self):
+        self._undo_stack.undo()
+
+    def redo(self):
+        self._undo_stack.redo()

@@ -24,4 +24,4 @@ class MeasurementItemController(QObject):
                 msg.exec()
                 return
 
-            self._model.name = new_name
+            self._model.set_name(new_name)

@@ -18,7 +18,7 @@ class CompoundItem(StandardItem):
     def __init__(self, model: Compound, ctrl: CompoundItemController):
         super().__init__(model._name, 14, False)
         self.setBackground(QBrush(QColor(255,255,255)))
-        self.setCheckable(True)
+        self.setCheckable(False)
 
         self._model: Compound = model
         self._ctrl: CompoundItemController = ctrl

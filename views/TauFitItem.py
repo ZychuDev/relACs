@@ -12,7 +12,7 @@ class TauFitItem(StandardItem):
     def __init__(self, model: TauFit, ctrl: TauFitItemController):
         super().__init__(model._name, 14, False)
         self.setBackground(QBrush(QColor(255,255,255)))
-        self.setCheckable(True)
+        self.setCheckable(False)
         self._model: TauFit = model
         self._ctrl: TauFitItemController = ctrl
 
