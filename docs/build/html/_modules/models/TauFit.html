@@ -68,6 +68,7 @@
   <h1>Source code for models.TauFit</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QWidget</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QUndoStack</span><span class="p">,</span> <span class="n">QUndoCommand</span>
 
 <span class="kn">from</span> <span class="nn">.Parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">TAU_PARAMETER_NAME</span>
 <span class="kn">from</span> <span class="nn">.Point</span> <span class="kn">import</span> <span class="n">Point</span>
@@ -80,7 +81,7 @@
 <span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span> <span class="c1"># type: ignore</span>
 <span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">svd</span> <span class="c1">#type: ignore</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">power</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">finfo</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">meshgrid</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">power</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">finfo</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">meshgrid</span><span class="p">,</span> <span class="n">setdiff1d</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">max</span> <span class="k">as</span> <span class="n">np_max</span>
 
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">nextafter</span>
@@ -90,7 +91,7 @@
 <span class="n">TauParameters</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Parameter</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
 <div class="viewcode-block" id="TauFit"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit">[docs]</a><span class="k">class</span> <span class="nc">TauFit</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;_summary_</span>
+    <span class="sd">&quot;&quot;&quot;Represent results of fitting process permorfmed on multiple Measurements.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): Name of TauFit.</span>
@@ -222,6 +223,8 @@
         <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">collection</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="p">:</span> <span class="n">QUndoStack</span> <span class="o">=</span> <span class="n">QUndoStack</span><span class="p">()</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
@@ -232,6 +235,68 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Tau fit name must be at least one character long&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TauFit.Rename"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.Rename">[docs]</a>    <span class="k">class</span> <span class="nc">Rename</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_fit</span><span class="p">:</span> <span class="s2">&quot;TauFit&quot;</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span> <span class="o">=</span> <span class="n">tau_fit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_name</span> <span class="o">=</span> <span class="n">new_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">old_name</span> <span class="o">=</span> <span class="n">tau_fit</span><span class="o">.</span><span class="n">name</span>
+            
+<div class="viewcode-block" id="TauFit.Rename.redo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.Rename.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_name</span></div>
+
+<div class="viewcode-block" id="TauFit.Rename.undo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.Rename.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_name</span></div></div>
+
+<div class="viewcode-block" id="TauFit.HidePoint"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.HidePoint">[docs]</a>    <span class="k">class</span> <span class="nc">HidePoint</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_fit</span><span class="p">:</span> <span class="s2">&quot;TauFit&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="p">:</span> <span class="n">TauFit</span> <span class="o">=</span> <span class="n">tau_fit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">z</span>
+
+<div class="viewcode-block" id="TauFit.HidePoint.redo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.HidePoint.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="o">.</span><span class="n">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.HidePoint.undo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.HidePoint.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="o">.</span><span class="n">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="TauFit.DeletePoint"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.DeletePoint">[docs]</a>    <span class="k">class</span> <span class="nc">DeletePoint</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_fit</span><span class="p">:</span> <span class="s2">&quot;TauFit&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="p">:</span> <span class="n">TauFit</span> <span class="o">=</span> <span class="n">tau_fit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">v</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">z</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">:</span><span class="n">Point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TauFit.DeletePoint.redo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.DeletePoint.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="o">.</span><span class="n">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.DeletePoint.undo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.DeletePoint.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="o">.</span><span class="n">_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tau_fit</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div></div>
+
+<div class="viewcode-block" id="TauFit.set_name"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.set_name">[docs]</a>    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TauFit.hide_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.hide_point">[docs]</a>    <span class="k">def</span> <span class="nf">hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hide point that can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            v (float): Value of actual varying ax of Point to hide.</span>
+<span class="sd">            z (float): Relaxation time of Point to hide.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">HidePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TauFit.delete_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete point that can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            v (float): Value of actual varying ax of Point ro delete.</span>
+<span class="sd">            z (float): Relaxation time of Point to delete.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DeletePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">z</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="TauFit.append_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.append_point">[docs]</a>    <span class="k">def</span> <span class="nf">append_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Append new point to TauFit.</span>
@@ -369,7 +434,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">constant_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TauFit.hide_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.hide_point">[docs]</a>    <span class="k">def</span> <span class="nf">hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Hide point.</span>
 
 <span class="sd">        Args:</span>
@@ -385,25 +450,32 @@
                 <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">v</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">field</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="ow">and</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span> <span class="o">==</span> <span class="n">z</span><span class="p">:</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span>
                     <span class="k">break</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
 
-<div class="viewcode-block" id="TauFit.delete_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Delete point</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            v (float): Value of actual varying ax of Point ro delete.</span>
 <span class="sd">            z (float): Relaxation time of Point to delete.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">old_points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span>
+
+        <span class="n">tmp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying</span> <span class="o">==</span> <span class="s2">&quot;Field&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span>  <span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span>  <span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">old_points</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">point</span><span class="p">:</span> <span class="n">Point</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">tmp</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">tmp</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">point</span>
 
 <div class="viewcode-block" id="TauFit.get_parameters_values"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_parameters_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameters_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get all parameters value.</span>
@@ -692,7 +764,13 @@
             <span class="n">s_p</span><span class="o">.</span><span class="n">update_from_json</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;saved_parameters&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="s2">&quot;tau&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;temp&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;is_hidden&quot;</span><span class="p">])</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="s2">&quot;tau&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;temp&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;is_hidden&quot;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="TauFit.undo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.redo"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>

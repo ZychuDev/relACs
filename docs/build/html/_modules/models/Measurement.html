@@ -68,15 +68,18 @@
   <h1>Source code for models.Measurement</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QMessageBox</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QUndoStack</span><span class="p">,</span> <span class="n">QUndoCommand</span>
 <span class="kn">from</span> <span class="nn">protocols</span> <span class="kn">import</span> <span class="n">SettingsSource</span><span class="p">,</span> <span class="n">Collection</span>
 <span class="kn">from</span> <span class="nn">readers</span> <span class="kn">import</span> <span class="n">SettingsReader</span>
 
-<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Series</span> <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Series</span><span class="p">,</span> <span class="n">concat</span> <span class="c1"># type: ignore</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">log10</span><span class="p">,</span> <span class="n">floor</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">zeros</span>
 
+
+
 <div class="viewcode-block" id="Measurement"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement">[docs]</a><span class="k">class</span> <span class="nc">Measurement</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;_summary_</span>
+    <span class="sd">&quot;&quot;&quot;Represent one cluster of Measurements performed on probe of Compound.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            df (DataFrame): Processed data from magnetometr.</span>
@@ -145,9 +148,49 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="p">:</span> <span class="n">SettingsSource</span> <span class="o">=</span> <span class="n">compound</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span> <span class="n">Collection</span> <span class="o">=</span> <span class="n">collection</span>
 
-    <span class="c1"># @property</span>
-    <span class="c1"># def df(self):</span>
-    <span class="c1">#     return self._df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="p">:</span> <span class="n">QUndoStack</span> <span class="o">=</span> <span class="n">QUndoStack</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Measurement.Rename"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.Rename">[docs]</a>    <span class="k">class</span> <span class="nc">Rename</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">:</span> <span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span> <span class="o">=</span> <span class="n">measurement</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">new_name</span> <span class="o">=</span> <span class="n">new_name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">old_name</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">name</span>
+            
+<div class="viewcode-block" id="Measurement.Rename.redo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.Rename.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_name</span></div>
+
+<div class="viewcode-block" id="Measurement.Rename.undo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.Rename.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_name</span></div></div>
+        
+<div class="viewcode-block" id="Measurement.HidePoint"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.HidePoint">[docs]</a>    <span class="k">class</span> <span class="nc">HidePoint</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">:</span> <span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span> <span class="o">=</span> <span class="n">measurement</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">x_str</span>
+
+<div class="viewcode-block" id="Measurement.HidePoint.redo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.HidePoint.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Measurement.HidePoint.undo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.HidePoint.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Measurement.DeletePoint"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.DeletePoint">[docs]</a>    <span class="k">class</span> <span class="nc">DeletePoint</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">:</span> <span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+
+            <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="p">:</span> <span class="n">Measurement</span> <span class="o">=</span> <span class="n">measurement</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">x</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">x_str</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Measurement.DeletePoint.redo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.DeletePoint.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Measurement.DeletePoint.undo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.DeletePoint.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">df_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -159,9 +202,19 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Compund name must be at least one character long&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">update_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">val</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">name_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
+<div class="viewcode-block" id="Measurement.set_name"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.set_name">[docs]</a>    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">))</span></div>
+    
 <div class="viewcode-block" id="Measurement.hide_point"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.hide_point">[docs]</a>    <span class="k">def</span> <span class="nf">hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">HidePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Measurement.delete_point"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DeletePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">))</span></div>
+
+    <span class="k">def</span> <span class="nf">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Hide point </span>
 
 <span class="sd">        Args:</span>
@@ -170,10 +223,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">actual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">][</span><span class="s1">&#39;Hidden&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;Hidden&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">actual</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">df_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="c1"># self.dataChanged.emit() #type: ignore</span>
 
-<div class="viewcode-block" id="Measurement.delete_point"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Delete point </span>
 
 <span class="sd">        Args:</span>
@@ -188,9 +241,10 @@
             <span class="n">msg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
             <span class="k">return</span>
 
+        <span class="n">point</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">df_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
-        <span class="c1"># self.dataChanged.emit() #type: ignore</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">point</span>
 
 <div class="viewcode-block" id="Measurement.get_jsonable"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.get_jsonable">[docs]</a>    <span class="k">def</span> <span class="nf">get_jsonable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Marshal object to python dictionary.</span>
@@ -204,7 +258,13 @@
          <span class="s2">&quot;tmp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="p">,</span>
          <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">return</span> <span class="n">jsonable</span></div></div>
+        <span class="k">return</span> <span class="n">jsonable</span></div>
+
+<div class="viewcode-block" id="Measurement.undo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.undo">[docs]</a>    <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">undo</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Measurement.redo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.redo">[docs]</a>    <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">redo</span><span class="p">()</span></div></div>
 </pre></div>
 
            </div>

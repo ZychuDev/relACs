@@ -347,7 +347,7 @@
 <dt class="sig sig-object py" id="models.Fit.Fit">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Fit.</span></span><span class="sig-name descname"><span class="pre">Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">protocols.Collection.Collection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
-<p>Represent one fit for Havriliak-Negami model with n-relaxation</p>
+<p>Represent one fit for Havriliak-Negami model with n-relaxation.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -393,6 +393,54 @@
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Fit.Fit.DeletePoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeletePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Fit.Fit" title="models.Fit.Fit"><span class="pre">Fit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.DeletePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.DeletePoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.DeletePoint.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.DeletePoint.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.DeletePoint.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.DeletePoint.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.DeletePoint.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.DeletePoint.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Fit.Fit.HidePoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HidePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Fit.Fit" title="models.Fit.Fit"><span class="pre">Fit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.HidePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.HidePoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.HidePoint.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.HidePoint.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.HidePoint.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.HidePoint.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.HidePoint.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.HidePoint.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Fit.Fit.Rename">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Fit.Fit" title="models.Fit.Fit"><span class="pre">Fit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.Rename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.Rename" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.Rename.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.Rename.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.Rename.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.Rename.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.Rename.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.Rename.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.copy_all_relxations">
 <span class="sig-name descname"><span class="pre">copy_all_relxations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.copy_all_relxations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.copy_all_relxations" title="Permalink to this definition"></a></dt>
@@ -419,16 +467,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.delete_point">
 <span class="sig-name descname"><span class="pre">delete_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.delete_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.delete_point" title="Permalink to this definition"></a></dt>
-<dd><p>Delete point</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
-<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.from_measurement">
@@ -482,16 +521,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.hide_point">
 <span class="sig-name descname"><span class="pre">hide_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.hide_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.hide_point" title="Permalink to this definition"></a></dt>
-<dd><p>Hide point</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
-<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.make_auto_fit">
@@ -542,6 +572,11 @@
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.save_all_relaxations">
 <span class="sig-name descname"><span class="pre">save_all_relaxations</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.save_all_relaxations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.save_all_relaxations" title="Permalink to this definition"></a></dt>
 <dd><p>Save current parameters of all relaxations.</p>
@@ -552,6 +587,16 @@
 <span class="sig-name descname"><span class="pre">save_to_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.save_to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.save_to_file" title="Permalink to this definition"></a></dt>
 <dd><p>Savig result to .csv file</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.set_name">
+<span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.set_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Fit.Fit.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.update_relaxations_from_json">
@@ -821,7 +866,7 @@
 <dt class="sig sig-object py" id="models.Measurement.Measurement">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Measurement.</span></span><span class="sig-name descname"><span class="pre">Measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">Collection</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
-<p>_summary_</p>
+<p>Represent one cluster of Measurements performed on probe of Compound.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -856,6 +901,54 @@
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.DeletePoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeletePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measurement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Measurement.Measurement" title="models.Measurement.Measurement"><span class="pre">Measurement</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.DeletePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.DeletePoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.DeletePoint.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.DeletePoint.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.DeletePoint.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.DeletePoint.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.DeletePoint.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.DeletePoint.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.HidePoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HidePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measurement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Measurement.Measurement" title="models.Measurement.Measurement"><span class="pre">Measurement</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.HidePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.HidePoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.HidePoint.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.HidePoint.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.HidePoint.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.HidePoint.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.HidePoint.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.HidePoint.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.Rename">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measurement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Measurement.Measurement" title="models.Measurement.Measurement"><span class="pre">Measurement</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.Rename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.Rename" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.Rename.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.Rename.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.Rename.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.Rename.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.Rename.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.Rename.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.columns_headers">
 <span class="sig-name descname"><span class="pre">columns_headers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['Temperature',</span> <span class="pre">'MagneticField',</span> <span class="pre">'ChiPrime',</span> <span class="pre">'ChiBis',</span> <span class="pre">'Frequency']</span></em><a class="headerlink" href="#models.Measurement.Measurement.columns_headers" title="Permalink to this definition"></a></dt>
@@ -864,16 +957,7 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.delete_point">
 <span class="sig-name descname"><span class="pre">delete_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.delete_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.delete_point" title="Permalink to this definition"></a></dt>
-<dd><p>Delete point</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
-<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.from_data_frame">
@@ -914,20 +998,26 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.hide_point">
 <span class="sig-name descname"><span class="pre">hide_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.hide_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.hide_point" title="Permalink to this definition"></a></dt>
-<dd><p>Hide point</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
-<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#models.Measurement.Measurement.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.set_name">
+<span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.set_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.undo" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1526,7 +1616,7 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 <dt class="sig sig-object py" id="models.TauFit.TauFit">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.TauFit.</span></span><span class="sig-name descname"><span class="pre">TauFit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
-<p>_summary_</p>
+<p>Represent results of fitting process permorfmed on multiple Measurements.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1602,6 +1692,38 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.DeletePoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeletePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.TauFit.TauFit" title="models.TauFit.TauFit"><span class="pre">TauFit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.DeletePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.DeletePoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.DeletePoint.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.DeletePoint.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.DeletePoint.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.DeletePoint.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.DeletePoint.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.DeletePoint.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.HidePoint">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">HidePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.TauFit.TauFit" title="models.TauFit.TauFit"><span class="pre">TauFit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.HidePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.HidePoint" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.HidePoint.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.HidePoint.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.HidePoint.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.HidePoint.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.HidePoint.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.HidePoint.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="models.TauFit.TauFit.Orbach">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Orbach</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_e</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.Orbach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.Orbach" title="Permalink to this definition"></a></dt>
@@ -1642,6 +1764,22 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 <dd class="field-odd"><p>float</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.Rename">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tau_fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.TauFit.TauFit" title="models.TauFit.TauFit"><span class="pre">TauFit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.Rename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.Rename" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.Rename.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.Rename.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.Rename.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.Rename.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.Rename.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.Rename.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py method">
@@ -1694,7 +1832,7 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 <dl class="py method">
 <dt class="sig sig-object py" id="models.TauFit.TauFit.delete_point">
 <span class="sig-name descname"><span class="pre">delete_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.delete_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.delete_point" title="Permalink to this definition"></a></dt>
-<dd><p>Delete point</p>
+<dd><p>Delete point that can be undone.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1915,7 +2053,7 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 <dl class="py method">
 <dt class="sig sig-object py" id="models.TauFit.TauFit.hide_point">
 <span class="sig-name descname"><span class="pre">hide_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.hide_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.hide_point" title="Permalink to this definition"></a></dt>
-<dd><p>Hide point.</p>
+<dd><p>Hide point that can be undone.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1999,6 +2137,11 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.redo">
+<span class="sig-name descname"><span class="pre">redo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.redo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.redo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="models.TauFit.TauFit.reset">
 <span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.reset" title="Permalink to this definition"></a></dt>
 <dd><p>Set all current parameters values to saved ones.</p>
@@ -2042,6 +2185,11 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.set_name">
+<span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.set_name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="models.TauFit.TauFit.set_varying">
 <span class="sig-name descname"><span class="pre">set_varying</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">txt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Field'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Temperature'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.set_varying"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.set_varying" title="Permalink to this definition"></a></dt>
 <dd><p>Set new varying ax in slice.</p>
@@ -2051,6 +2199,11 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="models.TauFit.TauFit.undo">
+<span class="sig-name descname"><span class="pre">undo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.undo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.undo" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.TauFit.TauFit.update_from_json">

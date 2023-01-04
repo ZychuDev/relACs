@@ -77,11 +77,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span> <span class="n">CompoundItemsCollectionModel</span> <span class="o">=</span> <span class="n">model</span>
 
 <div class="viewcode-block" id="CompoundItemsCollectionController.display"><a class="viewcode-back" href="../../controllers.html#controllers.CompoundItemsCollectionController.CompoundItemsCollectionController.display">[docs]</a>    <span class="k">def</span> <span class="nf">display</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Display Home Page</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_displayer</span><span class="o">.</span><span class="n">display_home_page</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="CompoundItemsCollectionController.add_compound"><a class="viewcode-back" href="../../controllers.html#controllers.CompoundItemsCollectionController.CompoundItemsCollectionController.add_compound">[docs]</a>    <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">add_compound</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
+        <span class="sd">&quot;&quot;&quot;Create and add to collection new Compound&quot;&quot;&quot;</span>
         <span class="n">name</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">QWidget</span><span class="p">(),</span> <span class="s1">&#39;Creating new compund&#39;</span><span class="p">,</span> <span class="s1">&#39;Enter name of compound:&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>

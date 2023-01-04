@@ -71,6 +71,7 @@
 <div class="viewcode-block" id="HomePageController"><a class="viewcode-back" href="../../controllers.html#controllers.HomePageController.HomePageController">[docs]</a><span class="k">class</span> <span class="nc">HomePageController</span><span class="p">():</span>
 <div class="viewcode-block" id="HomePageController.open_url"><a class="viewcode-back" href="../../controllers.html#controllers.HomePageController.HomePageController.open_url">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">open_url</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Open link to publication.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;www&#39;</span><span class="p">:</span>
             <span class="nb">open</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;10.1039/D2CC02238A&quot;</span><span class="p">:</span>

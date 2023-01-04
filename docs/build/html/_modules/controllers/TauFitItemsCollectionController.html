@@ -78,6 +78,8 @@
 
 <div class="viewcode-block" id="TauFitItemsCollectionController.save_all_to_file"><a class="viewcode-back" href="../../controllers.html#controllers.TauFitItemsCollectionController.TauFitItemsCollectionController.save_all_to_file">[docs]</a>    <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">save_all_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save results from all TauFits in collection to .csv file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">fit</span> <span class="ow">in</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_tau_fits</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="p">,</span> <span class="n">fit</span><span class="o">.</span><span class="n">get_result</span><span class="p">()],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>

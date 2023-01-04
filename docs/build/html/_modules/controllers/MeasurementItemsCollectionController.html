@@ -85,6 +85,8 @@
 
 <div class="viewcode-block" id="MeasurementItemsCollectionController.load_measurements_from_file"><a class="viewcode-back" href="../../controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.load_measurements_from_file">[docs]</a>    <span class="nd">@pyqtSlot</span><span class="p">()</span>
     <span class="k">def</span> <span class="nf">load_measurements_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load data from magnetometr to relACs program.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dlg</span><span class="p">:</span> <span class="n">QFileDialog</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="p">()</span>
         <span class="n">dlg</span><span class="o">.</span><span class="n">setFileMode</span><span class="p">(</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">FileMode</span><span class="o">.</span><span class="n">ExistingFile</span><span class="p">)</span>
 
@@ -173,6 +175,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_compound</span><span class="o">.</span><span class="n">_tree</span><span class="o">.</span><span class="n">resizeColumnToContents</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MeasurementItemsCollectionController.dat_to_csv"><a class="viewcode-back" href="../../controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.dat_to_csv">[docs]</a>    <span class="k">def</span> <span class="nf">dat_to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filepath</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create new file in in .csv format from .dat source file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            filepath (str): System path to source file.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: Raise when filepath is incorrect.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Filepath to created .csv file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span> 
 
@@ -194,6 +207,17 @@
         <span class="k">return</span> <span class="n">new_filepath</span></div>
 
 <div class="viewcode-block" id="MeasurementItemsCollectionController.cluster"><a class="viewcode-back" href="../../controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.cluster">[docs]</a>    <span class="k">def</span> <span class="nf">cluster</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">by</span><span class="p">:</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;MagneticField&quot;</span><span class="p">,</span> <span class="s2">&quot;Temperature&quot;</span><span class="p">],</span> <span class="n">epsilon</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">reindex</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">DataFrame</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Perform clusterization of measurement data from magnetometr.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (DataFrame): Measurement data from magnetometr</span>
+<span class="sd">            by (Literal[&amp;quot;MagneticField&amp;quot;, &amp;quot;Temperature&amp;quot;]): Main dimention of clusterization.</span>
+<span class="sd">            epsilon (float): If space between two subsequent measurement points is bigger than epsilon, all new points from this point onward will we added to next cluster. </span>
+<span class="sd">            reindex (bool, optional): Whether to reset index for DataFrames in result. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[DataFrame]: List of DataFrames that each represent one cluster.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sorted_data</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">by</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">min_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">sorted_data</span><span class="p">[</span><span class="n">by</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
 
