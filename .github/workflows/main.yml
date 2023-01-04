@@ -1,0 +1,57 @@
+name: Create windows application
+
+on:
+  push:
+    branches: [ "2.0" ]
+  pull_request:
+    branches: [ "2.0" ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.11
+    
+    - name: install packages
+      run: | 
+        pip install -r requirements.txt
+        pip install pyinstaller
+        
+    - name: build application and run Inno Setup
+      run: | 
+        python -m PyInstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
+        iscc ".\relACs.iss"
+        
+#     - name: Create Release
+#       id: create_release
+#       uses: actions/create-release@v1
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         tag_name: ${{ github.ref }} DO ZMIANY
+#         release_name: Release ${{ github.ref }}  DO ZMIANY
+#         draft: false
+#         prerelease: false
+#     - name: Upload Release Asset
+#       id: upload-release-asset 
+#       uses: actions/upload-release-asset@v1
+#       env:
+#         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       with:
+#         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+#         asset_path: ./dist/relACs_setup.exe
+#         asset_name: relACs_setup.exe
+#         asset_content_type: application/x-msdownload
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: relACs_setup.exe
+        path: ./dist/relACs_setup.exe
+        
