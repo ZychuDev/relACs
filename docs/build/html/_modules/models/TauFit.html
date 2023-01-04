@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>models.TauFit &mdash; relACs 2.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> relACs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">relACs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">relACs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">models.TauFit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for models.TauFit</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QWidget</span>
+
+<span class="kn">from</span> <span class="nn">.Parameter</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">TAU_PARAMETER_NAME</span>
+<span class="kn">from</span> <span class="nn">.Point</span> <span class="kn">import</span> <span class="n">Point</span>
+
+<span class="kn">from</span> <span class="nn">protocols</span> <span class="kn">import</span> <span class="n">SettingsSource</span><span class="p">,</span> <span class="n">Collection</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">Literal</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span> <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">svd</span> <span class="c1">#type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">power</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">finfo</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">meshgrid</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">max</span> <span class="k">as</span> <span class="n">np_max</span>
+
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">nextafter</span>
+
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">Series</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">concat</span> <span class="c1">#type: ignore</span>
+
+<span class="n">TauParameters</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Parameter</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
+<div class="viewcode-block" id="TauFit"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit">[docs]</a><span class="k">class</span> <span class="nc">TauFit</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of TauFit.</span>
+<span class="sd">            compound (SettingsSource): Examined compound.</span>
+<span class="sd">            collection (_type_): The collection to which it belongs.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            name_changed: Emitted when TauFit name change. Contains new name.</span>
+<span class="sd">            all_parameters_changed: Emitted when multiple parameters change. </span>
+<span class="sd">            points_changed: Emitted when multiple points change.</span>
+<span class="sd">            varying_changed: Emitted when varying ax in slice change. Contains name of new varying ax.</span>
+<span class="sd">            constant_changed: Emitted when constant ax in slice chang. Contains value of new constant ax.</span>
+<span class="sd">            parameters_saved: Emitted when saved parameters change.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">all_parameters_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">points_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">varying_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">constant_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parameters_saved</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+<div class="viewcode-block" id="TauFit.direct"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.direct">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">direct</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">a_dir</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">n_dir</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Direct part of model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temp (float): Temperature.</span>
+<span class="sd">            field (float): Magnetic field strange.</span>
+<span class="sd">            a_dir (float): </span>
+<span class="sd">            n_dir (float): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Direct</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">a_dir</span> <span class="o">*</span> <span class="n">temp</span> <span class="o">*</span> <span class="n">power</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">n_dir</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.qtm"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.qtm">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">qtm</span><span class="p">(</span><span class="n">field</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">b1</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">b2</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">b3</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;QTM(Quantum) part of model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            field (float): Magnetic field strange.</span>
+<span class="sd">            b1 (float): </span>
+<span class="sd">            b2 (float): </span>
+<span class="sd">            b3 (float): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: QTM</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">b1</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">b3</span><span class="o">*</span><span class="n">field</span><span class="o">*</span><span class="n">field</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">b2</span><span class="o">*</span><span class="n">field</span><span class="o">*</span><span class="n">field</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.Raman"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.Raman">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">Raman</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">c_raman</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">n_raman</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Raman part of model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temp (float): Temperature.</span>
+<span class="sd">            c_raman (float): </span>
+<span class="sd">            n_raman (float): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Raman</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">c_raman</span><span class="o">*</span> <span class="n">power</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">n_raman</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.Orbach"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.Orbach">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">Orbach</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">tau_0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">delta_e</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Orbahc part of model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temp (float): Temperature.</span>
+<span class="sd">            tau_0 (float): </span>
+<span class="sd">            delta_e (float): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Orbach</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">tau_0</span> <span class="o">*</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">delta_e</span><span class="o">/</span><span class="n">temp</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.model"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.model">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">a_dir</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">n_dir</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">b1</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">b2</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span>
+     <span class="n">b3</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">c_raman</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">n_raman</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">tau_0</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">delta_e</span><span class="p">:</span><span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Relaxation time model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            temp (float): Temperature.</span>
+<span class="sd">            field (float): Magnetic field strange.</span>
+<span class="sd">            a_dir (float): </span>
+<span class="sd">            n_dir (float): </span>
+<span class="sd">            b1 (float): </span>
+<span class="sd">            b2 (float): </span>
+<span class="sd">            b3 (float): </span>
+<span class="sd">            c_raman (float): </span>
+<span class="sd">            n_raman (float): </span>
+<span class="sd">            tau_0 (float): </span>
+<span class="sd">            delta_e (float): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Inverse of relaxation time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">a_dir</span><span class="o">*</span><span class="n">temp</span><span class="o">*</span><span class="p">(</span><span class="n">field</span><span class="o">**</span><span class="n">n_dir</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="n">b1</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">b3</span><span class="o">*</span><span class="n">field</span><span class="o">*</span><span class="n">field</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">b2</span><span class="o">*</span><span class="n">field</span><span class="o">*</span><span class="n">field</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="n">c_raman</span> <span class="o">*</span> <span class="n">power</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">n_raman</span><span class="p">)</span> \
+            <span class="o">+</span> <span class="n">tau_0</span> <span class="o">*</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">delta_e</span><span class="o">/</span><span class="p">(</span><span class="n">temp</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span> <span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residual_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saved_residual_error</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">logaritmic</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;a_dir&quot;</span><span class="p">,</span> <span class="s2">&quot;b1&quot;</span><span class="p">,</span> <span class="s2">&quot;b2&quot;</span><span class="p">,</span> <span class="s2">&quot;b3&quot;</span><span class="p">,</span> <span class="s2">&quot;tau_0&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span> <span class="n">TauParameters</span>  <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span> 
+            <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">compound</span><span class="o">.</span><span class="n">get_min</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">compound</span><span class="o">.</span><span class="n">get_max</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">is_log</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">logaritmic</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">TAU_PARAMETER_NAME</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">:</span> <span class="n">TauParameters</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span> 
+            <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">compound</span><span class="o">.</span><span class="n">get_min</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">compound</span><span class="o">.</span><span class="n">get_max</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">is_log</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">logaritmic</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">TAU_PARAMETER_NAME</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">varying</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;Field&quot;</span><span class="p">,</span> <span class="s2">&quot;Temperature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Field&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span> <span class="n">Collection</span>
+        <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">collection</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Tau fit name must be at least one character long&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TauFit.append_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.append_point">[docs]</a>    <span class="k">def</span> <span class="nf">append_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">silent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Append new point to TauFit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tau (float): Relaxation time.</span>
+<span class="sd">            temp (float): Temperature</span>
+<span class="sd">            field (float): Magnetic field strength</span>
+<span class="sd">            silent (bool, optional): Determined whether signal point_changed is emitted. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">point</span><span class="p">:</span> <span class="n">Point</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.get_hidden"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_hidden">[docs]</a>    <span class="k">def</span> <span class="nf">get_hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all hidden points</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r_tau</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_temp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_field</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span><span class="p">:</span>
+                <span class="n">r_tau</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+                <span class="n">r_temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">)</span>
+                <span class="n">r_field</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">r_tau</span><span class="p">,</span> <span class="n">r_temp</span><span class="p">,</span> <span class="n">r_field</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="TauFit.get_visible"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_visible">[docs]</a>    <span class="k">def</span> <span class="nf">get_visible</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all visible points.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r_tau</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_temp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_field</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span><span class="p">:</span>
+                <span class="n">r_tau</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+                <span class="n">r_temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">)</span>
+                <span class="n">r_field</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span><span class="n">r_tau</span><span class="p">,</span> <span class="n">r_temp</span><span class="p">,</span> <span class="n">r_field</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.get_all"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_all">[docs]</a>    <span class="k">def</span> <span class="nf">get_all</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all points.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tmp</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="TauFit.get_visible_s"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_visible_s">[docs]</a>    <span class="k">def</span> <span class="nf">get_visible_s</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all visible points in actual slice.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r_tau</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_temp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_field</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_constant_from_point</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+                    <span class="n">r_tau</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+                    <span class="n">r_temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">)</span>
+                    <span class="n">r_field</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">r_tau</span><span class="p">,</span> <span class="n">r_temp</span><span class="p">,</span> <span class="n">r_field</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.get_hidden_s"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_hidden_s">[docs]</a>    <span class="k">def</span> <span class="nf">get_hidden_s</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all hidden points in actual slice.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r_tau</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_temp</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">r_field</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_constant_from_point</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">:</span>
+                    <span class="n">r_tau</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span>
+                    <span class="n">r_temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">)</span>
+                    <span class="n">r_field</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">r_tau</span><span class="p">,</span> <span class="n">r_temp</span><span class="p">,</span> <span class="n">r_field</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.get_all_s"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_all_s">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_s</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all points in actual slice.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tmp</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">[(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_constant_from_point</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">([],</span> <span class="p">[],</span> <span class="p">[])</span></div>
+
+<div class="viewcode-block" id="TauFit.get_constant_from_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_constant_from_point">[docs]</a>    <span class="k">def</span> <span class="nf">get_constant_from_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="n">Point</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Extravt value of actual constant ax from point.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            p (Point): Actual point.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: Temperature or magnetic field strength depending on actual constant ax in slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying</span> <span class="o">==</span> <span class="s2">&quot;Field&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">field</span></div>
+
+<div class="viewcode-block" id="TauFit.set_varying"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.set_varying">[docs]</a>    <span class="k">def</span> <span class="nf">set_varying</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">txt</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;Field&quot;</span><span class="p">,</span><span class="s2">&quot;Temperature&quot;</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Set new varying ax in slice.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            txt (Literal[&amp;quot;Field&amp;quot;,&amp;quot;Temperature&amp;quot;]): New varying ax in slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">varying</span> <span class="o">=</span> <span class="n">txt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">varying_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varying</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.set_constant"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.set_constant">[docs]</a>    <span class="k">def</span> <span class="nf">set_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set new constant ax in slice.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (float): New constant ax in slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constant_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.hide_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.hide_point">[docs]</a>    <span class="k">def</span> <span class="nf">hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hide point.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            v (float): Value of actual varying ax of Point to hide.</span>
+<span class="sd">            z (float): Relaxation time of Point to hide.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying</span> <span class="o">==</span> <span class="s2">&quot;Field&quot;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">field</span> <span class="o">==</span> <span class="n">v</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="ow">and</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span> <span class="o">==</span> <span class="n">z</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span> <span class="o">==</span> <span class="mi">1</span><span class="o">/</span><span class="n">v</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">field</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="ow">and</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">)</span> <span class="o">==</span> <span class="n">z</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">is_hidden</span>
+                    <span class="k">break</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.delete_point"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete point</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            v (float): Value of actual varying ax of Point ro delete.</span>
+<span class="sd">            z (float): Relaxation time of Point to delete.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">old_points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Point</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying</span> <span class="o">==</span> <span class="s2">&quot;Field&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">temp</span><span class="p">,</span>  <span class="n">p</span><span class="o">.</span><span class="n">field</span><span class="p">,</span> <span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">tau</span><span class="p">))</span> <span class="o">!=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span> <span class="n">z</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_points</span> <span class="o">=</span> <span class="n">old_points</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">points_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.get_parameters_values"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_parameters_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameters_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all parameters value.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[float, float, float, float, float, float, float, float, float, float]: Values of all parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="c1"># type: ignore</span></div>
+
+<div class="viewcode-block" id="TauFit.get_saved_parameters_values"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_saved_parameters_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_saved_parameters_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get all saved parameters value.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple[float, float, float, float, float, float, float, float, float, float]: Values of all saved parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">)</span> <span class="c1"># type: ignore</span></div>
+
+<div class="viewcode-block" id="TauFit.get_parameters_min_bounds"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_parameters_min_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameters_min_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get lower boundaries of all parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[float]: Values of lower boundaries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">min</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TauFit.get_parameters_max_bounds"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_parameters_max_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">get_parameters_max_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get upper boundaries of all parameters.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[float]: Values of upper boundaries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">max</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TauFit.make_auto_fit"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.make_auto_fit">[docs]</a>    <span class="k">def</span> <span class="nf">make_auto_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slice_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Solve a nonlinear least-squares problem with bounds on the variables for cost_function().</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            slice_flag (bool, optional): Determines whether take into account only Points in actual slice. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameters_values</span><span class="p">()</span>
+        <span class="nb">min</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameters_min_bounds</span><span class="p">()</span>
+        <span class="nb">max</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_parameters_max_bounds</span><span class="p">()</span>
+
+        <span class="n">p</span><span class="p">:</span><span class="n">Parameter</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_blocked</span><span class="p">:</span>
+                <span class="nb">min</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">min</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="nb">max</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">max</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_blocked_on_0</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                <span class="nb">min</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="n">nextafter</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="nb">max</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="n">nextafter</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;</span> <span class="nb">min</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">is_blocked_on_0</span><span class="p">:</span>
+                <span class="n">tmp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="nb">min</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">max</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                <span class="n">params</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp</span>
+
+        <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">)</span>
+        <span class="n">cost_f</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_function</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="n">slice_flag</span><span class="p">)</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">cost_f</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Vh</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">jac</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="o">*</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">np_max</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">jac</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="n">tol</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="p">(</span><span class="n">Vh</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">s</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">@</span> <span class="n">Vh</span><span class="p">[</span><span class="n">w</span><span class="p">]</span>
+
+        <span class="n">chi2dof</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">cov</span> <span class="o">*=</span> <span class="n">chi2dof</span>
+
+        <span class="n">perr</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">diag</span><span class="p">(</span><span class="n">cov</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_all_errors</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">cost</span><span class="p">,</span> <span class="n">perr</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.cost_function"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.cost_function">[docs]</a>    <span class="k">def</span> <span class="nf">cost_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="nb">slice</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cost function minimalized in least_square method in fitting process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            p (_type_): All parameters.</span>
+<span class="sd">            slice (bool, optional): Determines whether take into account only Points in actual slice. Defaults to False.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: Cost of fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">slice</span><span class="p">:</span>
+            <span class="n">tau</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all_s</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tau</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">tau</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">tau</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">power</span><span class="p">(</span><span class="n">log</span><span class="p">(</span><span class="n">TauFit</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span><span class="p">))</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.set_all_errors"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.set_all_errors">[docs]</a>    <span class="k">def</span> <span class="nf">set_all_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residual_error</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">params_error</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Set all parameters error to new values.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            residual_error (float): Residual error of least square problem.</span>
+<span class="sd">            params_error (list[float]): Invidual parameters errors of least square problem.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residual_error</span> <span class="o">=</span> <span class="n">residual_error</span>
+        <span class="n">p</span><span class="p">:</span> <span class="n">Parameter</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="n">params_error</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">silent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_parameters_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.save"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set all current parameters as saved.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">set_blocked</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_blocked</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">set_blocked_0</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_blocked_on_0</span><span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters_saved</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.reset"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set all current parameters values to saved ones.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_blocked</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">is_blocked</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_blocked_0</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">is_blocked_on_0</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_parameters_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.copy"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set saved parameters of other as current parameters of self.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (Relaxation): Relaxation to copy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_blocked</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">is_blocked</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_blocked_0</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">is_blocked_on_0</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">set_error</span><span class="p">(</span><span class="n">o</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_parameters_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="TauFit.save_to_file"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.save_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Savig result to .csv file&quot;&quot;&quot;</span>
+        <span class="n">save_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="n">QWidget</span><span class="p">(),</span> <span class="s1">&#39;Save file&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">save_name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;;&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span></div>
+
+<div class="viewcode-block" id="TauFit.get_result"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_result">[docs]</a>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get DataFrame with results of fitting process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataFrame: Result of fit in DataFrame format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df_param</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Name&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;Error&quot;</span><span class="p">])</span>
+        <span class="n">p</span><span class="p">:</span><span class="n">Parameter</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Name&quot;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;Error&quot;</span><span class="p">:</span><span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">}</span>
+            <span class="n">df_param</span> <span class="o">=</span> <span class="n">df_param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+        <span class="n">tau</span><span class="p">,</span> <span class="n">tmp</span><span class="p">,</span> <span class="n">field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_all</span><span class="p">()</span>
+        <span class="n">df_experimental</span><span class="p">:</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">tau</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;tau&quot;</span><span class="p">])</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">tmp</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">tmp</span><span class="p">),</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">TauFit</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">get_saved_parameters_values</span><span class="p">())</span>
+
+        <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+                <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">Y</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+
+        <span class="n">tau</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="n">Z</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">z</span><span class="p">:</span>
+                <span class="n">tau</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="n">df_model</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="n">tau</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;TempModel&quot;</span><span class="p">,</span> <span class="s2">&quot;FieldModel&quot;</span><span class="p">,</span> <span class="s2">&quot;TauModel&quot;</span><span class="p">])</span>
+
+        <span class="n">all_temp</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tmp</span><span class="p">:</span>
+            <span class="n">all_temp</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="n">final_series_tmp</span> <span class="o">=</span> <span class="p">[</span><span class="n">Series</span><span class="p">()]</span><span class="o">*</span><span class="mi">7</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_temp</span><span class="p">):</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">field</span><span class="p">),</span> <span class="mi">50</span><span class="p">)</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">Series</span><span class="p">([</span><span class="n">t</span><span class="p">]</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+            <span class="n">partial_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_result</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">field</span> <span class="p">,</span> <span class="n">return_df</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">one_point_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp</span><span class="p">,</span> <span class="n">field</span><span class="p">]</span> <span class="o">+</span> <span class="n">partial_result</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">final_series_tmp</span><span class="p">)):</span>
+               <span class="n">final_series_tmp</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_series_tmp</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">one_point_series</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df_tmp</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">final_series_tmp</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Temp&quot;</span><span class="p">,</span> <span class="s2">&quot;Field&quot;</span><span class="p">,</span> <span class="s2">&quot;Orbach&quot;</span><span class="p">,</span> <span class="s2">&quot;Raman&quot;</span><span class="p">,</span> <span class="s2">&quot;QTM&quot;</span><span class="p">,</span> <span class="s2">&quot;Direct&quot;</span><span class="p">,</span> <span class="s2">&quot;Tau&quot;</span><span class="p">])</span>
+
+        <span class="n">final_series_field</span> <span class="o">=</span> <span class="p">[</span><span class="n">Series</span><span class="p">()]</span><span class="o">*</span><span class="mi">7</span>
+        <span class="n">all_field</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+            <span class="n">all_field</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_field</span><span class="p">):</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">tmp</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">tmp</span><span class="p">),</span> <span class="mi">50</span><span class="p">)</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">Series</span><span class="p">([</span><span class="n">f</span><span class="p">]</span><span class="o">*</span><span class="mi">50</span><span class="p">)</span>
+            <span class="n">partial_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">partial_result</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">return_df</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">one_point_series</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp</span><span class="p">,</span> <span class="n">field</span><span class="p">]</span> <span class="o">+</span> <span class="n">partial_result</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">final_series_field</span><span class="p">)):</span>
+                <span class="n">final_series_field</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_series_field</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">one_point_series</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df_field</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">final_series_field</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Temp&quot;</span><span class="p">,</span> <span class="s2">&quot;Field&quot;</span><span class="p">,</span> <span class="s2">&quot;Orbach&quot;</span><span class="p">,</span> <span class="s2">&quot;Raman&quot;</span><span class="p">,</span> <span class="s2">&quot;QTM&quot;</span><span class="p">,</span> <span class="s2">&quot;Direct&quot;</span><span class="p">,</span> <span class="s2">&quot;Tau&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">concat</span><span class="p">([</span><span class="n">df_param</span><span class="p">,</span> <span class="n">df_experimental</span><span class="p">,</span> <span class="n">df_model</span><span class="p">,</span> <span class="n">df_tmp</span><span class="p">,</span> <span class="n">df_field</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFit.partial_result"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.partial_result">[docs]</a>    <span class="k">def</span> <span class="nf">partial_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">return_df</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_saved_parameters_values</span><span class="p">()</span>
+        <span class="n">orbach</span><span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">TauFit</span><span class="o">.</span><span class="n">Orbach</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">8</span><span class="p">])</span>
+        <span class="n">raman</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">TauFit</span><span class="o">.</span><span class="n">Raman</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+        <span class="n">qtm</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">TauFit</span><span class="o">.</span><span class="n">qtm</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">direct</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">TauFit</span><span class="o">.</span><span class="n">direct</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="nb">sum</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">TauFit</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_df</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DataFrame</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">orbach</span><span class="p">,</span> <span class="n">raman</span><span class="p">,</span> <span class="n">qtm</span><span class="p">,</span> <span class="n">direct</span><span class="p">,</span> <span class="nb">sum</span><span class="p">)),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Orbach Tau&quot;</span><span class="p">,</span> <span class="s2">&quot;Raman Tau&quot;</span><span class="p">,</span> <span class="s2">&quot;QTM Tau&quot;</span><span class="p">,</span> <span class="s2">&quot;Direct Tau&quot;</span><span class="p">,</span> <span class="s2">&quot;Tau&quot;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">orbach</span><span class="p">,</span> <span class="n">raman</span><span class="p">,</span> <span class="n">qtm</span><span class="p">,</span> <span class="n">direct</span><span class="p">,</span> <span class="nb">sum</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TauFit.get_jsonable"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.get_jsonable">[docs]</a>    <span class="k">def</span> <span class="nf">get_jsonable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Marshal object to python dictionary.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary ready to save as .json</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">p_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">p_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_jsonable</span><span class="p">())</span>
+
+        <span class="n">s_p_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">:</span>
+            <span class="n">s_p_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">get_jsonable</span><span class="p">())</span>
+
+        <span class="n">jsonable</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="s2">&quot;residual_error&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">residual_error</span> <span class="p">,</span> 
+         <span class="s2">&quot;saved_residual_error&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_residual_error</span><span class="p">,</span>
+         <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="n">p_list</span><span class="p">,</span>
+         <span class="s2">&quot;saved_parameters&quot;</span><span class="p">:</span> <span class="n">s_p_list</span><span class="p">,</span>
+         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+         <span class="s2">&quot;constant&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">constant</span><span class="p">,</span>
+         <span class="s2">&quot;varying&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">varying</span><span class="p">,</span>
+         <span class="s2">&quot;points&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">get_jsonable</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_points</span><span class="p">]</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">jsonable</span></div>
+
+<div class="viewcode-block" id="TauFit.update_from_json"><a class="viewcode-back" href="../../models.html#models.TauFit.TauFit.update_from_json">[docs]</a>    <span class="k">def</span> <span class="nf">update_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;From given dictionary recreate saved state of TauFit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            f (list[dict]): Result of self.get_jsonable()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residual_error</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;residual_error&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saved_residual_error</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;saved_residual_error&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constant</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;constant&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">varying</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;varying&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">update_from_json</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">s_p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">):</span>
+            <span class="n">s_p</span><span class="o">.</span><span class="n">update_from_json</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;saved_parameters&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+
+        <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;points&quot;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="n">point</span><span class="p">[</span><span class="s2">&quot;tau&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;temp&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;field&quot;</span><span class="p">],</span> <span class="n">point</span><span class="p">[</span><span class="s2">&quot;is_hidden&quot;</span><span class="p">])</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Wiktor Żychowicz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

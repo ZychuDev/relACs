@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>protocols.Collection &mdash; relACs 2.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> relACs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">relACs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">relACs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">protocols.Collection</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for protocols.Collection</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QModelIndex</span>
+<span class="kn">from</span> <span class="nn">.Displayer</span> <span class="kn">import</span> <span class="n">Displayer</span>
+
+<div class="viewcode-block" id="Collection"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection">[docs]</a><span class="k">class</span> <span class="nc">Collection</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+    <span class="n">_displayer</span><span class="p">:</span> <span class="n">Displayer</span>
+    
+<div class="viewcode-block" id="Collection.check_name"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.check_name">[docs]</a>    <span class="k">def</span> <span class="nf">check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> 
+        <span class="sd">&quot;&quot;&quot;Check if item with given name is already in collection.</span>
+
+<span class="sd">            Args:</span>
+<span class="sd">                name (str): Item name.</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                bool: If name is already taken.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Collection.update_names"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.update_names">[docs]</a>    <span class="k">def</span> <span class="nf">update_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Updates name register in collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            old_name (str): Old item name.</span>
+<span class="sd">            new_name (str): New item name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Collection.remove"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">)</span><span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="sd">&quot;&quot;&quot;Remove item with given name from collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of item to remove.</span>
+<span class="sd">            index (QModelIndex): Removed item&#39;s index in controll tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+<div class="viewcode-block" id="Collection.change_displayed_item"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.change_displayed_item">[docs]</a>    <span class="k">def</span> <span class="nf">change_displayed_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Replace currently displayed item.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the item to display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Collection.check_if_is_selected"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.check_if_is_selected">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_is_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Checks item select state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (QModelIndex): Item Index in cotroll tree.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Check state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Collection.get_next"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.get_next">[docs]</a>    <span class="k">def</span> <span class="nf">get_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get name of next item in collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Current item name.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Next item name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Collection.get_previous"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.get_previous">[docs]</a>    <span class="k">def</span> <span class="nf">get_previous</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get name of previous item in collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Current item name.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Previous item name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Collection.get_item_model"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.get_item_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get item of given name</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of item to retrieve.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+
+<div class="viewcode-block" id="Collection.get_names"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.get_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get register of names</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            set[str]: All names of collection elements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Wiktor Żychowicz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

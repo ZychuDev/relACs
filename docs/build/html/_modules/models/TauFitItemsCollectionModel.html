@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>models.TauFitItemsCollectionModel &mdash; relACs 2.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> relACs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">relACs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">relACs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">models.TauFitItemsCollectionModel</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for models.TauFitItemsCollectionModel</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.Compound</span> <span class="kn">import</span> <span class="n">Compound</span>
+<span class="kn">from</span> <span class="nn">.TauFit</span> <span class="kn">import</span> <span class="n">TauFit</span>
+
+<span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QModelIndex</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QColor</span>
+
+<span class="kn">from</span> <span class="nn">protocols</span> <span class="kn">import</span> <span class="n">Collection</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">cast</span>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel">[docs]</a><span class="k">class</span> <span class="nc">TauFitItemsCollectionModel</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;_summary_</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of collection.</span>
+<span class="sd">            compound (Compound): The Compound to which it belongs.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            name_changed: Emitted when collection name is changed. Contains new name.</span>
+<span class="sd">            fit_added: Emitted when new TauFit is added to collection. Contains new TauFit.</span>
+<span class="sd">            fit_removed: Emitted when TauFit is removed from collection. Contains removed TauFit&#39;s Index in controll tree. </span>
+<span class="sd">            displayed_item_changed: Emitted when displayed TauFit is replaced.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">fit_added</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="n">TauFit</span><span class="p">)</span>
+    <span class="n">fit_removed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="n">QModelIndex</span><span class="p">)</span>
+    <span class="n">displayed_item_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="n">TauFit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span> <span class="n">Compound</span><span class="p">):</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="p">:</span> <span class="n">Compound</span> <span class="o">=</span> <span class="n">compound</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_font_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_bold</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_color</span><span class="p">:</span> <span class="n">QColor</span> <span class="o">=</span> <span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">122</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tau_fits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">TauFit</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_displayed_item</span><span class="p">:</span> <span class="n">TauFit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="o">.</span><span class="n">_tree</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+    
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">new_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+        
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.remove"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.remove">[docs]</a>    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tau_fit_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove TauFit with given name from collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            tau_fit_name (str): Name of TauFit to remove.</span>
+<span class="sd">            index (QModelIndex): Removed TauFit&#39;s index in controll tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">tau_fit_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tau_fit_name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tau_fits</span> <span class="o">=</span> <span class="p">[</span><span class="n">fit</span> <span class="k">for</span> <span class="n">fit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tau_fits</span> <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_removed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.update_names"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.update_names">[docs]</a>    <span class="k">def</span> <span class="nf">update_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates name register in collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            old_name (str): Old TauFit name.</span>
+<span class="sd">            new_name (str): New TauFit name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.check_name"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.check_name">[docs]</a>    <span class="k">def</span> <span class="nf">check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Check if TauFit with given name is already in collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): TauFit name.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: If name is already taken.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.change_displayed_item"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.change_displayed_item">[docs]</a>    <span class="k">def</span> <span class="nf">change_displayed_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace currently displayed TauFit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of the TauFit to display.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_item</span><span class="p">:</span> <span class="n">TauFit</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">fit</span> <span class="k">for</span> <span class="n">fit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tau_fits</span> <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_displayed_item</span> <span class="o">=</span> <span class="n">new_item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayed_item_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">new_item</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.append_tau_fit"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.append_tau_fit">[docs]</a>    <span class="k">def</span> <span class="nf">append_tau_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fit</span><span class="p">:</span> <span class="n">TauFit</span><span class="p">,</span> <span class="n">silent</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">display</span><span class="p">:</span> <span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Apped tauFit to collection</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Taufit (Fit): TauFit to add to collection </span>
+<span class="sd">            silent (bool, optional): Determines whether fit_added signal will be emitted. Defaults to False.</span>
+<span class="sd">            display (bool, optional): Determines whether display newly added Fit. Defaults to False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fit</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Tau fit with name </span><span class="si">{</span><span class="n">fit</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> already exists.</span><span class="se">\n</span><span class="s2"> Loading skipped&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tau_fits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">fit</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Collection</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">silent</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit_added</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">display</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_displayed_item</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.check_if_is_selected"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.check_if_is_selected">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_is_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="n">QModelIndex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Checks tauFit select state.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (QModelIndex): TauFit Index in cotroll tree.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Check state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">selected</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">QModelIndex</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">selected_index</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">selected_index</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.get_names"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.get_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span> 
+        <span class="sd">&quot;&quot;&quot;Get register of names</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            set[str]: All names of collection elements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.get_item_model"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.get_item_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TauFit</span><span class="o">|</span><span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get TauFit of given name</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of TauFit to retrieve.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Fit | None: TauFit with given name or None if it is not part of collection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tau_fits</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.get_jsonable"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.get_jsonable">[docs]</a>    <span class="k">def</span> <span class="nf">get_jsonable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Marshal collection to python list of dictionaries.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list[dict]: All TauFits in collection marshaled into dictionaries.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">jsonable</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">get_jsonable</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tau_fits</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">jsonable</span></div>
+
+<div class="viewcode-block" id="TauFitItemsCollectionModel.from_json"><a class="viewcode-back" href="../../models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.from_json">[docs]</a>    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fits</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Append new TauFits created from result of get_jsonable().&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fits</span><span class="p">:</span>
+            <span class="n">new_model</span><span class="p">:</span> <span class="n">TauFit</span> <span class="o">=</span> <span class="n">TauFit</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">Collection</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+            <span class="n">new_model</span><span class="o">.</span><span class="n">update_from_json</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">append_tau_fit</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Wiktor Żychowicz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

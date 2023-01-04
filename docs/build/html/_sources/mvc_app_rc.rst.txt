@@ -1,0 +1,7 @@
+mvc\_app\_rc module
+===================
+
+.. automodule:: mvc_app_rc
+   :members:
+   :undoc-members:
+   :show-inheritance:

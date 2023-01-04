@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>views.FitItemsCollection &mdash; relACs 2.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> relACs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">relACs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">relACs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">views.FitItemsCollection</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for views.FitItemsCollection</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSlot</span><span class="p">,</span> <span class="n">QPoint</span><span class="p">,</span> <span class="n">QModelIndex</span><span class="p">,</span> <span class="n">Qt</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QBrush</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QMenu</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QInputDialog</span><span class="p">,</span> <span class="n">QMessageBox</span>
+
+<span class="kn">from</span> <span class="nn">models</span> <span class="kn">import</span> <span class="n">FitItemsCollectionModel</span><span class="p">,</span> <span class="n">Fit</span><span class="p">,</span> <span class="n">TauFit</span>
+<span class="kn">from</span> <span class="nn">controllers</span> <span class="kn">import</span> <span class="n">FitItemsCollectionController</span><span class="p">,</span> <span class="n">FitItemController</span>
+<span class="kn">from</span> <span class="nn">.StandardItem</span> <span class="kn">import</span> <span class="n">StandardItem</span>
+<span class="kn">from</span> <span class="nn">.FitItem</span> <span class="kn">import</span> <span class="n">FitItem</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">concat</span> <span class="c1"># type: ignore</span>
+
+<div class="viewcode-block" id="FitItemsCollection"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection">[docs]</a><span class="k">class</span> <span class="nc">FitItemsCollection</span><span class="p">(</span><span class="n">StandardItem</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">FitItemsCollectionModel</span><span class="p">,</span> <span class="n">ctrl</span><span class="p">:</span> <span class="n">FitItemsCollectionController</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span><span class="mi">201</span><span class="p">,</span><span class="mi">183</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">:</span> <span class="n">FitItemsCollectionModel</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctrl</span><span class="p">:</span> <span class="n">FitItemsCollectionController</span> <span class="o">=</span> <span class="n">ctrl</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">fit_added</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_fit_added</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">fit_removed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_fit_removed</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">displayed_item_changed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_displayed_item_changed</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FitItemsCollection.show_menu"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.show_menu">[docs]</a>    <span class="k">def</span> <span class="nf">show_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menu_position</span><span class="p">:</span> <span class="n">QPoint</span><span class="p">):</span>
+        <span class="n">menu</span> <span class="o">=</span> <span class="n">QMenu</span><span class="p">()</span>
+
+        <span class="n">submenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s2">&quot;Sort&quot;</span><span class="p">)</span>
+        <span class="n">submenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Sort by temperature&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">,</span> <span class="s2">&quot;temp&quot;</span><span class="p">))</span>
+        <span class="n">submenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Sort by field&quot;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">))</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Check all&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_all</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Uncheck all&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">uncheck_all</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Make Tau fits from checked data&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_tau_fits_checked</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Make auto fit for all checked&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_fit_selected</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Save all checked to file&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_to_file_selected</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">addSeparator</span><span class="p">()</span>
+        
+        <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Remove checked&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remove_selected</span><span class="p">)</span>
+        <span class="n">menu</span><span class="o">.</span><span class="n">exec</span><span class="p">(</span><span class="n">menu_position</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.on_fit_added"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.on_fit_added">[docs]</a>    <span class="k">def</span> <span class="nf">on_fit_added</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new</span><span class="p">:</span><span class="n">Fit</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">appendRow</span><span class="p">(</span><span class="n">FitItem</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">FitItemController</span><span class="p">(</span><span class="n">new</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">expandAll</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.on_displayed_item_changed"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.on_displayed_item_changed">[docs]</a>    <span class="k">def</span> <span class="nf">on_displayed_item_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fit</span><span class="p">:</span><span class="n">Fit</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_compound</span><span class="o">.</span><span class="n">_displayer</span><span class="o">.</span><span class="n">display_fit</span><span class="p">(</span><span class="n">fit</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.on_fit_removed"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.on_fit_removed">[docs]</a>    <span class="k">def</span> <span class="nf">on_fit_removed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span><span class="n">QModelIndex</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.check_all"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.check_all">[docs]</a>    <span class="k">def</span> <span class="nf">check_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.uncheck_all"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.uncheck_all">[docs]</a>    <span class="k">def</span> <span class="nf">uncheck_all</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.sort"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.sort">[docs]</a>    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sort_by</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;temp&quot;</span><span class="p">,</span> <span class="s2">&quot;field&quot;</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sort_mode</span> <span class="o">=</span> <span class="n">sort_by</span>
+
+        <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">sort_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort_mode</span> <span class="c1"># type: ignore</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">sortChildren</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.save_to_file_selected"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.save_to_file_selected">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_file_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">save_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="n">QWidget</span><span class="p">(),</span> <span class="s1">&#39;Save file&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">final_df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">()</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">()</span>
+            <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">nr_of_rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nr_of_rows</span><span class="p">:</span>
+                <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">checkState</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+                    <span class="n">concat</span><span class="p">([</span><span class="n">final_df</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">_model_get_result</span><span class="p">()])</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">save_name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">final_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;;&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.make_fit_selected"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.make_fit_selected">[docs]</a>    <span class="k">def</span> <span class="nf">make_fit_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nr_of_rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nr_of_rows</span><span class="p">:</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">checkState</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+                <span class="n">child</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">make_auto_fit</span><span class="p">(</span><span class="n">auto</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">next_fit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">_model</span> <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">nr_of_rows</span><span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.remove_selected"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.remove_selected">[docs]</a>    <span class="k">def</span> <span class="nf">remove_selected</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">i</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">nr_of_rows</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nr_of_rows</span><span class="p">:</span>
+            <span class="n">child</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">checkState</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">index</span><span class="p">())</span>
+                <span class="n">nr_of_rows</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="FitItemsCollection.make_tau_fits_checked"><a class="viewcode-back" href="../../views.html#views.FitItemsCollection.FitItemsCollection.make_tau_fits_checked">[docs]</a>    <span class="k">def</span> <span class="nf">make_tau_fits_checked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">i</span> <span class="p">:</span> <span class="nb">int</span>
+        <span class="n">points</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">)]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+            <span class="n">item</span><span class="p">:</span> <span class="n">FitItem</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">FitItem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">checkState</span><span class="p">()</span> <span class="o">==</span> <span class="n">Qt</span><span class="o">.</span><span class="n">CheckState</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">item</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">relaxations</span><span class="p">:</span>
+                    <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_df</span>
+                    <span class="n">temp</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Temperature&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Temperature&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">field</span> <span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;MagneticField&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;MagneticField&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">r</span><span class="o">.</span><span class="n">get_tau</span><span class="p">(),</span> <span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> 
+        <span class="n">name</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="n">QWidget</span><span class="p">(),</span> <span class="s1">&#39;Creating new Tau fit&#39;</span><span class="p">,</span> <span class="s1">&#39;Enter name of Tau fit:&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg</span><span class="p">:</span> <span class="n">QMessageBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Icon</span><span class="o">.</span><span class="n">Warning</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Tau fit&#39;s name must consist of at least one character!&quot;</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Tau fit creation cancelation&quot;</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="n">new_fit</span><span class="p">:</span> <span class="n">TauFit</span> <span class="o">=</span> <span class="n">TauFit</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">_compound</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+            <span class="n">new_fit</span><span class="o">.</span><span class="n">append_point</span><span class="p">(</span><span class="o">*</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">append_tau_fit</span><span class="p">(</span><span class="n">new_fit</span><span class="p">,</span> <span class="n">display</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Wiktor Żychowicz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

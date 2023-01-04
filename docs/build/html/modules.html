@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>relACs &mdash; relACs 2.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="controllers module" href="controllers.html" />
+    <link rel="prev" title="Welcome to relACs’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> relACs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">relACs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html">controllers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html">models package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html">protocols package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.html">readers package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="runTests.html">runTests module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html">tests package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="views.html">views package</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">relACs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">relACs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="relacs">
+<h1>relACs<a class="headerlink" href="#relacs" title="Permalink to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="controllers.html">controllers module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.CompoundItemController">controllers.CompoundItemController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.CompoundItemController.CompoundItemController"><code class="docutils literal notranslate"><span class="pre">CompoundItemController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.CompoundItemController.CompoundItemController.rename"><code class="docutils literal notranslate"><span class="pre">CompoundItemController.rename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.CompoundItemsCollectionController">controllers.CompoundItemsCollectionController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.CompoundItemsCollectionController.CompoundItemsCollectionController"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.CompoundItemsCollectionController.CompoundItemsCollectionController.add_compound"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionController.add_compound()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.CompoundItemsCollectionController.CompoundItemsCollectionController.display"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionController.display()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.ControlTreeController">controllers.ControlTreeController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.ControlTreeController.ControlTreeController"><code class="docutils literal notranslate"><span class="pre">ControlTreeController</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.FitItemController">controllers.FitItemController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.FitItemController.FitItemController"><code class="docutils literal notranslate"><span class="pre">FitItemController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.FitItemController.FitItemController.rename"><code class="docutils literal notranslate"><span class="pre">FitItemController.rename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.FitItemsCollectionController">controllers.FitItemsCollectionController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.FitItemsCollectionController.FitItemsCollectionController"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionController</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.HomePageController">controllers.HomePageController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.HomePageController.HomePageController"><code class="docutils literal notranslate"><span class="pre">HomePageController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.HomePageController.HomePageController.open_url"><code class="docutils literal notranslate"><span class="pre">HomePageController.open_url()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.MeasurementItemController">controllers.MeasurementItemController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.MeasurementItemController.MeasurementItemController"><code class="docutils literal notranslate"><span class="pre">MeasurementItemController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemController.MeasurementItemController.rename"><code class="docutils literal notranslate"><span class="pre">MeasurementItemController.rename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.MeasurementItemsCollectionController">controllers.MeasurementItemsCollectionController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.cluster"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController.cluster()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.dat_to_csv"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController.dat_to_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.get_item_model"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController.get_item_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.get_names"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController.get_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.get_next"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController.get_next()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.get_previous"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController.get_previous()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.MeasurementItemsCollectionController.MeasurementItemsCollectionController.load_measurements_from_file"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionController.load_measurements_from_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.TauFitItemController">controllers.TauFitItemController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.TauFitItemController.TauFitItemController"><code class="docutils literal notranslate"><span class="pre">TauFitItemController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.TauFitItemController.TauFitItemController.rename"><code class="docutils literal notranslate"><span class="pre">TauFitItemController.rename()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers.TauFitItemsCollectionController">controllers.TauFitItemsCollectionController module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="controllers.html#controllers.TauFitItemsCollectionController.TauFitItemsCollectionController"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionController</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="controllers.html#controllers.TauFitItemsCollectionController.TauFitItemsCollectionController.save_all_to_file"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionController.save_all_to_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="controllers.html#module-controllers">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="main.html">main module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="main.html#main.RelACs"><code class="docutils literal notranslate"><span class="pre">RelACs</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">models package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="models.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.Compound">models.Compound module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.Compound.Compound"><code class="docutils literal notranslate"><span class="pre">Compound</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Compound.Compound.get_jsonable"><code class="docutils literal notranslate"><span class="pre">Compound.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Compound.Compound.get_max"><code class="docutils literal notranslate"><span class="pre">Compound.get_max()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Compound.Compound.get_min"><code class="docutils literal notranslate"><span class="pre">Compound.get_min()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Compound.Compound.molar_mass"><code class="docutils literal notranslate"><span class="pre">Compound.molar_mass</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Compound.Compound.name"><code class="docutils literal notranslate"><span class="pre">Compound.name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.CompoundItemsCollectionModel">models.CompoundItemsCollectionModel module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.append_existing_compound"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.append_existing_compound()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.append_new_compound"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.append_new_compound()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.change_displayed_item"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.change_displayed_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.check_if_is_selected"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.check_if_is_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.check_name"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.check_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.create_compound_from_json"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.create_compound_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.name"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.remove"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.CompoundItemsCollectionModel.CompoundItemsCollectionModel.update_names"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollectionModel.update_names()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.Fit">models.Fit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.Fit.Fit"><code class="docutils literal notranslate"><span class="pre">Fit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.name_changed"><code class="docutils literal notranslate"><span class="pre">Fit.name_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.df_changed"><code class="docutils literal notranslate"><span class="pre">Fit.df_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.df_point_deleted"><code class="docutils literal notranslate"><span class="pre">Fit.df_point_deleted</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.copy_all_relxations"><code class="docutils literal notranslate"><span class="pre">Fit.copy_all_relxations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.cost_function"><code class="docutils literal notranslate"><span class="pre">Fit.cost_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.delete_point"><code class="docutils literal notranslate"><span class="pre">Fit.delete_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.from_measurement"><code class="docutils literal notranslate"><span class="pre">Fit.from_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.get_jsonable"><code class="docutils literal notranslate"><span class="pre">Fit.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.get_result"><code class="docutils literal notranslate"><span class="pre">Fit.get_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.hide_point"><code class="docutils literal notranslate"><span class="pre">Fit.hide_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.make_auto_fit"><code class="docutils literal notranslate"><span class="pre">Fit.make_auto_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.model"><code class="docutils literal notranslate"><span class="pre">Fit.model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.molar_mass"><code class="docutils literal notranslate"><span class="pre">Fit.molar_mass</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.name"><code class="docutils literal notranslate"><span class="pre">Fit.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.save_all_relaxations"><code class="docutils literal notranslate"><span class="pre">Fit.save_all_relaxations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.save_to_file"><code class="docutils literal notranslate"><span class="pre">Fit.save_to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Fit.Fit.update_relaxations_from_json"><code class="docutils literal notranslate"><span class="pre">Fit.update_relaxations_from_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.FitItemsCollectionModel">models.FitItemsCollectionModel module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.name_changed"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.name_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.fit_added"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.fit_added</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.fit_removed"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.fit_removed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.displayed_item_changed"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.displayed_item_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.append_fit"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.append_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.change_displayed_item"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.change_displayed_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.check_if_is_selected"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.check_if_is_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.check_name"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.check_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.from_json"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.get_item_model"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.get_item_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.get_jsonable"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.get_names"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.get_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.get_next"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.get_next()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.get_previous"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.get_previous()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.name"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.remove"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.tree"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.tree</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.FitItemsCollectionModel.FitItemsCollectionModel.update_names"><code class="docutils literal notranslate"><span class="pre">FitItemsCollectionModel.update_names()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.Literals">models.Literals module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.Measurement">models.Measurement module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.Measurement.Measurement"><code class="docutils literal notranslate"><span class="pre">Measurement</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.name_changed"><code class="docutils literal notranslate"><span class="pre">Measurement.name_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.df_changed"><code class="docutils literal notranslate"><span class="pre">Measurement.df_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.columns_headers"><code class="docutils literal notranslate"><span class="pre">Measurement.columns_headers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.delete_point"><code class="docutils literal notranslate"><span class="pre">Measurement.delete_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.from_data_frame"><code class="docutils literal notranslate"><span class="pre">Measurement.from_data_frame()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.get_jsonable"><code class="docutils literal notranslate"><span class="pre">Measurement.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.hide_point"><code class="docutils literal notranslate"><span class="pre">Measurement.hide_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Measurement.Measurement.name"><code class="docutils literal notranslate"><span class="pre">Measurement.name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.MeasurementItemsCollectionModel">models.MeasurementItemsCollectionModel module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.name_changed"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.name_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.measurement_added"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.measurement_added</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.measurement_removed"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.measurement_removed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.displayed_item_changed"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.displayed_item_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.append_measurement"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.append_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.change_displayed_item"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.change_displayed_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.check_if_is_selected"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.check_if_is_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.check_name"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.check_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.from_json"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.get_jsonable"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.name"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.remove"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.tree"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.tree</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel.update_names"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollectionModel.update_names()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.Parameter">models.Parameter module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.Parameter.Parameter"><code class="docutils literal notranslate"><span class="pre">Parameter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.value_changed"><code class="docutils literal notranslate"><span class="pre">Parameter.value_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.block_state_changed"><code class="docutils literal notranslate"><span class="pre">Parameter.block_state_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.block_0_state_changed"><code class="docutils literal notranslate"><span class="pre">Parameter.block_0_state_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.error_changed"><code class="docutils literal notranslate"><span class="pre">Parameter.error_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.name_to_symbol"><code class="docutils literal notranslate"><span class="pre">Parameter.name_to_symbol</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.get_jsonable"><code class="docutils literal notranslate"><span class="pre">Parameter.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.get_range"><code class="docutils literal notranslate"><span class="pre">Parameter.get_range()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.get_value"><code class="docutils literal notranslate"><span class="pre">Parameter.get_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.set_blocked"><code class="docutils literal notranslate"><span class="pre">Parameter.set_blocked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.set_blocked_0"><code class="docutils literal notranslate"><span class="pre">Parameter.set_blocked_0()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.set_error"><code class="docutils literal notranslate"><span class="pre">Parameter.set_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.set_value"><code class="docutils literal notranslate"><span class="pre">Parameter.set_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Parameter.Parameter.update_from_json"><code class="docutils literal notranslate"><span class="pre">Parameter.update_from_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.Point">models.Point module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.Point.Point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Point.Point.get_jsonable"><code class="docutils literal notranslate"><span class="pre">Point.get_jsonable()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.Relaxation">models.Relaxation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.Relaxation.Relaxation"><code class="docutils literal notranslate"><span class="pre">Relaxation</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.parameters_saved"><code class="docutils literal notranslate"><span class="pre">Relaxation.parameters_saved</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.all_parameters_changed"><code class="docutils literal notranslate"><span class="pre">Relaxation.all_parameters_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.all_error_changed"><code class="docutils literal notranslate"><span class="pre">Relaxation.all_error_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.copy"><code class="docutils literal notranslate"><span class="pre">Relaxation.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.get_jsonable"><code class="docutils literal notranslate"><span class="pre">Relaxation.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.get_parameters_max_bounds"><code class="docutils literal notranslate"><span class="pre">Relaxation.get_parameters_max_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.get_parameters_min_bounds"><code class="docutils literal notranslate"><span class="pre">Relaxation.get_parameters_min_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.get_parameters_values"><code class="docutils literal notranslate"><span class="pre">Relaxation.get_parameters_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.get_saved_parameters_values"><code class="docutils literal notranslate"><span class="pre">Relaxation.get_saved_parameters_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.get_tau"><code class="docutils literal notranslate"><span class="pre">Relaxation.get_tau()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.reset"><code class="docutils literal notranslate"><span class="pre">Relaxation.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.save"><code class="docutils literal notranslate"><span class="pre">Relaxation.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.set_all_errors"><code class="docutils literal notranslate"><span class="pre">Relaxation.set_all_errors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.Relaxation.Relaxation.set_all_values"><code class="docutils literal notranslate"><span class="pre">Relaxation.set_all_values()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.TauFit">models.TauFit module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.TauFit.TauFit"><code class="docutils literal notranslate"><span class="pre">TauFit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.name_changed"><code class="docutils literal notranslate"><span class="pre">TauFit.name_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.all_parameters_changed"><code class="docutils literal notranslate"><span class="pre">TauFit.all_parameters_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.points_changed"><code class="docutils literal notranslate"><span class="pre">TauFit.points_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.varying_changed"><code class="docutils literal notranslate"><span class="pre">TauFit.varying_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.constant_changed"><code class="docutils literal notranslate"><span class="pre">TauFit.constant_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.parameters_saved"><code class="docutils literal notranslate"><span class="pre">TauFit.parameters_saved</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.Orbach"><code class="docutils literal notranslate"><span class="pre">TauFit.Orbach()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.Raman"><code class="docutils literal notranslate"><span class="pre">TauFit.Raman()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.append_point"><code class="docutils literal notranslate"><span class="pre">TauFit.append_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.copy"><code class="docutils literal notranslate"><span class="pre">TauFit.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.cost_function"><code class="docutils literal notranslate"><span class="pre">TauFit.cost_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.delete_point"><code class="docutils literal notranslate"><span class="pre">TauFit.delete_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.direct"><code class="docutils literal notranslate"><span class="pre">TauFit.direct()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_all"><code class="docutils literal notranslate"><span class="pre">TauFit.get_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_all_s"><code class="docutils literal notranslate"><span class="pre">TauFit.get_all_s()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_constant_from_point"><code class="docutils literal notranslate"><span class="pre">TauFit.get_constant_from_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_hidden"><code class="docutils literal notranslate"><span class="pre">TauFit.get_hidden()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_hidden_s"><code class="docutils literal notranslate"><span class="pre">TauFit.get_hidden_s()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_jsonable"><code class="docutils literal notranslate"><span class="pre">TauFit.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_parameters_max_bounds"><code class="docutils literal notranslate"><span class="pre">TauFit.get_parameters_max_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_parameters_min_bounds"><code class="docutils literal notranslate"><span class="pre">TauFit.get_parameters_min_bounds()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_parameters_values"><code class="docutils literal notranslate"><span class="pre">TauFit.get_parameters_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_result"><code class="docutils literal notranslate"><span class="pre">TauFit.get_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_saved_parameters_values"><code class="docutils literal notranslate"><span class="pre">TauFit.get_saved_parameters_values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_visible"><code class="docutils literal notranslate"><span class="pre">TauFit.get_visible()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.get_visible_s"><code class="docutils literal notranslate"><span class="pre">TauFit.get_visible_s()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.hide_point"><code class="docutils literal notranslate"><span class="pre">TauFit.hide_point()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.make_auto_fit"><code class="docutils literal notranslate"><span class="pre">TauFit.make_auto_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.model"><code class="docutils literal notranslate"><span class="pre">TauFit.model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.name"><code class="docutils literal notranslate"><span class="pre">TauFit.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.partial_result"><code class="docutils literal notranslate"><span class="pre">TauFit.partial_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.qtm"><code class="docutils literal notranslate"><span class="pre">TauFit.qtm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.reset"><code class="docutils literal notranslate"><span class="pre">TauFit.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.save"><code class="docutils literal notranslate"><span class="pre">TauFit.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.save_to_file"><code class="docutils literal notranslate"><span class="pre">TauFit.save_to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.set_all_errors"><code class="docutils literal notranslate"><span class="pre">TauFit.set_all_errors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.set_constant"><code class="docutils literal notranslate"><span class="pre">TauFit.set_constant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.set_varying"><code class="docutils literal notranslate"><span class="pre">TauFit.set_varying()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFit.TauFit.update_from_json"><code class="docutils literal notranslate"><span class="pre">TauFit.update_from_json()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models.TauFitItemsCollectionModel">models.TauFitItemsCollectionModel module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.name_changed"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.name_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.fit_added"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.fit_added</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.fit_removed"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.fit_removed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.displayed_item_changed"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.displayed_item_changed</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.append_tau_fit"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.append_tau_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.change_displayed_item"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.change_displayed_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.check_if_is_selected"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.check_if_is_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.check_name"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.check_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.from_json"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.get_item_model"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.get_item_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.get_jsonable"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.get_jsonable()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.get_names"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.get_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.name"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.remove"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.tree"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.tree</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="models.html#models.TauFitItemsCollectionModel.TauFitItemsCollectionModel.update_names"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollectionModel.update_names()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="models.html#module-models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="protocols.html">protocols package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html#module-protocols.Collection">protocols.Collection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="protocols.html#protocols.Collection.Collection"><code class="docutils literal notranslate"><span class="pre">Collection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.change_displayed_item"><code class="docutils literal notranslate"><span class="pre">Collection.change_displayed_item()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.check_if_is_selected"><code class="docutils literal notranslate"><span class="pre">Collection.check_if_is_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.check_name"><code class="docutils literal notranslate"><span class="pre">Collection.check_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.get_item_model"><code class="docutils literal notranslate"><span class="pre">Collection.get_item_model()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.get_names"><code class="docutils literal notranslate"><span class="pre">Collection.get_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.get_next"><code class="docutils literal notranslate"><span class="pre">Collection.get_next()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.get_previous"><code class="docutils literal notranslate"><span class="pre">Collection.get_previous()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.remove"><code class="docutils literal notranslate"><span class="pre">Collection.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Collection.Collection.update_names"><code class="docutils literal notranslate"><span class="pre">Collection.update_names()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html#module-protocols.Displayer">protocols.Displayer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="protocols.html#protocols.Displayer.Displayer"><code class="docutils literal notranslate"><span class="pre">Displayer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Displayer.Displayer.display_fit"><code class="docutils literal notranslate"><span class="pre">Displayer.display_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Displayer.Displayer.display_home_page"><code class="docutils literal notranslate"><span class="pre">Displayer.display_home_page()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Displayer.Displayer.display_measurement"><code class="docutils literal notranslate"><span class="pre">Displayer.display_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.Displayer.Displayer.display_tau_fit"><code class="docutils literal notranslate"><span class="pre">Displayer.display_tau_fit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html#module-protocols.SettingsSource">protocols.SettingsSource module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource"><code class="docutils literal notranslate"><span class="pre">SettingsSource</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource.get_max"><code class="docutils literal notranslate"><span class="pre">SettingsSource.get_max()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource.get_min"><code class="docutils literal notranslate"><span class="pre">SettingsSource.get_min()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="protocols.html#module-protocols">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="readers.html">readers package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="readers.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.html#module-readers.DataReader">readers.DataReader module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="readers.html#readers.DataReader.DataReader"><code class="docutils literal notranslate"><span class="pre">DataReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="readers.html#readers.DataReader.DataReader.get_raw_dataframe"><code class="docutils literal notranslate"><span class="pre">DataReader.get_raw_dataframe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="readers.html#readers.DataReader.ExtenralHeadingsSettingsReader"><code class="docutils literal notranslate"><span class="pre">ExtenralHeadingsSettingsReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="readers.html#readers.DataReader.ExtenralHeadingsSettingsReader.get_external_headings"><code class="docutils literal notranslate"><span class="pre">ExtenralHeadingsSettingsReader.get_external_headings()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="readers.html#module-readers.SettingsReader">readers.SettingsReader module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="readers.html#readers.SettingsReader.SettingsReader"><code class="docutils literal notranslate"><span class="pre">SettingsReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="readers.html#readers.SettingsReader.SettingsReader.get_epsilons"><code class="docutils literal notranslate"><span class="pre">SettingsReader.get_epsilons()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="readers.html#readers.SettingsReader.SettingsReader.get_headings_maping"><code class="docutils literal notranslate"><span class="pre">SettingsReader.get_headings_maping()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="readers.html#module-readers.cluster">readers.cluster module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="readers.html#module-readers">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="runTests.html">runTests module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests.ParameterTest">tests.ParameterTest module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tests.html#tests.ParameterTest.ParameterTest"><code class="docutils literal notranslate"><span class="pre">ParameterTest</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tests.html#tests.ParameterTest.ParameterTest.setUp"><code class="docutils literal notranslate"><span class="pre">ParameterTest.setUp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tests.html#tests.ParameterTest.ParameterTest.set_value_emited"><code class="docutils literal notranslate"><span class="pre">ParameterTest.set_value_emited()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tests.html#tests.ParameterTest.ParameterTest.tearDown"><code class="docutils literal notranslate"><span class="pre">ParameterTest.tearDown()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tests.html#tests.ParameterTest.ParameterTest.test_default_error"><code class="docutils literal notranslate"><span class="pre">ParameterTest.test_default_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tests.html#tests.ParameterTest.ParameterTest.test_set_error"><code class="docutils literal notranslate"><span class="pre">ParameterTest.test_set_error()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tests.html#tests.ParameterTest.ParameterTest.test_set_error_silent"><code class="docutils literal notranslate"><span class="pre">ParameterTest.test_set_error_silent()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tests.html#module-tests">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="views.html">views package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="views.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.CompoundItem">views.CompoundItem module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.CompoundItem.CompoundItem"><code class="docutils literal notranslate"><span class="pre">CompoundItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompoundItem.CompoundItem.on_name_changed"><code class="docutils literal notranslate"><span class="pre">CompoundItem.on_name_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompoundItem.CompoundItem.show_menu"><code class="docutils literal notranslate"><span class="pre">CompoundItem.show_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.CompundItemsCollection">views.CompundItemsCollection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.from_json"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.load_from_json"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.load_from_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.on_click"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.on_compound_added"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.on_compound_added()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.on_compound_removed"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.on_compound_removed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.on_name_changed"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.on_name_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.save_to_json"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.save_to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.CompundItemsCollection.CompoundItemsCollection.show_menu"><code class="docutils literal notranslate"><span class="pre">CompoundItemsCollection.show_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.ControlTreeView">views.ControlTreeView module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.ControlTreeView.ControlTreeView"><code class="docutils literal notranslate"><span class="pre">ControlTreeView</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ControlTreeView.ControlTreeView.show_item_menu"><code class="docutils literal notranslate"><span class="pre">ControlTreeView.show_item_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.DataExplorer">views.DataExplorer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.DataExplorer.DataExplorer"><code class="docutils literal notranslate"><span class="pre">DataExplorer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.DataExplorer.on_click"><code class="docutils literal notranslate"><span class="pre">DataExplorer.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.DataExplorer.set_measurement"><code class="docutils literal notranslate"><span class="pre">DataExplorer.set_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.DataExplorer.update_domains"><code class="docutils literal notranslate"><span class="pre">DataExplorer.update_domains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.DataExplorer.update_plots"><code class="docutils literal notranslate"><span class="pre">DataExplorer.update_plots()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.DataExplorer.MplCanvas"><code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.DataExplorer.TableModel"><code class="docutils literal notranslate"><span class="pre">TableModel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.TableModel.columnCount"><code class="docutils literal notranslate"><span class="pre">TableModel.columnCount()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.TableModel.data"><code class="docutils literal notranslate"><span class="pre">TableModel.data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.TableModel.headerData"><code class="docutils literal notranslate"><span class="pre">TableModel.headerData()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.DataExplorer.TableModel.rowCount"><code class="docutils literal notranslate"><span class="pre">TableModel.rowCount()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.FitItem">views.FitItem module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.FitItem.FitItem"><code class="docutils literal notranslate"><span class="pre">FitItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItem.FitItem.on_click"><code class="docutils literal notranslate"><span class="pre">FitItem.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItem.FitItem.on_name_changed"><code class="docutils literal notranslate"><span class="pre">FitItem.on_name_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItem.FitItem.show_menu"><code class="docutils literal notranslate"><span class="pre">FitItem.show_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.FitItemsCollection">views.FitItemsCollection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.check_all"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.check_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.make_fit_selected"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.make_fit_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.make_tau_fits_checked"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.make_tau_fits_checked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.on_displayed_item_changed"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.on_displayed_item_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.on_fit_added"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.on_fit_added()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.on_fit_removed"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.on_fit_removed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.remove_selected"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.remove_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.save_to_file_selected"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.save_to_file_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.show_menu"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.show_menu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.sort"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.sort()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitItemsCollection.FitItemsCollection.uncheck_all"><code class="docutils literal notranslate"><span class="pre">FitItemsCollection.uncheck_all()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.FitPage">views.FitPage module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.FitPage.FitPage"><code class="docutils literal notranslate"><span class="pre">FitPage</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.copy_all_relaxations"><code class="docutils literal notranslate"><span class="pre">FitPage.copy_all_relaxations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.copy_parameters"><code class="docutils literal notranslate"><span class="pre">FitPage.copy_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.make_auto_fit"><code class="docutils literal notranslate"><span class="pre">FitPage.make_auto_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.on_click"><code class="docutils literal notranslate"><span class="pre">FitPage.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.on_cycle_next_clicked"><code class="docutils literal notranslate"><span class="pre">FitPage.on_cycle_next_clicked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.on_cycle_previous_clicked"><code class="docutils literal notranslate"><span class="pre">FitPage.on_cycle_previous_clicked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.on_point_deleted"><code class="docutils literal notranslate"><span class="pre">FitPage.on_point_deleted()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.reset_all_relaxations"><code class="docutils literal notranslate"><span class="pre">FitPage.reset_all_relaxations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.save_all_relaxations"><code class="docutils literal notranslate"><span class="pre">FitPage.save_all_relaxations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.FitPage.set_fit"><code class="docutils literal notranslate"><span class="pre">FitPage.set_fit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.FitPage.MplCanvas"><code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.FitPage.ParametersControl"><code class="docutils literal notranslate"><span class="pre">ParametersControl</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.ParametersControl.set_fit"><code class="docutils literal notranslate"><span class="pre">ParametersControl.set_fit()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.FitPage.RelaxationTab"><code class="docutils literal notranslate"><span class="pre">RelaxationTab</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.RelaxationTab.set_relaxation"><code class="docutils literal notranslate"><span class="pre">RelaxationTab.set_relaxation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.RelaxationTab.update_errors"><code class="docutils literal notranslate"><span class="pre">RelaxationTab.update_errors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.FitPage.RelaxationTab.update_saved_errors"><code class="docutils literal notranslate"><span class="pre">RelaxationTab.update_saved_errors()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.HomePageView">views.HomePageView module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.HomePageView.HomePageUi"><code class="docutils literal notranslate"><span class="pre">HomePageUi</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.HomePageView.HomePageUi.get_layout"><code class="docutils literal notranslate"><span class="pre">HomePageUi.get_layout()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.HomePageView.HomePageView"><code class="docutils literal notranslate"><span class="pre">HomePageView</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.HomePageView.ResizableLabel"><code class="docutils literal notranslate"><span class="pre">ResizableLabel</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.HomePageView.ResizableLabel.paintEvent"><code class="docutils literal notranslate"><span class="pre">ResizableLabel.paintEvent()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.MainView">views.MainView module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.MainView.MainView"><code class="docutils literal notranslate"><span class="pre">MainView</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.MeasurementItem">views.MeasurementItem module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.MeasurementItem.MeasurementItem"><code class="docutils literal notranslate"><span class="pre">MeasurementItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItem.MeasurementItem.make_fit"><code class="docutils literal notranslate"><span class="pre">MeasurementItem.make_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItem.MeasurementItem.on_click"><code class="docutils literal notranslate"><span class="pre">MeasurementItem.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItem.MeasurementItem.on_name_changed"><code class="docutils literal notranslate"><span class="pre">MeasurementItem.on_name_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItem.MeasurementItem.show_menu"><code class="docutils literal notranslate"><span class="pre">MeasurementItem.show_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.MeasurementItemsCollection">views.MeasurementItemsCollection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.check_all"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.check_all()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.display_member"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.display_member()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.make_all_fits"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.make_all_fits()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.make_fits_checked"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.make_fits_checked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.make_fits_checked_2"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.make_fits_checked_2()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.on_click"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.on_displayed_item_changed"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.on_displayed_item_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.on_measurement_added"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.on_measurement_added()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.on_measurement_removed"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.on_measurement_removed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.on_name_changed"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.on_name_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.remove_selected"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.remove_selected()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.show_menu"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.show_menu()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.sort"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.sort()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.MeasurementItemsCollection.MeasurementItemsCollection.uncheck_all"><code class="docutils literal notranslate"><span class="pre">MeasurementItemsCollection.uncheck_all()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.ParameterSlider">views.ParameterSlider module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider"><code class="docutils literal notranslate"><span class="pre">ParameterSlider</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.fixup_line_edit"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.fixup_line_edit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.on_0_checkbox_clicked"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.on_0_checkbox_clicked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.on_checkbox_clicked"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.on_checkbox_clicked()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.set_blocked_0_silent"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.set_blocked_0_silent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.set_blocked_silent"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.set_blocked_silent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.set_edit_value_silent"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.set_edit_value_silent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.set_parameter"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.set_parameter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.set_slider_value_silent"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.set_slider_value_silent()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.ParameterSlider.ParameterSlider.slider_to_param"><code class="docutils literal notranslate"><span class="pre">ParameterSlider.slider_to_param()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.StandardItem">views.StandardItem module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.StandardItem.StandardItem"><code class="docutils literal notranslate"><span class="pre">StandardItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.StandardItem.StandardItem.on_click"><code class="docutils literal notranslate"><span class="pre">StandardItem.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.StandardItem.StandardItem.on_double_click"><code class="docutils literal notranslate"><span class="pre">StandardItem.on_double_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.StandardItem.StandardItem.show_menu"><code class="docutils literal notranslate"><span class="pre">StandardItem.show_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.TauFitItem">views.TauFitItem module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.TauFitItem.TauFitItem"><code class="docutils literal notranslate"><span class="pre">TauFitItem</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitItem.TauFitItem.on_click"><code class="docutils literal notranslate"><span class="pre">TauFitItem.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitItem.TauFitItem.on_name_changed"><code class="docutils literal notranslate"><span class="pre">TauFitItem.on_name_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitItem.TauFitItem.show_menu"><code class="docutils literal notranslate"><span class="pre">TauFitItem.show_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.TauFitItemsCollection">views.TauFitItemsCollection module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.TauFitItemsCollection.TauFitItemsCollection"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollection</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitItemsCollection.TauFitItemsCollection.on_displayed_item_changed"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollection.on_displayed_item_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitItemsCollection.TauFitItemsCollection.on_fit_added"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollection.on_fit_added()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitItemsCollection.TauFitItemsCollection.on_fit_removed"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollection.on_fit_removed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitItemsCollection.TauFitItemsCollection.show_menu"><code class="docutils literal notranslate"><span class="pre">TauFitItemsCollection.show_menu()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.TauFitPage">views.TauFitPage module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.TauFitPage.MplCanvas"><code class="docutils literal notranslate"><span class="pre">MplCanvas</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.TauFitPage.MplCanvas3D"><code class="docutils literal notranslate"><span class="pre">MplCanvas3D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage"><code class="docutils literal notranslate"><span class="pre">TauFitPage</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.copy"><code class="docutils literal notranslate"><span class="pre">TauFitPage.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.copy_parameters"><code class="docutils literal notranslate"><span class="pre">TauFitPage.copy_parameters()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.make_auto_fit"><code class="docutils literal notranslate"><span class="pre">TauFitPage.make_auto_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.make_auto_fit_for_slice"><code class="docutils literal notranslate"><span class="pre">TauFitPage.make_auto_fit_for_slice()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.on_click"><code class="docutils literal notranslate"><span class="pre">TauFitPage.on_click()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.on_constant_value_changed"><code class="docutils literal notranslate"><span class="pre">TauFitPage.on_constant_value_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.on_parameters_saved"><code class="docutils literal notranslate"><span class="pre">TauFitPage.on_parameters_saved()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.on_points_changed"><code class="docutils literal notranslate"><span class="pre">TauFitPage.on_points_changed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.reset"><code class="docutils literal notranslate"><span class="pre">TauFitPage.reset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.save"><code class="docutils literal notranslate"><span class="pre">TauFitPage.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.set_model_constant"><code class="docutils literal notranslate"><span class="pre">TauFitPage.set_model_constant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.set_model_varying"><code class="docutils literal notranslate"><span class="pre">TauFitPage.set_model_varying()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.TauFitPage.TauFitPage.set_tau_fit"><code class="docutils literal notranslate"><span class="pre">TauFitPage.set_tau_fit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views.WorkingSpace">views.WorkingSpace module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="views.html#views.WorkingSpace.WorkingSpace"><code class="docutils literal notranslate"><span class="pre">WorkingSpace</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.WorkingSpace.WorkingSpace.display_fit"><code class="docutils literal notranslate"><span class="pre">WorkingSpace.display_fit()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.WorkingSpace.WorkingSpace.display_home_page"><code class="docutils literal notranslate"><span class="pre">WorkingSpace.display_home_page()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.WorkingSpace.WorkingSpace.display_measurement"><code class="docutils literal notranslate"><span class="pre">WorkingSpace.display_measurement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="views.html#views.WorkingSpace.WorkingSpace.display_tau_fit"><code class="docutils literal notranslate"><span class="pre">WorkingSpace.display_tau_fit()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#module-views">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to relACs’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="controllers.html" class="btn btn-neutral float-right" title="controllers module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Wiktor Żychowicz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

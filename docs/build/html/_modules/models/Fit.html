@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>models.Fit &mdash; relACs 2.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> relACs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">relACs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">relACs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">models.Fit</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for models.Fit</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QWidget</span>
+
+<span class="kn">from</span> <span class="nn">.Relaxation</span> <span class="kn">import</span> <span class="n">Relaxation</span>
+<span class="kn">from</span> <span class="nn">.Measurement</span> <span class="kn">import</span> <span class="n">Measurement</span> 
+<span class="kn">from</span> <span class="nn">.Parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
+
+<span class="kn">from</span> <span class="nn">protocols</span> <span class="kn">import</span> <span class="n">SettingsSource</span><span class="p">,</span> <span class="n">Collection</span>
+
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">Series</span><span class="p">,</span> <span class="n">concat</span> <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">finfo</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="nb">sum</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">logspace</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="nb">max</span> <span class="k">as</span> <span class="n">np_max</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span> <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">svd</span> <span class="c1">#type: ignore</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">nextafter</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Self</span> 
+
+<div class="viewcode-block" id="Fit"><a class="viewcode-back" href="../../models.html#models.Fit.Fit">[docs]</a><span class="k">class</span> <span class="nc">Fit</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represent one fit for Havriliak-Negami model with n-relaxation</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Name of fit.</span>
+<span class="sd">            df (DataFrame): Measurement data(processed data from magnetometer).</span>
+<span class="sd">            temp (float): Temperature measured during the measurement.</span>
+<span class="sd">            field (float): Magnetic field strength during measurement.</span>
+<span class="sd">            compound (SettingsSource): Examined compound.</span>
+<span class="sd">            collection (Collection | None): The collection to which it belongs.</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            name_changed: Emitted when name change. Contains new name.</span>
+<span class="sd">            df_changed: Emitted when at least one row in df changed.</span>
+<span class="sd">            df_point_deleted: Emitted when row in df is removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">name_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">df_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">df_point_deleted</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Fit.model"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.model">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">logFrequency</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chi_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chi_s</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Implemntation of Havriliak-Negami model</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            logFrequency (ndarray): Logarytm of frequency.</span>
+<span class="sd">            alpha (float): Alpha parameter</span>
+<span class="sd">            beta (float): Beta parameter</span>
+<span class="sd">            tau (float): Time of relaxation.</span>
+<span class="sd">            chi_t (float): </span>
+<span class="sd">            chi_s (float): </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ndarray: Model predictions for each point in domain</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">chi_s</span> <span class="o">+</span> <span class="p">(</span><span class="n">chi_t</span> <span class="o">-</span> <span class="n">chi_s</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="n">logFrequency</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span> <span class="o">*</span> <span class="n">power</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span> <span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span> <span class="n">alpha</span><span class="p">))</span><span class="o">**</span><span class="n">beta</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Fit.from_measurement"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.from_measurement">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_measurement</span><span class="p">(</span><span class="n">measurement</span><span class="p">:</span> <span class="n">Measurement</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span><span class="n">SettingsSource</span><span class="p">,</span> <span class="n">nr_of_relaxations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create new Fit from Measurement and append it to the collection.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            measurement (Measurement): Measurement from which Fit will be created.</span>
+<span class="sd">            compound (SettingsSource): Source of boundaries for parameters.</span>
+<span class="sd">            nr_of_relaxations (int, optional): Number of relaxations in Havriliak-Negami model. Defaults to 1.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Fit: Created Fit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fit_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">measurement</span><span class="o">.</span><span class="n">_name</span> <span class="o">+</span> <span class="s2">&quot;_Fit_Frequency&quot;</span>
+        <span class="n">fit</span><span class="p">:</span> <span class="n">Fit</span> <span class="o">=</span>  <span class="n">Fit</span><span class="p">(</span><span class="n">fit_name</span><span class="p">,</span> <span class="n">measurement</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">measurement</span><span class="o">.</span><span class="n">_tmp</span><span class="p">,</span> <span class="n">measurement</span><span class="o">.</span><span class="n">_field</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">fit</span><span class="o">.</span><span class="n">relaxations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nr_of_relaxations</span><span class="p">):</span>
+            <span class="n">fit</span><span class="o">.</span><span class="n">relaxations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Relaxation</span><span class="p">(</span><span class="n">compound</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">fit</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span><span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="n">Collection</span><span class="o">|</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">df</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">temp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Relaxation</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="p">:</span> <span class="n">SettingsSource</span> <span class="o">=</span> <span class="n">compound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span> <span class="n">Collection</span> <span class="o">|</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">collection</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1"># TO::DO </span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Compund name must be at least one character long&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">update_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">molar_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_molar_mass</span>
+
+    <span class="nd">@molar_mass</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">molar_mass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">val</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Molar mass must be greater than 0&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_molar_mass</span> <span class="o">=</span> <span class="n">val</span>
+
+<div class="viewcode-block" id="Fit.hide_point"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.hide_point">[docs]</a>    <span class="k">def</span> <span class="nf">hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hide point </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): Value of point for domain column.</span>
+<span class="sd">            x_str (str): Name of domain column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">actual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">][</span><span class="s1">&#39;Hidden&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">,</span> <span class="s2">&quot;Hidden&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">actual</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Fit.delete_point"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete point </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): Value of point for domain column.</span>
+<span class="sd">            x_str (str): Name of domain column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">msg</span><span class="p">:</span> <span class="n">QMessageBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Icon</span><span class="o">.</span><span class="n">Warning</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Measurement must consist of at least 2 data points&quot;</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Data point removal error&quot;</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_point_deleted</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="Fit.cost_function"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.cost_function">[docs]</a>    <span class="k">def</span> <span class="nf">cost_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cost function minimalized in least_square method in fitting process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            p (_type_): Parameters for all relaxations.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            _type_: Cost of fit.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="s2">&quot;Hidden&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">]</span>
+
+        <span class="n">sum_real</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">sum_img</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">Fit</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">rest</span><span class="p">[</span><span class="s2">&quot;FrequencyLog&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="p">],</span> <span class="n">p</span><span class="p">[</span><span class="mi">4</span><span class="o">+</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">sum_real</span> <span class="o">+=</span> <span class="n">r</span><span class="o">.</span><span class="n">real</span>
+            <span class="n">sum_img</span> <span class="o">+=</span> <span class="o">-</span><span class="n">r</span><span class="o">.</span><span class="n">imag</span>
+
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">dif_real</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="n">sum_real</span> <span class="o">-</span> <span class="n">rest</span><span class="p">[</span><span class="s1">&#39;ChiPrimeMol&#39;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">dif_img</span> <span class="o">=</span> <span class="n">power</span><span class="p">(</span><span class="n">sum_img</span> <span class="o">-</span> <span class="n">rest</span><span class="p">[</span><span class="s1">&#39;ChiBisMol&#39;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+
+
+        <span class="k">return</span>  <span class="n">dif_real</span> <span class="o">+</span> <span class="n">dif_img</span></div>
+
+<div class="viewcode-block" id="Fit.make_auto_fit"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.make_auto_fit">[docs]</a>    <span class="k">def</span> <span class="nf">make_auto_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auto</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">next_fit</span><span class="p">:</span> <span class="n">Self</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span> <span class="c1"># type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;Solve a nonlinear least-squares problem with bounds on the variables for cost_function().</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            auto (bool, optional): Determines whether fit was explicitly call by user. Defaults to False.</span>
+<span class="sd">            next_fit (Self, optional): Fit to transfer parameters value in case of performing automated fit process for mutiple Fits. Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">params</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="nb">min</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">max</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">r_nr</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">)):</span>
+            <span class="n">relaxation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">[</span><span class="n">r_nr</span><span class="p">]</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">params</span> <span class="o">+</span> <span class="n">relaxation</span><span class="o">.</span><span class="n">get_parameters_values</span><span class="p">()</span>
+            <span class="nb">min</span> <span class="o">=</span> <span class="nb">min</span> <span class="o">+</span> <span class="n">relaxation</span><span class="o">.</span><span class="n">get_parameters_min_bounds</span><span class="p">()</span>
+            <span class="nb">max</span> <span class="o">=</span> <span class="nb">max</span> <span class="o">+</span> <span class="n">relaxation</span><span class="o">.</span><span class="n">get_parameters_max_bounds</span><span class="p">()</span>
+
+        
+        <span class="n">r</span><span class="p">:</span> <span class="n">Relaxation</span>
+        <span class="n">i</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_blocked</span><span class="p">:</span>
+                    <span class="nb">min</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">)]</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">min</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">)])</span>
+                    <span class="nb">max</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">)]</span> <span class="o">=</span> <span class="n">nextafter</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">max</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">)])</span>
+
+        <span class="n">bounds</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">min</span><span class="p">,</span> <span class="nb">max</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_function</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">bounds</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">i</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">)])</span>
+        
+        <span class="n">_</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">Vh</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">jac</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np_max</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">jac</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="n">tol</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="p">(</span><span class="n">Vh</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="o">/</span><span class="n">s</span><span class="p">[</span><span class="n">w</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">@</span> <span class="n">Vh</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="c1"># robust covariance matrix</span>
+
+        <span class="n">chi2dof</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">fun</span><span class="o">.</span><span class="n">size</span> <span class="o">-</span> <span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">cov</span> <span class="o">*=</span> <span class="n">chi2dof</span>
+
+        <span class="n">perr</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">diag</span><span class="p">(</span><span class="n">cov</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">):</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">set_all_errors</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">cost</span><span class="p">,</span> <span class="n">perr</span><span class="p">[</span><span class="n">i</span><span class="o">*</span><span class="mi">5</span> <span class="p">:</span> <span class="n">i</span><span class="o">*</span><span class="mi">5</span><span class="o">+</span><span class="mi">5</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">auto</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_all_relaxations</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">next_fit</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#type: ignore</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">copy_all_relxations</span><span class="p">(</span><span class="n">next_fit</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Fit.save_to_file"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.save_to_file">[docs]</a>    <span class="k">def</span> <span class="nf">save_to_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Savig result to .csv file&quot;&quot;&quot;</span>
+        <span class="n">save_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="n">QWidget</span><span class="p">(),</span> <span class="s1">&#39;Save file&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">save_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">save_name</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">get_result</span><span class="p">()</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;;&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Fit.get_result"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.get_result">[docs]</a>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get DataFrame with results of fitting process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataFrame: Result of fit in DataFrame format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df_param</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">([[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Value&#39;</span><span class="p">,</span><span class="s1">&#39;Error&#39;</span><span class="p">])</span>
+        <span class="n">df_model_final</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">r</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">:</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;Name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;Error&quot;</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">error</span><span class="p">}</span>
+                <span class="n">df_param</span> <span class="o">=</span> <span class="n">df_param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">ignore_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">df_experimental</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[[</span><span class="s2">&quot;Frequency&quot;</span><span class="p">,</span> <span class="s2">&quot;ChiPrimeMol&quot;</span><span class="p">,</span><span class="s2">&quot;ChiBisMol&quot;</span><span class="p">]]</span>
+            <span class="n">columns_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Frequency T=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="si">}</span><span class="s2"> H=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+             <span class="sa">f</span><span class="s2">&quot;ChiPrimeMol T=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="si">}</span><span class="s2"> H=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;ChiBisMol T=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="si">}</span><span class="s2"> H=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
+            <span class="c1"># df_experimental.columns = columns_names</span>
+            <span class="c1"># df_experimental.reset_index(drop=True, inplace=True)</span>
+
+            <span class="n">df_model</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns_names</span><span class="p">)</span>
+            <span class="n">displayed</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="s2">&quot;Hidden&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="kc">False</span><span class="p">]</span>
+
+            <span class="n">xx</span> <span class="o">=</span> <span class="n">logspace</span><span class="p">(</span><span class="n">displayed</span><span class="p">[</span><span class="s2">&quot;FrequencyLog&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">displayed</span><span class="p">[</span><span class="s2">&quot;FrequencyLog&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolution</span><span class="p">)</span>
+            <span class="n">df_model</span><span class="p">[</span><span class="n">columns_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+
+            <span class="n">yy</span> <span class="o">=</span> <span class="n">Fit</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_saved_parameters_values</span><span class="p">())</span>
+            <span class="n">df_model</span><span class="p">[</span><span class="n">columns_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">yy</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+            <span class="n">df_model</span><span class="p">[</span><span class="n">columns_names</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="o">-</span><span class="n">yy</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+
+            <span class="n">df_model_final</span> <span class="o">=</span> <span class="n">concat</span><span class="p">([</span><span class="n">df_model_final</span><span class="p">,</span> <span class="n">df_model</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df_model_final</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">),</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="n">rel_str</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;rel_nr=</span><span class="si">{</span><span class="n">j</span><span class="o">//</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">columns</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">rel_str</span>
+                <span class="n">columns</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">rel_str</span>
+                <span class="n">columns</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">rel_str</span>
+            <span class="n">df_model_final</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+
+        <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">concat</span><span class="p">([</span><span class="n">df_param</span><span class="p">,</span> <span class="n">df_experimental</span><span class="p">,</span> <span class="n">df_model_final</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="Fit.save_all_relaxations"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.save_all_relaxations">[docs]</a>    <span class="k">def</span> <span class="nf">save_all_relaxations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save current parameters of all relaxations.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">:</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Fit.copy_all_relxations"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.copy_all_relxations">[docs]</a>    <span class="k">def</span> <span class="nf">copy_all_relxations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Self</span><span class="p">):</span> <span class="c1">#type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;Copy saved parameters for all relaxations&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">relaxations</span><span class="p">):</span> <span class="c1">#type: ignore</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Fit.get_jsonable"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.get_jsonable">[docs]</a>    <span class="k">def</span> <span class="nf">get_jsonable</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Marshal object to python dictionary.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary ready to save as .json</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">r_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">:</span>
+            <span class="n">r_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">get_jsonable</span><span class="p">())</span>
+        <span class="n">jsonable</span> <span class="o">=</span> <span class="p">{</span>
+         <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> 
+         <span class="s2">&quot;df&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">to_json</span><span class="p">(),</span>
+         <span class="s2">&quot;tmp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="p">,</span>
+         <span class="s2">&quot;field&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="p">,</span>
+         <span class="s2">&quot;relaxations&quot;</span><span class="p">:</span> <span class="n">r_list</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">jsonable</span></div>
+
+<div class="viewcode-block" id="Fit.update_relaxations_from_json"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.update_relaxations_from_json">[docs]</a>    <span class="k">def</span> <span class="nf">update_relaxations_from_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relaxations_json</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;From given dictionary recreate saved state of relaxations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            relaxations_json (list[dict]): Result of self.get_jsonable()</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">r_j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">relaxations_json</span><span class="p">):</span>
+            <span class="n">r</span><span class="p">:</span> <span class="n">Relaxation</span> <span class="o">=</span> <span class="n">Relaxation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="p">)</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">residual_error</span> <span class="o">=</span> <span class="n">r_j</span><span class="p">[</span><span class="s2">&quot;residual_error&quot;</span><span class="p">]</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">saved_residual_error</span> <span class="o">=</span> <span class="n">r_j</span><span class="p">[</span><span class="s2">&quot;saved_residual_error&quot;</span><span class="p">]</span>
+            <span class="n">r</span><span class="o">.</span><span class="n">was_saved</span> <span class="o">=</span> <span class="n">r_j</span><span class="p">[</span><span class="s2">&quot;was_saved&quot;</span><span class="p">]</span>
+            
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">update_from_json</span><span class="p">(</span><span class="n">r_j</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">s_p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">saved_parameters</span><span class="p">):</span>
+                <span class="n">s_p</span><span class="o">.</span><span class="n">update_from_json</span><span class="p">(</span><span class="n">r_j</span><span class="p">[</span><span class="s2">&quot;saved_parameters&quot;</span><span class="p">][</span><span class="n">k</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">r</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Wiktor Żychowicz.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
