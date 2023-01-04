@@ -3,6 +3,7 @@ from webbrowser import open
 class HomePageController():
     @staticmethod
     def open_url(item):
+        """Open link to publication."""
         if item.text()[:3] == 'www':
             open(item.text())
         if item.text() == "10.1039/D2CC02238A":

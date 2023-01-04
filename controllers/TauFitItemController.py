@@ -7,6 +7,8 @@ class TauFitItemController(QObject):
         self._model = model
     
     def rename(self):
+        """Change model name.
+        """
         new_name, ok = QInputDialog.getText(QWidget(), 'Renaming Tau Fit', 'Enter new name of the Tau Fit:')
         if ok:
             msg: QMessageBox = QMessageBox()

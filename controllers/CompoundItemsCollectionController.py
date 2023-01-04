@@ -9,11 +9,13 @@ class CompoundItemsCollectionController(QObject):
         self._model: CompoundItemsCollectionModel = model
 
     def display(self):
+        """Display Home Page
+        """
         self._model._displayer.display_home_page()
 
     @pyqtSlot()
     def add_compound(self):
-
+        """Create and add to collection new Compound"""
         name, ok = QInputDialog.getText(QWidget(), 'Creating new compund', 'Enter name of compound:')
 
         if not ok:

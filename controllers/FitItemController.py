@@ -7,6 +7,7 @@ class FitItemController(QObject):
         self._model: Fit = model
 
     def rename(self):
+        """Change model name."""
         new_name, ok = QInputDialog.getText(QWidget(), 'Renaming fit', 'Enter new name of the fit:')
         if ok:
             msg: QMessageBox = QMessageBox()

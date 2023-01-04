@@ -17,6 +17,8 @@ class MeasurementItemsCollectionController(QObject):
 
     @pyqtSlot()
     def load_measurements_from_file(self):
+        """Load data from magnetometr to relACs program.
+        """
         dlg: QFileDialog = QFileDialog()
         dlg.setFileMode(QFileDialog.FileMode.ExistingFile)
 
@@ -105,6 +107,17 @@ class MeasurementItemsCollectionController(QObject):
         self._model._compound._tree.resizeColumnToContents(0)
 
     def dat_to_csv(self, filepath:str) -> str:
+        """Create new file in in .csv format from .dat source file.
+
+        Args:
+            filepath (str): System path to source file.
+
+        Raises:
+            ValueError: Raise when filepath is incorrect.
+
+        Returns:
+            str: Filepath to created .csv file.
+        """
         if not os.path.isfile(filepath):
             raise ValueError 
 
@@ -126,6 +139,17 @@ class MeasurementItemsCollectionController(QObject):
         return new_filepath
 
     def cluster(self, data: DataFrame, by:Literal["MagneticField", "Temperature"], epsilon:float, reindex: bool=False) -> list[DataFrame]:
+        """Perform clusterization of measurement data from magnetometr.
+
+        Args:
+            data (DataFrame): Measurement data from magnetometr
+            by (Literal[&quot;MagneticField&quot;, &quot;Temperature&quot;]): Main dimention of clusterization.
+            epsilon (float): If space between two subsequent measurement points is bigger than epsilon, all new points from this point onward will we added to next cluster. 
+            reindex (bool, optional): Whether to reset index for DataFrames in result. Defaults to False.
+
+        Returns:
+            list[DataFrame]: List of DataFrames that each represent one cluster.
+        """
         sorted_data: DataFrame = data.sort_values(by=by).copy()
         min_value: float = sorted_data[by].min()
 

@@ -10,6 +10,8 @@ class TauFitItemsCollectionController(QObject):
 
     @pyqtSlot()
     def save_all_to_file(self):
+        """Save results from all TauFits in collection to .csv file.
+        """
         df = DataFrame()
         for fit in  self._model._tau_fits:
             df = concat([df, fit.get_result()], axis=1)

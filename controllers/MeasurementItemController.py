@@ -8,6 +8,7 @@ class MeasurementItemController(QObject):
         
     @pyqtSlot()
     def rename(self):
+        """Change model name."""
         new_name, ok = QInputDialog.getText(QWidget(), 'Renaming compund', 'Enter new name of the compound:')
         if ok:
             msg: QMessageBox = QMessageBox()
