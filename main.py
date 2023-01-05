@@ -20,10 +20,15 @@
 """ 
 
 import sys
-from PyQt6.QtWidgets import QApplication
+
+import requests #type: ignore
+from webbrowser import open
+
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QPushButton
 from PyQt6.QtGui import QIcon
 
 from views import MainView
+
 
 class RelACs(QApplication):
     def __init__(self, sys_argv:list[str]):
@@ -34,6 +39,24 @@ class RelACs(QApplication):
         self.main_view.showMaximized()
 
 if __name__ == "__main__":
+    response = requests.get("https://api.github.com/repos/ZychuDev/relACs/releases")
+    if response.ok:
+        release = "2.02"
+        latest_relase= response.json()[0]["tag_name"]
+        if latest_relase != release:
+            launcher = QApplication(sys.argv)
+            window = QWidget()
+            launcher_layout = QVBoxLayout()
+            launcher_layout.addWidget(QLabel(f"New relACs version {latest_relase} is available."))
+            install_button = QPushButton("Install new version")
+            install_button.clicked.connect(lambda: open(f"https://github.com/ZychuDev/relACs/releases/tag/{latest_relase}")) #type: ignore
+            skip_button: QPushButton = QPushButton("Continue using old version")
+            skip_button.clicked.connect(launcher.exit) #type: ignore
+            launcher_layout.addWidget(install_button)
+            launcher_layout.addWidget(skip_button)
+            window.setLayout(launcher_layout)
+            window.show()
+            launcher.exec()
     app:QApplication = RelACs(sys.argv)
     # app.setStyle("Fusion")
     sys.exit(app.exec())
