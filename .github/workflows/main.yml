@@ -35,8 +35,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: 2.0 #DO ZMIANY
-        release_name: Release 2.0  #DO ZMIANY
+        tag_name: 2.02 #DO ZMIANY
+        release_name: Release 2.02  #DO ZMIANY
         draft: false
         prerelease: false
     - name: Upload Release Asset
