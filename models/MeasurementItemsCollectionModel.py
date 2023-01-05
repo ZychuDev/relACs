@@ -10,11 +10,11 @@ from protocols import Collection
 from typing import cast
 
 class MeasurementItemsCollectionModel(QObject):
-    """_summary_
+    """Model for collection of MeasurementItems.
 
         Args:
-            name (str): _description_
-            compound (Compound): _description_
+            name (str): Collection name
+            compound (Compound): Parent item.
 
         Attributes:
             name_changed: Emitted when collection name is changed. Contains new name.
