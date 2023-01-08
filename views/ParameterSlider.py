@@ -7,6 +7,7 @@ from models import Parameter
 from scipy.interpolate import interp1d # type: ignore
 from numpy import log10
 
+# from time import time
 class ParameterSlider(QWidget):
     def __init__(self):
         super().__init__()
@@ -91,6 +92,7 @@ class ParameterSlider(QWidget):
         self.parameter.block_state_changed.connect(self.set_blocked_silent)
         self.parameter.block_0_state_changed.connect(self.set_blocked_0_silent)
 
+        
     def on_checkbox_clicked(self):
         self.parameter.set_blocked(self.blocked_check.isChecked())
 
@@ -126,6 +128,7 @@ class ParameterSlider(QWidget):
         else:
             self.line_edit.setText(str(round(v, 8)))
         self.slider.blockSignals(False)
+        # print(time())
 
     def slider_to_param(self) -> float:
         v: int = self.slider.value()

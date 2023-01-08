@@ -9,7 +9,7 @@ class MainView(QMainWindow):
     """
     def __init__(self):
         super().__init__()
-
+        self.setWindowTitle("RelACs")
         self.setObjectName("MainWindow")
         self.menubar = QMenuBar(self)
         
