@@ -66,8 +66,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for models.Fit</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QMessageBox</span><span class="p">,</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QWidget</span>
+<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">pyqtBoundSignal</span>
+<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QFileDialog</span><span class="p">,</span> <span class="n">QWidget</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QUndoStack</span><span class="p">,</span> <span class="n">QUndoCommand</span>
 
 <span class="kn">from</span> <span class="nn">.Relaxation</span> <span class="kn">import</span> <span class="n">Relaxation</span>
@@ -99,11 +99,13 @@
 <span class="sd">            name_changed: Emitted when name change. Contains new name.</span>
 <span class="sd">            df_changed: Emitted when at least one row in df changed.</span>
 <span class="sd">            df_point_deleted: Emitted when row in df is removed.</span>
+<span class="sd">            deletion_imposible: Emitted when deletion operation could not be performed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
     <span class="n">df_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
     <span class="n">df_point_deleted</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">deletion_imposible</span><span class="p">:</span><span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Fit.model"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.model">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="n">logFrequency</span><span class="p">:</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">alpha</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tau</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chi_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chi_s</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ndarray</span><span class="p">:</span>
@@ -144,7 +146,7 @@
             <span class="n">fit</span><span class="o">.</span><span class="n">relaxations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Relaxation</span><span class="p">(</span><span class="n">compound</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">fit</span></div>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span><span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="n">Collection</span><span class="o">|</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span><span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="s2">&quot;Fit&quot;</span><span class="p">]</span><span class="o">|</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">df</span>
@@ -152,10 +154,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_tmp</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">temp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Relaxation</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">relaxations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Relaxation</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="p">:</span> <span class="n">SettingsSource</span> <span class="o">=</span> <span class="n">compound</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span> <span class="n">Collection</span> <span class="o">|</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="s2">&quot;Fit&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">collection</span>
 
@@ -171,7 +173,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Compund name must be at least one character long&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">update_names</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">update_names</span><span class="p">(</span><span class="n">old_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="n">new_name</span><span class="o">=</span><span class="n">val</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
@@ -202,16 +204,20 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="o">.</span><span class="n">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="Fit.DeletePoint"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.DeletePoint">[docs]</a>    <span class="k">class</span> <span class="nc">DeletePoint</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fit</span><span class="p">:</span> <span class="s2">&quot;Fit&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fit</span><span class="p">:</span> <span class="s2">&quot;Fit&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error_signal</span><span class="p">:</span> <span class="n">pyqtBoundSignal</span><span class="p">):</span>
 
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">:</span> <span class="n">Fit</span> <span class="o">=</span> <span class="n">fit</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">x</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">x_str</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_signal</span> <span class="o">=</span> <span class="n">error_signal</span>
 
 <div class="viewcode-block" id="Fit.DeletePoint.redo"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.DeletePoint.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="o">.</span><span class="n">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span></div>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="o">.</span><span class="n">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error_signal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Fit.DeletePoint.undo"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.DeletePoint.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="o">.</span><span class="n">_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">])</span>
@@ -229,13 +235,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_molar_mass</span> <span class="o">=</span> <span class="n">val</span>
 
 <div class="viewcode-block" id="Fit.set_name"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.set_name">[docs]</a>    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets fit name. This action can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_name (str): New measurement name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">))</span></div>
     
 <div class="viewcode-block" id="Fit.hide_point"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.hide_point">[docs]</a>    <span class="k">def</span> <span class="nf">hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Change point visibility on the opposite of actual. This action can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): Value of point for domain column.</span>
+<span class="sd">            x_str (str): Name of domain column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">HidePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Fit.delete_point"><a class="viewcode-back" href="../../models.html#models.Fit.Fit.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DeletePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">))</span></div>
+        <span class="sd">&quot;&quot;&quot;Delete point. This action can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): Value of point for domain column.</span>
+<span class="sd">            x_str (str): Name of domain column.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: Raised when there is not enough points to delete any more.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DeletePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deletion_imposible</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="nf">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Hide point </span>
@@ -256,12 +282,7 @@
 <span class="sd">            x_str (str): Name of domain column.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">msg</span><span class="p">:</span> <span class="n">QMessageBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Icon</span><span class="o">.</span><span class="n">Warning</span><span class="p">)</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Measurement must consist of at least 2 data points&quot;</span><span class="p">)</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Data point removal error&quot;</span><span class="p">)</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
-            <span class="k">return</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span>
 
         <span class="n">point</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

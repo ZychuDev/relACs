@@ -15,7 +15,7 @@ class Compound(QObject):
         displayer (Displayer): Object responsible for visualization of Measurements, Fits and TauFits 
     """
     name_changed: pyqtSignal= pyqtSignal(str)
-    def __init__(self, name: str, molar_mass: float, collection: Collection|None, tree:QTreeView, displayer: Displayer):
+    def __init__(self, name: str, molar_mass: float, collection: Collection["Compound"]|None, tree:QTreeView, displayer: Displayer):
         super().__init__()
 
         if molar_mass < 0:

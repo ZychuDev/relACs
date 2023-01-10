@@ -1,5 +1,4 @@
-from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtBoundSignal
 from PyQt6.QtGui import QUndoStack, QUndoCommand
 from protocols import SettingsSource, Collection
 from readers import SettingsReader
@@ -14,8 +13,8 @@ class Measurement(QObject):
     """Represent one cluster of Measurements performed on probe of Compound.
 
         Args:
-            df (DataFrame): Processed data from magnetometr.
             name (str): Measurement name.
+            df (DataFrame): Processed data from magnetometr.
             temp (float): Temperature measured during the measurement.
             field (float): Magnetic field strength during measurement.
             compound (SettingsSource): Examined compound.
@@ -23,15 +22,17 @@ class Measurement(QObject):
         Attributes:
             name_changed: Emitted when name change. Contains new name.
             df_changed: Emitted when at least one row in df changed.
+            deletion_imposible: Emitted when deletion operation could not be performed.
     """
 
     name_changed: pyqtSignal = pyqtSignal(str)
     df_changed:pyqtSignal = pyqtSignal()
+    deletion_imposible:pyqtSignal = pyqtSignal()
     
     columns_headers: list[str] = ["Temperature","MagneticField","ChiPrime","ChiBis","Frequency"]
 
     @staticmethod
-    def from_data_frame(df: DataFrame, sufix:str, compound:SettingsSource, collection: Collection):
+    def from_data_frame(df: DataFrame, sufix:str, compound:SettingsSource, collection: Collection["Measurement"]):
         """Create new Measurement from DataFrame resulted from clustering process.
 
         Args:
@@ -66,10 +67,10 @@ class Measurement(QObject):
         name = f"T: {temp}K H: {field}Oe {sufix}"
         length: int = len(df["Frequency"])
         df["Hidden"] = Series(zeros(length), index=df.index)
-        return Measurement(df, name, temp, field, compound, collection)
+        return Measurement(name, df, temp, field, compound, collection)
 
 
-    def __init__(self, df: DataFrame, name: str, temp:float, field:float, compound: SettingsSource, collection: Collection):
+    def __init__(self, name: str, df: DataFrame, temp:float, field:float, compound: SettingsSource, collection: Collection["Measurement"]):
 
         super().__init__()
         self._name: str = name
@@ -78,7 +79,7 @@ class Measurement(QObject):
         self._field: float = field
 
         self._compound: SettingsSource = compound
-        self._collection: Collection = collection
+        self._collection: Collection["Measurement"] = collection
 
         self._undo_stack: QUndoStack = QUndoStack()
 
@@ -109,16 +110,21 @@ class Measurement(QObject):
             self._measurement._hide_point(self.x, self.x_str)
 
     class DeletePoint(QUndoCommand):
-        def __init__(self, measurement: "Measurement", x: float, x_str: str):
+        def __init__(self, measurement: "Measurement", x: float, x_str: str, error_signal:pyqtBoundSignal):
 
             super().__init__()
             self._measurement: Measurement = measurement
             self.x: float = x
             self.x_str: str = x_str
             self.point: DataFrame = DataFrame()
-
+            self.error_signal = error_signal
         def redo(self) -> None:
-            self.point = self._measurement._delete_point(self.x, self.x_str)
+            try:
+                self.point = self._measurement._delete_point(self.x, self.x_str)
+            except IndexError:
+                self.error_signal.emit()
+
+            
 
         def undo(self) -> None:
             self._measurement._df = concat([self._measurement._df, self.point])
@@ -138,16 +144,37 @@ class Measurement(QObject):
         self.name_changed.emit(val)
 
     def set_name(self, new_name: str):
+        """Sets measurement name. This action can be undone.
+
+        Args:
+            new_name (str): New measurement name
+        """
         self._undo_stack.push(self.Rename(self, new_name))
     
     def hide_point(self, x: float, x_str: str):
+        """Change point visibility on the opposite of actual. This action can be undone.
+
+        Args:
+            x (float): Value of point for domain column.
+            x_str (str): Name of domain column.
+        """
         self._undo_stack.push(self.HidePoint(self, x, x_str))
 
     def delete_point(self, x: float, x_str: str):
-        self._undo_stack.push(self.DeletePoint(self, x, x_str))
+        """Delete point. This action can be undone.
+
+        Args:
+            x (float): Value of point for domain column.
+            x_str (str): Name of domain column.
+
+        Raises:
+            IndexError: Raised when there is not enough points to delete any more.
+        """
+
+        self._undo_stack.push(self.DeletePoint(self, x, x_str, self.deletion_imposible))
 
     def _hide_point(self, x: float, x_str: str):
-        """Hide point 
+        """Change point visibility on the opposite of actual.
 
         Args:
             x (float): Value of point for domain column.
@@ -158,20 +185,22 @@ class Measurement(QObject):
         self.df_changed.emit()
         # self.dataChanged.emit() #type: ignore
 
-    def _delete_point(self, x: float, x_str: str):
+    def _delete_point(self, x: float, x_str: str) -> DataFrame:
         """Delete point 
 
         Args:
             x (float): Value of point for domain column.
             x_str (str): Name of domain column.
+
+        Raises:
+            IndexError: Raised when there is not enough points to delete any more.
+
+        Returns:
+            DataFrame: Deleted point.
         """
+
         if self._df.shape[0] == 2:
-            msg: QMessageBox = QMessageBox()
-            msg.setIcon(QMessageBox.Icon.Warning)
-            msg.setText("Measurement must consist of at least 2 data points")
-            msg.setWindowTitle("Data point removal error")
-            msg.exec()
-            return
+            raise IndexError
 
         point: DataFrame = self._df.loc[self._df[x_str] == x]
         self._df.drop(self._df.loc[self._df[x_str] == x].index, inplace=True)

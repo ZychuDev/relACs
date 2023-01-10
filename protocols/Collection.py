@@ -1,8 +1,9 @@
-from typing import Protocol
+from typing import Protocol, TypeVar
 from PyQt6.QtCore import QModelIndex
 from .Displayer import Displayer
 
-class Collection(Protocol):
+T = TypeVar('T', covariant=True)
+class Collection(Protocol[T]):
     _displayer: Displayer
     
     def check_name(self, new_name:str) -> bool: 
@@ -74,7 +75,7 @@ class Collection(Protocol):
         """
         ...
 
-    def get_item_model(self, name: str):
+    def get_item_model(self, name: str) -> T|None:
         """Get item of given name
 
         Args:

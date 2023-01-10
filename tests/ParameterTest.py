@@ -11,6 +11,9 @@ class ParameterTest(TestCase):
     def tearDown(self):
         self.p.error_changed.disconnect()
 
+    def set_value_emited(self, v: float):
+        self.value_emited = v
+
     def test_default_error(self):
         self.assertEqual(self.p.error, 0.0, "incorrect default error")
 
@@ -24,5 +27,10 @@ class ParameterTest(TestCase):
         self.assertEqual(self.p.error, 0.9, "wrong error after change")
         self.assertEqual(self.value_emited, None, "value emited in silent mode")
 
-    def set_value_emited(self, v: float):
-        self.value_emited = v
+    def test_jsonable(self):
+        jsonable: dict = self.p.get_jsonable()
+        p2: Parameter = Parameter("beta", -2, 3, True)
+        p2.update_from_json(jsonable)
+        p_attrs = vars(self.p)
+        for attr, value in vars(p2).items():
+            self.assertEqual(p_attrs[attr], value, f"Uncorrect JSON unmarshaling for {attr}")

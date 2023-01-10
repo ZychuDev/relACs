@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableView, QHeaderView
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QTableView, QHeaderView, QMessageBox
 from PyQt6.QtCore import QAbstractTableModel, QSize, Qt
 from PyQt6.QtGui import QFont, QKeySequence, QShortcut
 
@@ -114,6 +114,7 @@ class DataExplorer(QWidget):
         self.shortcut_redo: QShortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
         self.shortcut_redo.activated.connect(self.on_redo)
 
+
     def on_undo(self):
         if self.measurement is not None:
             self.measurement.undo()
@@ -122,15 +123,24 @@ class DataExplorer(QWidget):
         if self.measurement is not None:
             self.measurement.redo()
 
+    def on_deletion_imposible(self):
+        msg: QMessageBox = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Warning)
+        msg.setText("Measurement must consist of at least 2 data points")
+        msg.setWindowTitle("Data point removal error")
+        msg.exec()
+
     def set_measurement(self, measurement:Measurement):
         if self.measurement is not None:
             self.measurement.df_changed.disconnect()
             self.measurement.name_changed.disconnect()
+            self.measurement.deletion_imposible.disconnect()
 
         self.measurement = measurement
         self.measurement.df_changed.connect(self.update_plots)
         self.measurement.df_changed.connect(self.table.update)
         self.measurement.name_changed.connect(lambda new_name: self.title_label.setText(new_name))
+        self.measurement.deletion_imposible.connect(self.on_deletion_imposible)
         self.title_label.setText(measurement.name)
 
         self.table_model = TableModel(self.measurement._df)
@@ -226,4 +236,6 @@ class DataExplorer(QWidget):
             self.measurement.delete_point(x_data[ind], x_str)
 
         self._last_event_time = time()
+
+
         

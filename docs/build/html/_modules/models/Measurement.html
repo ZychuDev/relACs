@@ -66,8 +66,7 @@
            <div itemprop="articleBody">
              
   <h1>Source code for models.Measurement</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span>
-<span class="kn">from</span> <span class="nn">PyQt6.QtWidgets</span> <span class="kn">import</span> <span class="n">QMessageBox</span>
+<span></span><span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QObject</span><span class="p">,</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">pyqtBoundSignal</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtGui</span> <span class="kn">import</span> <span class="n">QUndoStack</span><span class="p">,</span> <span class="n">QUndoCommand</span>
 <span class="kn">from</span> <span class="nn">protocols</span> <span class="kn">import</span> <span class="n">SettingsSource</span><span class="p">,</span> <span class="n">Collection</span>
 <span class="kn">from</span> <span class="nn">readers</span> <span class="kn">import</span> <span class="n">SettingsReader</span>
@@ -82,8 +81,8 @@
     <span class="sd">&quot;&quot;&quot;Represent one cluster of Measurements performed on probe of Compound.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            df (DataFrame): Processed data from magnetometr.</span>
 <span class="sd">            name (str): Measurement name.</span>
+<span class="sd">            df (DataFrame): Processed data from magnetometr.</span>
 <span class="sd">            temp (float): Temperature measured during the measurement.</span>
 <span class="sd">            field (float): Magnetic field strength during measurement.</span>
 <span class="sd">            compound (SettingsSource): Examined compound.</span>
@@ -91,15 +90,17 @@
 <span class="sd">        Attributes:</span>
 <span class="sd">            name_changed: Emitted when name change. Contains new name.</span>
 <span class="sd">            df_changed: Emitted when at least one row in df changed.</span>
+<span class="sd">            deletion_imposible: Emitted when deletion operation could not be performed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">name_changed</span><span class="p">:</span> <span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
     <span class="n">df_changed</span><span class="p">:</span><span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">deletion_imposible</span><span class="p">:</span><span class="n">pyqtSignal</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
     
     <span class="n">columns_headers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Temperature&quot;</span><span class="p">,</span><span class="s2">&quot;MagneticField&quot;</span><span class="p">,</span><span class="s2">&quot;ChiPrime&quot;</span><span class="p">,</span><span class="s2">&quot;ChiBis&quot;</span><span class="p">,</span><span class="s2">&quot;Frequency&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Measurement.from_data_frame"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.from_data_frame">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_data_frame</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">sufix</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span><span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="n">Collection</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_data_frame</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">sufix</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span><span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="s2">&quot;Measurement&quot;</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;Create new Measurement from DataFrame resulted from clustering process.</span>
 
 <span class="sd">        Args:</span>
@@ -134,10 +135,10 @@
         <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;T: </span><span class="si">{</span><span class="n">temp</span><span class="si">}</span><span class="s2">K H: </span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">Oe </span><span class="si">{</span><span class="n">sufix</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Frequency&quot;</span><span class="p">])</span>
         <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Hidden&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Series</span><span class="p">(</span><span class="n">zeros</span><span class="p">(</span><span class="n">length</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Measurement</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Measurement</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">compound</span><span class="p">,</span> <span class="n">collection</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span> <span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="n">Collection</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">compound</span><span class="p">:</span> <span class="n">SettingsSource</span><span class="p">,</span> <span class="n">collection</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="s2">&quot;Measurement&quot;</span><span class="p">]):</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">name</span>
@@ -146,7 +147,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_field</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">field</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_compound</span><span class="p">:</span> <span class="n">SettingsSource</span> <span class="o">=</span> <span class="n">compound</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span> <span class="n">Collection</span> <span class="o">=</span> <span class="n">collection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="s2">&quot;Measurement&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collection</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="p">:</span> <span class="n">QUndoStack</span> <span class="o">=</span> <span class="n">QUndoStack</span><span class="p">()</span>
 
@@ -177,16 +178,21 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="Measurement.DeletePoint"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.DeletePoint">[docs]</a>    <span class="k">class</span> <span class="nc">DeletePoint</span><span class="p">(</span><span class="n">QUndoCommand</span><span class="p">):</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">:</span> <span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">measurement</span><span class="p">:</span> <span class="s2">&quot;Measurement&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">error_signal</span><span class="p">:</span><span class="n">pyqtBoundSignal</span><span class="p">):</span>
 
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="p">:</span> <span class="n">Measurement</span> <span class="o">=</span> <span class="n">measurement</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">x</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">x_str</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">()</span>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_signal</span> <span class="o">=</span> <span class="n">error_signal</span>
 <div class="viewcode-block" id="Measurement.DeletePoint.redo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.DeletePoint.redo">[docs]</a>        <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span></div>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_str</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error_signal</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+            
 
 <div class="viewcode-block" id="Measurement.DeletePoint.undo"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.DeletePoint.undo">[docs]</a>        <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_measurement</span><span class="o">.</span><span class="n">_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">point</span><span class="p">])</span>
@@ -206,16 +212,37 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">name_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Measurement.set_name"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.set_name">[docs]</a>    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets measurement name. This action can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            new_name (str): New measurement name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">))</span></div>
     
 <div class="viewcode-block" id="Measurement.hide_point"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.hide_point">[docs]</a>    <span class="k">def</span> <span class="nf">hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Change point visibility on the opposite of actual. This action can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): Value of point for domain column.</span>
+<span class="sd">            x_str (str): Name of domain column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">HidePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Measurement.delete_point"><a class="viewcode-back" href="../../models.html#models.Measurement.Measurement.delete_point">[docs]</a>    <span class="k">def</span> <span class="nf">delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DeletePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">))</span></div>
+        <span class="sd">&quot;&quot;&quot;Delete point. This action can be undone.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x (float): Value of point for domain column.</span>
+<span class="sd">            x_str (str): Name of domain column.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: Raised when there is not enough points to delete any more.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_undo_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DeletePoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">x_str</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">deletion_imposible</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="nf">_hide_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Hide point </span>
+        <span class="sd">&quot;&quot;&quot;Change point visibility on the opposite of actual.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x (float): Value of point for domain column.</span>
@@ -226,20 +253,22 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">df_changed</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
         <span class="c1"># self.dataChanged.emit() #type: ignore</span>
 
-    <span class="k">def</span> <span class="nf">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_delete_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">x_str</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Delete point </span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            x (float): Value of point for domain column.</span>
 <span class="sd">            x_str (str): Name of domain column.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexError: Raised when there is not enough points to delete any more.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataFrame: Deleted point.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">msg</span><span class="p">:</span> <span class="n">QMessageBox</span> <span class="o">=</span> <span class="n">QMessageBox</span><span class="p">()</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Icon</span><span class="o">.</span><span class="n">Warning</span><span class="p">)</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Measurement must consist of at least 2 data points&quot;</span><span class="p">)</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Data point removal error&quot;</span><span class="p">)</span>
-            <span class="n">msg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
-            <span class="k">return</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span>
 
         <span class="n">point</span><span class="p">:</span> <span class="n">DataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="n">x_str</span><span class="p">]</span> <span class="o">==</span> <span class="n">x</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

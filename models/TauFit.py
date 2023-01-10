@@ -151,7 +151,7 @@ class TauFit(QObject):
         self.varying: Literal["Field", "Temperature"] = "Field"
         self.constant: float = 0
 
-        self._collection: Collection
+        self._collection: Collection["TauFit"]
         if collection is not None:
             self._collection = collection
 
@@ -543,7 +543,7 @@ class TauFit(QObject):
 
         self.all_parameters_changed.emit()
 
-    def copy(self, other):
+    def copy(self, other:"TauFit"):
         """Set saved parameters of other as current parameters of self.
 
         Args:

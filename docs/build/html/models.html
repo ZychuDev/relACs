@@ -137,7 +137,7 @@
 <span id="models-compound-module"></span><h2>models.Compound module<a class="headerlink" href="#module-models.Compound" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.Compound.Compound">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Compound.</span></span><span class="sig-name descname"><span class="pre">Compound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molar_mass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">protocols.Collection.Collection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QTreeView</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Displayer.Displayer" title="protocols.Displayer.Displayer"><span class="pre">Displayer</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Compound.html#Compound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Compound.Compound" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Compound.</span></span><span class="sig-name descname"><span class="pre">Compound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molar_mass</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#models.Compound.Compound" title="models.Compound.Compound"><span class="pre">Compound</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">QTreeView</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">displayer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Displayer.Displayer" title="protocols.Displayer.Displayer"><span class="pre">Displayer</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Compound.html#Compound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Compound.Compound" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
 <p>Represent examined Compound</p>
 <dl class="field-list simple">
@@ -345,7 +345,7 @@
 <span id="models-fit-module"></span><h2>models.Fit module<a class="headerlink" href="#module-models.Fit" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.Fit.Fit">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Fit.</span></span><span class="sig-name descname"><span class="pre">Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">protocols.Collection.Collection</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Fit.</span></span><span class="sig-name descname"><span class="pre">Fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#models.Fit.Fit" title="models.Fit.Fit"><span class="pre">Fit</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
 <p>Represent one fit for Havriliak-Negami model with n-relaxation.</p>
 <dl class="field-list simple">
@@ -393,9 +393,20 @@
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.Fit.Fit.deletion_imposible">
+<span class="sig-name descname"><span class="pre">deletion_imposible</span></span><a class="headerlink" href="#models.Fit.Fit.deletion_imposible" title="Permalink to this definition"></a></dt>
+<dd><p>Emitted when deletion operation could not be performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>PyQt6.QtCore.pyqtSignal</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="models.Fit.Fit.DeletePoint">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeletePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Fit.Fit" title="models.Fit.Fit"><span class="pre">Fit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.DeletePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.DeletePoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeletePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Fit.Fit" title="models.Fit.Fit"><span class="pre">Fit</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_signal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pyqtBoundSignal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.DeletePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.DeletePoint" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.DeletePoint.redo">
@@ -467,7 +478,19 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.delete_point">
 <span class="sig-name descname"><span class="pre">delete_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.delete_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.delete_point" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Delete point. This action can be undone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
+<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised when there is not enough points to delete any more.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.from_measurement">
@@ -521,7 +544,16 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.hide_point">
 <span class="sig-name descname"><span class="pre">hide_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.hide_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.hide_point" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Change point visibility on the opposite of actual. This action can be undone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
+<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.make_auto_fit">
@@ -591,7 +623,13 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.set_name">
 <span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Fit.html#Fit.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Fit.Fit.set_name" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Sets fit name. This action can be undone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_name</strong> (<em>str</em>) – New measurement name</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Fit.Fit.undo">
@@ -864,14 +902,14 @@
 <span id="models-measurement-module"></span><h2>models.Measurement module<a class="headerlink" href="#module-models.Measurement" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="models.Measurement.Measurement">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Measurement.</span></span><span class="sig-name descname"><span class="pre">Measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">Collection</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.Measurement.</span></span><span class="sig-name descname"><span class="pre">Measurement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#models.Measurement.Measurement" title="models.Measurement.Measurement"><span class="pre">Measurement</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
 <p>Represent one cluster of Measurements performed on probe of Compound.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>DataFrame</em>) – Processed data from magnetometr.</p></li>
 <li><p><strong>name</strong> (<em>str</em>) – Measurement name.</p></li>
+<li><p><strong>df</strong> (<em>DataFrame</em>) – Processed data from magnetometr.</p></li>
 <li><p><strong>temp</strong> (<em>float</em>) – Temperature measured during the measurement.</p></li>
 <li><p><strong>field</strong> (<em>float</em>) – Magnetic field strength during measurement.</p></li>
 <li><p><strong>compound</strong> (<a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><em>SettingsSource</em></a>) – Examined compound.</p></li>
@@ -901,9 +939,20 @@
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="models.Measurement.Measurement.deletion_imposible">
+<span class="sig-name descname"><span class="pre">deletion_imposible</span></span><a class="headerlink" href="#models.Measurement.Measurement.deletion_imposible" title="Permalink to this definition"></a></dt>
+<dd><p>Emitted when deletion operation could not be performed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>PyQt6.QtCore.pyqtSignal</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.DeletePoint">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeletePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measurement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Measurement.Measurement" title="models.Measurement.Measurement"><span class="pre">Measurement</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.DeletePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.DeletePoint" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DeletePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">measurement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Measurement.Measurement" title="models.Measurement.Measurement"><span class="pre">Measurement</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_signal</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pyqtBoundSignal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.DeletePoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.DeletePoint" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QUndoCommand</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.DeletePoint.redo">
@@ -957,11 +1006,23 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.delete_point">
 <span class="sig-name descname"><span class="pre">delete_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.delete_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.delete_point" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Delete point. This action can be undone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
+<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>IndexError</strong> – Raised when there is not enough points to delete any more.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.from_data_frame">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_data_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sufix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">Collection</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.from_data_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.from_data_frame" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_data_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sufix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.SettingsSource.SettingsSource" title="protocols.SettingsSource.SettingsSource"><span class="pre">SettingsSource</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">collection</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="protocols.html#protocols.Collection.Collection" title="protocols.Collection.Collection"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#models.Measurement.Measurement" title="models.Measurement.Measurement"><span class="pre">Measurement</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.from_data_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.from_data_frame" title="Permalink to this definition"></a></dt>
 <dd><p>Create new Measurement from DataFrame resulted from clustering process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -998,7 +1059,16 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.hide_point">
 <span class="sig-name descname"><span class="pre">hide_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.hide_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.hide_point" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Change point visibility on the opposite of actual. This action can be undone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – Value of point for domain column.</p></li>
+<li><p><strong>x_str</strong> (<em>str</em>) – Name of domain column.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.name">
@@ -1013,7 +1083,13 @@
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.set_name">
 <span class="sig-name descname"><span class="pre">set_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/Measurement.html#Measurement.set_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.Measurement.Measurement.set_name" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Sets measurement name. This action can be undone.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_name</strong> (<em>str</em>) – New measurement name</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.Measurement.Measurement.undo">
@@ -1029,12 +1105,12 @@
 <dt class="sig sig-object py" id="models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">models.MeasurementItemsCollectionModel.</span></span><span class="sig-name descname"><span class="pre">MeasurementItemsCollectionModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compound</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.Compound.Compound" title="models.Compound.Compound"><span class="pre">Compound</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/MeasurementItemsCollectionModel.html#MeasurementItemsCollectionModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.MeasurementItemsCollectionModel.MeasurementItemsCollectionModel" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">QObject</span></code></p>
-<p>_summary_</p>
+<p>Model for collection of MeasurementItems.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – _description_</p></li>
-<li><p><strong>compound</strong> (<a class="reference internal" href="#models.Compound.Compound" title="models.Compound.Compound"><em>Compound</em></a>) – _description_</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – Collection name</p></li>
+<li><p><strong>compound</strong> (<a class="reference internal" href="#models.Compound.Compound" title="models.Compound.Compound"><em>Compound</em></a>) – Parent item.</p></li>
 </ul>
 </dd>
 </dl>
@@ -1800,7 +1876,7 @@ runtime environment when cost function in calculated. Defaults to False.</p></li
 
 <dl class="py method">
 <dt class="sig sig-object py" id="models.TauFit.TauFit.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.copy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#models.TauFit.TauFit" title="models.TauFit.TauFit"><span class="pre">TauFit</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/models/TauFit.html#TauFit.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#models.TauFit.TauFit.copy" title="Permalink to this definition"></a></dt>
 <dd><p>Set saved parameters of other as current parameters of self.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

@@ -629,5 +629,6 @@ class TauFitPage(QWidget):
 
     def copy(self, src_name: str, dlg: QDialog):
         other = self.tau_fit._collection.get_item_model(src_name)
-        self.tau_fit.copy(other)
+        if other is not None:
+            self.tau_fit.copy(other)
         dlg.close()

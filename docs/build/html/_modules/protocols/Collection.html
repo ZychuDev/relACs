@@ -66,11 +66,12 @@
            <div itemprop="articleBody">
              
   <h1>Source code for protocols.Collection</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">TypeVar</span>
 <span class="kn">from</span> <span class="nn">PyQt6.QtCore</span> <span class="kn">import</span> <span class="n">QModelIndex</span>
 <span class="kn">from</span> <span class="nn">.Displayer</span> <span class="kn">import</span> <span class="n">Displayer</span>
 
-<div class="viewcode-block" id="Collection"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection">[docs]</a><span class="k">class</span> <span class="nc">Collection</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="n">covariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="Collection"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection">[docs]</a><span class="k">class</span> <span class="nc">Collection</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">T</span><span class="p">]):</span>
     <span class="n">_displayer</span><span class="p">:</span> <span class="n">Displayer</span>
     
 <div class="viewcode-block" id="Collection.check_name"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.check_name">[docs]</a>    <span class="k">def</span> <span class="nf">check_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span> 
@@ -142,7 +143,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="o">...</span></div>
 
-<div class="viewcode-block" id="Collection.get_item_model"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.get_item_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<div class="viewcode-block" id="Collection.get_item_model"><a class="viewcode-back" href="../../protocols.html#protocols.Collection.Collection.get_item_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_item_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">|</span><span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Get item of given name</span>
 
 <span class="sd">        Args:</span>

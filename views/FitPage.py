@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
  QPushButton, QCheckBox, QTableWidget, QAbstractScrollArea,
- QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox)
+ QAbstractItemView, QTableWidgetItem, QTabWidget, QDialog, QComboBox, QMessageBox)
 from PyQt6.QtCore import QSize, QMetaObject, QObject, Qt
 from PyQt6.QtGui import QFont, QPalette, QBrush, QColor, QKeySequence, QShortcut
 
@@ -298,6 +298,13 @@ class FitPage(QWidget):
         if self.fit is not None:
             self.fit.redo()
 
+    def on_deletion_imposible(self):
+        msg: QMessageBox = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Warning)
+        msg.setText("Fit must consist of at least 2 data points")
+        msg.setWindowTitle("Data point removal error")
+        msg.exec()
+
     def make_auto_fit(self):
         self.fit.make_auto_fit()
 
@@ -345,6 +352,8 @@ class FitPage(QWidget):
         if self.fit._collection is None:
             return
         other = self.fit._collection.get_item_model(src_name)
+        if other is None:
+            return
         for i, r in enumerate(self.fit.relaxations):
             r.copy(other.relaxations[i])
         dlg.close()
@@ -353,6 +362,7 @@ class FitPage(QWidget):
         if self.fit is not None:
             self.fit.df_changed.disconnect()
             self.fit.df_point_deleted.disconnect()
+            self.fit.deletion_imposible.disconnect()
             for r in self.fit.relaxations:
                 r.parameters_saved.disconnect()
                 r.all_parameters_changed.disconnect()
@@ -363,6 +373,7 @@ class FitPage(QWidget):
         self.fit = fit
         self.fit.df_changed.connect(self._update_measurements_plots)
         self.fit.df_point_deleted.connect(self.on_point_deleted)
+        self.fit.deletion_imposible.connect(self.on_deletion_imposible)
         self.fit.name_changed.connect(lambda new_name: self.title_label.setText(new_name))
         for i, r in enumerate(self.fit.relaxations):
             r.parameters_saved.connect(self._recreate_and_draw)

@@ -1,5 +1,5 @@
-from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QMessageBox, QFileDialog, QWidget
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtBoundSignal
+from PyQt6.QtWidgets import QFileDialog, QWidget
 from PyQt6.QtGui import QUndoStack, QUndoCommand
 
 from .Relaxation import Relaxation
@@ -31,11 +31,13 @@ class Fit(QObject):
             name_changed: Emitted when name change. Contains new name.
             df_changed: Emitted when at least one row in df changed.
             df_point_deleted: Emitted when row in df is removed.
+            deletion_imposible: Emitted when deletion operation could not be performed.
     """
 
     name_changed: pyqtSignal = pyqtSignal(str)
     df_changed: pyqtSignal = pyqtSignal()
     df_point_deleted: pyqtSignal = pyqtSignal()
+    deletion_imposible:pyqtSignal = pyqtSignal()
 
     @staticmethod
     def model(logFrequency: ndarray, alpha: float, beta: float, tau: float, chi_t: float, chi_s: float) -> ndarray:
@@ -76,7 +78,7 @@ class Fit(QObject):
             fit.relaxations.append(Relaxation(compound))
 
         return fit
-    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:SettingsSource, collection: Collection|None):
+    def __init__(self, name: str, df: DataFrame, temp: float, field: float, compound:SettingsSource, collection: Collection["Fit"]|None):
         super().__init__()
         self._name: str = name
         self._df: DataFrame = df
@@ -84,10 +86,10 @@ class Fit(QObject):
         self._tmp: float = temp
         self._field: float = field
 
-        self.relaxations: list[Relaxation]
+        self.relaxations: list[Relaxation] = []
 
         self._compound: SettingsSource = compound
-        self._collection: Collection | None
+        self._collection: Collection["Fit"] | None
         if collection is not None:
             self._collection = collection
 
@@ -103,7 +105,7 @@ class Fit(QObject):
         if len(val) < 1:
             raise ValueError("Compund name must be at least one character long")
         if self._collection is not None:
-            self._collection.update_names(self._name, val)
+            self._collection.update_names(old_name=self._name, new_name=val)
         self._name = val
         self.name_changed.emit(val)
 
@@ -134,16 +136,20 @@ class Fit(QObject):
             self.fit._hide_point(self.x, self.x_str)
 
     class DeletePoint(QUndoCommand):
-        def __init__(self, fit: "Fit", x: float, x_str: str):
+        def __init__(self, fit: "Fit", x: float, x_str: str, error_signal: pyqtBoundSignal):
 
             super().__init__()
             self.fit: Fit = fit
             self.x: float = x
             self.x_str: str = x_str
             self.point: DataFrame = DataFrame()
+            self.error_signal = error_signal
 
         def redo(self) -> None:
-            self.point = self.fit._delete_point(self.x, self.x_str)
+            try:
+                self.point = self.fit._delete_point(self.x, self.x_str)
+            except IndexError:
+                self.error_signal.emit()
 
         def undo(self) -> None:
             self.fit._df = concat([self.fit._df, self.point])
@@ -161,13 +167,33 @@ class Fit(QObject):
         self._molar_mass = val
 
     def set_name(self, new_name: str):
+        """Sets fit name. This action can be undone.
+
+        Args:
+            new_name (str): New measurement name
+        """
         self._undo_stack.push(self.Rename(self, new_name))
     
     def hide_point(self, x: float, x_str: str):
+        """Change point visibility on the opposite of actual. This action can be undone.
+
+        Args:
+            x (float): Value of point for domain column.
+            x_str (str): Name of domain column.
+        """
         self._undo_stack.push(self.HidePoint(self, x, x_str))
 
     def delete_point(self, x: float, x_str: str):
-        self._undo_stack.push(self.DeletePoint(self, x, x_str))
+        """Delete point. This action can be undone.
+
+        Args:
+            x (float): Value of point for domain column.
+            x_str (str): Name of domain column.
+
+        Raises:
+            IndexError: Raised when there is not enough points to delete any more.
+        """
+        self._undo_stack.push(self.DeletePoint(self, x, x_str, self.deletion_imposible))
 
     def _hide_point(self, x: float, x_str: str):
         """Hide point 
@@ -188,12 +214,7 @@ class Fit(QObject):
             x_str (str): Name of domain column.
         """
         if self._df.shape[0] == 2:
-            msg: QMessageBox = QMessageBox()
-            msg.setIcon(QMessageBox.Icon.Warning)
-            msg.setText("Measurement must consist of at least 2 data points")
-            msg.setWindowTitle("Data point removal error")
-            msg.exec()
-            return
+            raise IndexError
 
         point: DataFrame = self._df.loc[self._df[x_str] == x]
         self._df.drop(self._df.loc[self._df[x_str] == x].index, inplace=True)

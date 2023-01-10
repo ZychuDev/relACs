@@ -31,6 +31,9 @@ from views import MainView
 
 
 class RelACs(QApplication):
+    """Implementation of entire program.
+
+    """
     def __init__(self, sys_argv:list[str]):
         super(RelACs, self).__init__(sys_argv)
         self.main_view: MainView = MainView()
@@ -39,6 +42,8 @@ class RelACs(QApplication):
         self.main_view.showMaximized()
 
 class Launcher(QApplication):
+    """Checks if installed relACs version is actual. Helps install the latest version.
+    """
     def __init__(self, sys_argv:list[str]):
         super(Launcher, self).__init__(sys_argv)
         self.window = QWidget()
@@ -58,7 +63,7 @@ class Launcher(QApplication):
 if __name__ == "__main__":
     response = requests.get("https://api.github.com/repos/ZychuDev/relACs/releases")
     if response.ok:
-        release = "2.05"
+        release = "2.06"
         latest_relase= response.json()[0]["tag_name"]
         if latest_relase != release:
             launcher = Launcher(sys.argv)

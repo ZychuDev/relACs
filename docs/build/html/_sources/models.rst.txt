@@ -29,7 +29,7 @@ models.Fit module
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: name_changed, df_changed, df_point_deleted, parameter_changed, fit_changed
+   :exclude-members: name_changed, df_changed, df_point_deleted, parameter_changed, fit_changed, deletion_imposible
 
 models.FitItemsCollectionModel module
 -------------------------------------
@@ -55,7 +55,7 @@ models.Measurement module
    :members:
    :undoc-members:
    :show-inheritance:
-   :exclude-members: name_changed, df_changed
+   :exclude-members: name_changed, df_changed, deletion_imposible
 
 models.MeasurementItemsCollectionModel module
 ---------------------------------------------

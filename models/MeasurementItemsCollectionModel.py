@@ -154,7 +154,7 @@ class MeasurementItemsCollectionModel(QObject):
     def from_json(self, measurements: list[dict]):
         """Append new Measurements created from result of get_jsonable()"""
         for m in measurements:
-            new_model = Measurement(read_json(m["df"]), m["name"], m["tmp"], m["field"], self._compound, cast(Collection, self))
+            new_model = Measurement(m["name"], read_json(m["df"]),  m["tmp"], m["field"], self._compound, cast(Collection, self))
             self.append_measurement(new_model)
 
 
