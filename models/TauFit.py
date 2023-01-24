@@ -402,8 +402,9 @@ class TauFit(QObject):
 
         if len(tmp) < 2:
             return
-
+        print(list(set(self._points) - set(tmp)))
         point: Point = list(set(self._points) - set(tmp))[0]
+        
         self._points = tmp
 
         self.points_changed.emit()

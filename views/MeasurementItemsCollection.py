@@ -42,6 +42,7 @@ class MeasurementItemsCollection(StandardItem):
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
         menu.addAction("Load measurements from file", self._ctrl.load_measurements_from_file)
+        menu.addAction("Load dielecrtic measurements from folder", self._ctrl.load_dielectric_measurements_from_folder)
         menu.addSeparator()
         
         submenu = menu.addMenu("Sort")

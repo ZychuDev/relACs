@@ -28,7 +28,7 @@ class MainView(QMainWindow):
         
         self.splitter.addWidget(self.control_tree)
         self.splitter.addWidget(self.working_space)
-        self.splitter.setStretchFactor(0,2)
+        self.splitter.setStretchFactor(0,6)
         self.splitter.setStretchFactor(1,9)
         self.setCentralWidget(self.splitter)
 
