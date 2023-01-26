@@ -526,7 +526,7 @@ class TauFit(QObject):
         temp = Series(temp)
         field = Series(field)
         tau = Series(tau)
-        return power(log(TauFit.model(temp, field, *p)) - log(1/tau), 2)
+        return abs(log(TauFit.model(temp, field, *p)) - log(1/tau))
 
     def set_all_errors(self, residual_error: float, params_error: list[float]):
         """Set all parameters error to new values.

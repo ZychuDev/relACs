@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "relACs"
-#define MyAppVersion "2.08"
+#define MyAppVersion "2.09"
 #define MyAppPublisher "Multifunctional Luminescent Materials Group"
 #define MyAppURL "http://www.multilumimater.pl/relacs/"
 #define MyAppExeName "relACs.exe"

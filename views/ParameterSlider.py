@@ -83,7 +83,7 @@ class ParameterSlider(QWidget):
 
 
         self.slider.valueChanged.connect(lambda: self.parameter.set_value(self.slider_to_param())) #lambda: self.set_edit_value_silent()
-        self.line_edit.editingFinished.connect(lambda: self.parameter.set_value(round(float(self.line_edit.text()), 8) if not self.parameter.is_log else 10 ** round(float(self.line_edit.text()), 8)))#lambda: self.set_slider_value_silent(self.edit_to_slider())
+        self.line_edit.editingFinished.connect(lambda: self.parameter.set_value(round(float(self.line_edit.text()), 16) if not self.parameter.is_log else 10 ** round(float(self.line_edit.text()), 16)))#lambda: self.set_slider_value_silent(self.edit_to_slider())
         self.blocked_check.stateChanged.connect(self.on_checkbox_clicked)
         self.blocked_on_0.stateChanged.connect(self.on_0_checkbox_clicked)
 
@@ -127,9 +127,9 @@ class ParameterSlider(QWidget):
     def set_edit_value_silent(self, v: float):
         self.slider.blockSignals(True)
         if self.parameter.is_log:
-            self.line_edit.setText(str(round(log10(v), 8)))
+            self.line_edit.setText(str(round(log10(v), 16)))
         else:
-            self.line_edit.setText(str(round(v, 8)))
+            self.line_edit.setText(str(round(v, 16)))
         self.slider.blockSignals(False)
         # print(time())
 
@@ -141,10 +141,10 @@ class ParameterSlider(QWidget):
             return 10**result
         else:
             result = float(interp1d([self.slider.minimum(), self.slider.maximum()], [self.parameter.min, self.parameter.max])(v))
-        return round(result, 8)
+        return round(result, 16)
     
     def fixup_line_edit(self, v: str):
-        self.set_edit_value_silent(round(self.parameter.value, 8))
+        self.set_edit_value_silent(round(self.parameter.value, 16))
 
 
 

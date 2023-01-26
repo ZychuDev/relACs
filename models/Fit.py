@@ -246,8 +246,8 @@ class Fit(QObject):
 
             i += 1
 
-        dif_real = power(sum_real - rest['ChiPrimeMol'], 2)
-        dif_img = power(sum_img - rest['ChiBisMol'], 2)
+        dif_real = abs((sum_real - rest['ChiPrimeMol']))
+        dif_img = abs((sum_img - rest['ChiBisMol']))
 
 
         return  dif_real + dif_img
