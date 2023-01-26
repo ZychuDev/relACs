@@ -28,14 +28,14 @@ class Relaxation(QObject):
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
             Parameter("beta", compound.get_min("beta"), compound.get_max("beta")),
             Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau")),
-            Parameter("chi_t", compound.get_min("chi_t"), compound.get_max("chi_t")),
+            Parameter("chi_dif", compound.get_min("chi_dif"), compound.get_max("chi_dif")),
             Parameter("chi_s", compound.get_min("chi_s"), compound.get_max("chi_s")),
         )
         self.saved_parameters: FrequencyParameters = (
             Parameter("alpha", compound.get_min("alpha"), compound.get_max("alpha")),
             Parameter("beta", compound.get_min("beta"), compound.get_max("beta")),
             Parameter("log10_tau", compound.get_min("log10_tau"), compound.get_max("log10_tau")),
-            Parameter("chi_t", compound.get_min("chi_t"), compound.get_max("chi_t")),
+            Parameter("chi_dif", compound.get_min("chi_dif"), compound.get_max("chi_dif")),
             Parameter("chi_s", compound.get_min("chi_s"), compound.get_max("chi_s")),
         )
 
@@ -105,7 +105,7 @@ class Relaxation(QObject):
         """Get all parameters values.
 
         Returns:
-            tuple[float, float, float, float, float]: Values in order: alpha, beta, tau, chi_t, chi_s.
+            tuple[float, float, float, float, float]: Values in order: alpha, beta, tau, chi_dif, chi_s.
         """
         return tuple(p.value for p in self.parameters) # type: ignore
 
@@ -121,7 +121,7 @@ class Relaxation(QObject):
         """Get all lower boundaries.
 
         Returns:
-            list[float]: Lower boundaries in order: alpha, beta, tau, chi_t, chi_s.
+            list[float]: Lower boundaries in order: alpha, beta, tau, chi_dif, chi_s.
         """
         return [p.min for p in self.parameters]
 
@@ -129,7 +129,7 @@ class Relaxation(QObject):
         """Get all upper boundaries.
 
         Returns:
-            list[float]: Upper boundaries in order: alpha, beta, tau, chi_t, chi_s.
+            list[float]: Upper boundaries in order: alpha, beta, tau, chi_dif, chi_s.
         """
         return [p.max for p in self.parameters]
 
@@ -137,7 +137,7 @@ class Relaxation(QObject):
         """Get all saved parameters values.
 
         Returns:
-            tuple[float, float, float, float, float]: Values in order: alpha, beta, tau, chi_t, chi_s.
+            tuple[float, float, float, float, float]: Values in order: alpha, beta, tau, chi_dif, chi_s.
         """
         return tuple(p.value for p in self.saved_parameters) # type: ignore
 

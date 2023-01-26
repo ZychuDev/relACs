@@ -24,17 +24,19 @@ class Parameter(QObject):
 
             name_to_symbol: Map between parameters names and their symbols
     """
-
+    range_changed: pyqtSignal = pyqtSignal(str)
     value_changed: pyqtSignal = pyqtSignal(float) 
+    range_changed2: pyqtSignal = pyqtSignal(str)
     block_state_changed: pyqtSignal = pyqtSignal(bool)
     block_0_state_changed: pyqtSignal = pyqtSignal(bool)
     error_changed: pyqtSignal = pyqtSignal(float)
+    
 
     name_to_symbol:dict[PARAMETER_NAME|TAU_PARAMETER_NAME, str] = {
         "alpha": "\u03B1",
         "beta": "\u03B2",
         "log10_tau": "log\u2081\u2080\u03C4",
-        "chi_t": "\u03C7\u209C",
+        "chi_dif": "\u03C7\u209C-\u03C7\u209B",
         "chi_s": "\u03C7\u209B",
         "a_dir" : "A<span style=\" vertical-align:sub;\">dir</span></p>",
         "n_dir" : "N<span style=\" vertical-align:sub;\">dir</span></p>",
@@ -168,3 +170,11 @@ class Parameter(QObject):
         """
         self.is_blocked_on_0 = block
         self.block_0_state_changed.emit(self.is_blocked_on_0)
+
+    def set_range(self, min: float, max: float):
+        self.min = min
+        self.max = max
+        self.set_value((max+min)/2.0, silent=False)
+        self.range_changed.emit(self.name)
+        
+        

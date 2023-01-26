@@ -1,6 +1,5 @@
 from PyQt6.QtCore import QObject, pyqtSlot
 from PyQt6.QtWidgets import QInputDialog, QMessageBox, QWidget
-
 from models import Compound
 
 class CompoundItemController(QObject):
@@ -30,5 +29,4 @@ class CompoundItemController(QObject):
 
             self._model.name = new_name
 
-                
-               
+    

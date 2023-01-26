@@ -1,11 +1,13 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QFileDialog, QWidget
+from PyQt6.QtWidgets import QFileDialog, QWidget, QMessageBox
 from PyQt6.QtGui import QUndoStack, QUndoCommand
 
 from .Parameter import Parameter, TAU_PARAMETER_NAME
 from .Point import Point
 
 from protocols import SettingsSource, Collection
+
+from readers import SettingsReader
 
 from typing import get_args, Literal
 from functools import partial
@@ -473,20 +475,38 @@ class TauFit(QObject):
         bounds: tuple[list[float], list[float]] = (min, max)
         cost_f = partial(self.cost_function, slice=slice_flag)
 
-        res = least_squares(cost_f, params, bounds=bounds)
+        settings: SettingsReader = SettingsReader()
+        tole = settings.get_tolerances()
+        try:
+            try:
+                res = least_squares(cost_f, params, bounds=bounds, ftol=tole["f_tol"], xtol=tole["x_tol"], gtol=tole["g_tol"])
+            except ValueError as e:
+                msg: QMessageBox = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Warning)
+                msg.setText("One of tolerances is to low. You can adjust them in settings.\n")
+                msg.setText(str(e))
+                msg.setWindowTitle("Auto fit failed")
+                msg.exec()
+                return
+            _, s, Vh = svd(res.jac, full_matrices=False)
+            tol = finfo(float).eps*s[0]*np_max(res.jac.shape)
+            w = s > tol
+            cov = (Vh[w].T/s[w]**2) @ Vh[w]
 
+            chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
+            cov *= chi2dof
+
+            perr = sqrt(diag(cov))
+        except Exception as e:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Icon.Warning)
+                    msg.setText("Something went wrong. Try change starting values of parameters.\n")
+                    msg.setText(str(e))
+                    msg.setWindowTitle("Auto fit failed")
+                    msg.exec()
+                    return
         for i, p in enumerate(self.parameters):
             p.set_value(res.x[i])
-
-        _, s, Vh = svd(res.jac, full_matrices=False)
-        tol = finfo(float).eps*s[0]*np_max(res.jac.shape)
-        w = s > tol
-        cov = (Vh[w].T/s[w]**2) @ Vh[w]
-
-        chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
-        cov *= chi2dof
-
-        perr = sqrt(diag(cov))
         self.set_all_errors(res.cost, perr)
 
     def cost_function(self, p, slice=False):

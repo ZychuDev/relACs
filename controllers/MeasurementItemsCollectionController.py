@@ -223,7 +223,7 @@ class MeasurementItemsCollectionController(QObject):
                             temp = line.split("[K] = ")[1].split(",")[0]
                         except Exception as e:
                             temp = line.split("[°C]=")[1].split(" ")[0]
-                            temp = float(temp) - 273.15
+                            temp = str(float(temp) - 273.15)
                     if i == 2:
                         rows = line.split()
                         rows[0] = "AC Frequency (Hz),"

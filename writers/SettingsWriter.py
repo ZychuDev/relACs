@@ -111,13 +111,38 @@ def edit_default_settings():
         plot_edit[key] = edit
         layout.addLayout(l)
 
+    tolerance_edit = {}
+    tolerance_settings = dict(config['Tolerance'])
+    for key , val in tolerance_settings.items():
+        l = QHBoxLayout()
+        label = QLabel(key)
+        label.setMinimumSize(QSize(150, 0))
+        label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        edit = QLineEdit()
+        edit.setLocale(QLocale(QLocale.Language.English, QLocale.Country.UnitedStates))
+        v = QDoubleValidator()
+        v.setRange(0,1e-128)
+        loc = QLocale(QLocale.c())
+        loc.setNumberOptions(QLocale.NumberOption.RejectGroupSeparator)
+        v.setLocale(loc)
+        edit.setValidator(v)
+        edit.setText(val)
+        l.addWidget(label)
+        l.addWidget(edit)
+        tolerance_edit[key] = edit
+        layout.addLayout(l)
+
     button = QPushButton("Apply new default settigs")
-    button.clicked.connect(partial(write_default_settings, ranges_edit, headers_edit, epsilons_edit, plot_edit, dlg))
+    button.clicked.connect(partial(write_default_settings, ranges_edit, headers_edit, epsilons_edit, plot_edit, tolerance_edit, dlg))
     layout.addWidget(button)
+
+    reset_button = QPushButton("Reset settings")
+    reset_button.clicked.connect(partial(reset_settings, dlg))
+    layout.addWidget(reset_button)
     dlg.setLayout(layout)
     dlg.exec()
 
-def write_default_settings(ranges_edit:dict, headers_edit:dict, epsilons_edit:dict, plot_edit:dict, dlg:QDialog):
+def write_default_settings(ranges_edit:dict, headers_edit:dict, epsilons_edit:dict, plot_edit:dict, tolerance_edit:dict ,dlg:QDialog):
     """Write new default settings.
 
     Args:
@@ -133,6 +158,57 @@ def write_default_settings(ranges_edit:dict, headers_edit:dict, epsilons_edit:di
     config['Headers'] = {key:header.text() for key, header in headers_edit.items()}
     config['Epsilons'] = {key:epsilon.text() for key, epsilon in epsilons_edit.items()}
     config['Plot'] = {key:value.text() for key, value in plot_edit.items()}
+    config['Tolerance'] = {key:value.text() for key, value in tolerance_edit.items()}
+
+    with open('default_settings.ini', 'w') as f:
+        config.write(f)
+
+    dlg.accept()
+
+def reset_settings(dlg):
+    config = RawConfigParser()
+    config.optionxform = str #type: ignore
+    config['Ranges'] = {
+        "alpha":"0.0, 1.0",
+        "beta":"0.0, 1.0",
+        "log10_tau":"-10.0, 0.0",
+        "chi_dif":"0.0, 20.0",
+        "chi_s":"0.0, 20.0",
+        "a_dir":"1e-15, 100.0",
+        "n_dir":"0.0, 8.0",
+        "b1":"1e-64, 1e+15",
+        "b2":"1e-64, 10.0",
+        "b3":"1e-64, 10.0",
+        "c_raman ":"0.0, 1.0",
+        "n_raman":"0.0, 15.0",
+        "tau_0":"0.0, 1e+27",
+        "delta_e ":"0.0, 3000.0",
+    }
+
+    config['Headers'] = {
+        "Temperature" : "Temperature (K)",
+        "MagneticField ": "Magnetic Field (Oe)",
+        "ChiPrime" : "AC X' (emu/Oe)",
+        "ChiBis" : "AC X'' (emu/Oe)",
+        "Frequency" : "AC Frequency (Hz)",
+    }
+
+    config['Epsilons'] = {
+        "Field" : "1",
+        "Temp" : "0.05",
+    }
+
+    config['Plot'] = {
+        "picker_radius" : "10",
+        "dpi" : "100",
+        "dpi_frequency_plots" : "100",
+    }
+
+    config['Tolerance'] = {
+        "ftol" : "1e-8",
+        "xtol" : "1e-8",
+        "gtol" : "1e-8",
+    }
 
     with open('default_settings.ini', 'w') as f:
         config.write(f)

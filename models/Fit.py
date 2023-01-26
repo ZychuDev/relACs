@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QObject, pyqtSignal, pyqtBoundSignal
-from PyQt6.QtWidgets import QFileDialog, QWidget
+from PyQt6.QtWidgets import QFileDialog, QWidget, QMessageBox
 from PyQt6.QtGui import QUndoStack, QUndoCommand
 
 from .Relaxation import Relaxation
@@ -7,9 +7,12 @@ from .Measurement import Measurement
 
 from protocols import SettingsSource, Collection
 
+from readers import SettingsReader
+
 from pandas import DataFrame, Series, concat # type: ignore
 from numpy import ndarray, pi, power, finfo, diag, sum, sqrt, pi, power, logspace
 from numpy import max as np_max
+from numpy import min as np_min
 from scipy.optimize import least_squares # type: ignore
 from scipy.linalg import svd #type: ignore
 from math import nextafter
@@ -40,7 +43,7 @@ class Fit(QObject):
     deletion_imposible:pyqtSignal = pyqtSignal()
 
     @staticmethod
-    def model(logFrequency: ndarray, alpha: float, beta: float, tau: float, chi_t: float, chi_s: float) -> ndarray:
+    def model(logFrequency: ndarray, alpha: float, beta: float, tau: float, chi_dif: float, chi_s: float) -> ndarray:
         """Implemntation of Havriliak-Negami model
 
         Args:
@@ -48,13 +51,13 @@ class Fit(QObject):
             alpha (float): Alpha parameter
             beta (float): Beta parameter
             tau (float): Time of relaxation.
-            chi_t (float): 
+            chi_dif (float): chi_t - chi_s
             chi_s (float): 
 
         Returns:
             ndarray: Model predictions for each point in domain
         """
-        return chi_s + (chi_t - chi_s)/((1 + (10**logFrequency*2*pi * power(10, tau) * 1j )**(1- alpha))**beta)
+        return chi_s + (chi_dif)/((1 + (10**logFrequency*2*pi * power(10, tau) * 1j )**(1- alpha))**beta)
 
     @staticmethod
     def from_measurement(measurement: Measurement, compound:SettingsSource, nr_of_relaxations: int = 1):
@@ -275,21 +278,45 @@ class Fit(QObject):
                     max[j + i*len(r.parameters)] = nextafter(p.value, max[j + i*len(r.parameters)])
 
         bounds: tuple[list[float], list[float]] = (min, max)
-        res = least_squares(self.cost_function, params, bounds=bounds)
+        minimal: float = np_min(params)
+        maximal: float = np_max(params)
+
+        settings: SettingsReader = SettingsReader()
+        tole = settings.get_tolerances()
+        try:
+            try:
+                res = least_squares(self.cost_function, params, bounds=bounds, ftol=tole["f_tol"], xtol=tole["x_tol"], gtol=tole["g_tol"])
+            except ValueError as e:
+                msg: QMessageBox = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Warning)
+                msg.setText("One of tolerances is to low. You can adjust them in settings.\n")
+                msg.setText(str(e))
+                msg.setWindowTitle("Auto fit failed")
+                msg.exec()
+                return
+
+            _, s, Vh = svd(res.jac, full_matrices=False)
+            tol = finfo(float).eps * s[0] * np_max(res.jac.shape)
+            w = s > tol
+            cov = (Vh[w].T/s[w]**2) @ Vh[w] # robust covariance matrix
+
+            chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
+            cov *= chi2dof
+
+            perr = sqrt(diag(cov))
+        except Exception as e:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("Something went wrong. Try change starting values of parameters.\n")
+            msg.setText(str(e))
+            msg.setWindowTitle("Auto fit failed")
+            msg.exec()
+            return
 
         for i, r in enumerate(self.relaxations):
             for j, p in enumerate(r.parameters):
                 p.set_value(res.x[j + i*len(r.parameters)])
-        
-        _, s, Vh = svd(res.jac, full_matrices=False)
-        tol = finfo(float).eps * s[0] * np_max(res.jac.shape)
-        w = s > tol
-        cov = (Vh[w].T/s[w]**2) @ Vh[w] # robust covariance matrix
 
-        chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
-        cov *= chi2dof
-
-        perr = sqrt(diag(cov))
         for i, r in enumerate(self.relaxations):
             r.set_all_errors(res.cost, perr[i*5 : i*5+5])
 
@@ -320,7 +347,8 @@ class Fit(QObject):
         df_model_final: DataFrame = DataFrame()
         for i, r in enumerate(self.relaxations):
             for p in r.saved_parameters:
-                row = { "Name": f"{p.name}{i+1}", "Value": p.value, "Error": p.error}
+                name:str = p.name if p.name != "chi_dif" else "chi_t-chi_s"
+                row = { "Name": f"{name}{i+1}", "Value": p.value, "Error": p.error}
                 df_param = df_param.append(row, ignore_index = True)
 
             df_experimental: DataFrame = self._df[["Frequency", "ChiPrimeMol","ChiBisMol"]]

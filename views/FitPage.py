@@ -278,6 +278,7 @@ class FitPage(QWidget):
         self.setLayout(vertical_layout)
 
         self.fit_button.clicked.connect(self.make_auto_fit)
+        self.adjust_range_button.clicked.connect(self.on_adjust_range)
         self.save_button.clicked.connect(self.save_all_relaxations)
         self.reset_current_button.clicked.connect(self.reset_all_relaxations)
         self.copy_parameters_button.clicked.connect(self.copy_parameters)
@@ -304,6 +305,10 @@ class FitPage(QWidget):
         msg.setText("Fit must consist of at least 2 data points")
         msg.setWindowTitle("Data point removal error")
         msg.exec()
+
+    def on_adjust_range(self):
+        if self.fit is not None:
+            self.fit._compound.emit_change_ranges()
 
     def make_auto_fit(self):
         self.fit.make_auto_fit()
@@ -392,7 +397,8 @@ class FitPage(QWidget):
         self._update_domains()
         self.canvas.draw()
 
-
+    def refresh(self):
+        self.set_fit(self.fit)
 
     def _update_measurements_plots(self):
         if self.fit is None:

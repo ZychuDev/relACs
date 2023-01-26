@@ -91,8 +91,11 @@ class ParameterSlider(QWidget):
         self.parameter.value_changed.connect(self.set_edit_value_silent)
         self.parameter.block_state_changed.connect(self.set_blocked_silent)
         self.parameter.block_0_state_changed.connect(self.set_blocked_0_silent)
-
+        self.parameter.range_changed.connect(self.on_range_change)
         
+    def on_range_change(self):
+        self.set_parameter(self.parameter)
+
     def on_checkbox_clicked(self):
         self.parameter.set_blocked(self.blocked_check.isChecked())
 
@@ -142,6 +145,7 @@ class ParameterSlider(QWidget):
     
     def fixup_line_edit(self, v: str):
         self.set_edit_value_silent(round(self.parameter.value, 8))
+
 
 
 

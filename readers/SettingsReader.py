@@ -20,3 +20,10 @@ class SettingsReader():
             result[key] = float(s[0]), float(s[1])
 
         return result
+
+    def get_tolerances(self) -> dict[str, float]:
+        return {
+            "f_tol" : float(self.config['Tolerance']['ftol']),
+            "x_tol" : float(self.config['Tolerance']['xtol']),
+            "g_tol" : float(self.config['Tolerance']['gtol']),
+        }

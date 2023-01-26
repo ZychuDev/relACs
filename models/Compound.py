@@ -1,7 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtWidgets import QTreeView
 from protocols import Collection, Displayer 
-from models import PARAMETER_NAME, TAU_PARAMETER_NAME
 from readers import SettingsReader
 
 class Compound(QObject):
@@ -15,6 +14,7 @@ class Compound(QObject):
         displayer (Displayer): Object responsible for visualization of Measurements, Fits and TauFits 
     """
     name_changed: pyqtSignal= pyqtSignal(str)
+    change_ranges: pyqtSignal = pyqtSignal()
     def __init__(self, name: str, molar_mass: float, collection: Collection["Compound"]|None, tree:QTreeView, displayer: Displayer):
         super().__init__()
 
@@ -31,6 +31,15 @@ class Compound(QObject):
         settings: SettingsReader = SettingsReader()
         self._ranges: dict[str, tuple[float, float]] = settings.get_ranges()
 
+    def emit_change_ranges(self):
+        """Emits chnage ranges signal
+        """
+        self.change_ranges.emit()
+
+
+    def change_range(self, p: str, min:float, max:float):
+        if p in self._ranges:
+            self._ranges[p] = (min, max)
 
     @property
     def name(self):
@@ -91,3 +100,6 @@ class Compound(QObject):
         """
 
         return self._ranges[param_name][1]
+
+    def get_parameters(self):
+        return list(self._ranges.keys())

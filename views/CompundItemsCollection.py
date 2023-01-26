@@ -22,6 +22,7 @@ class CompoundItemsCollection(StandardItem):
         self._ctrl: CompoundItemsCollectionController = ctrl
         self._model.compound_added.connect(self.on_compound_added)
         self._model.compound_removed.connect(self.on_compound_removed)
+        self.save_filename: str|None = None
 
     def on_click(self):
         self._ctrl.display()
@@ -110,5 +111,31 @@ class CompoundItemsCollection(StandardItem):
             i = i + 1
 
         jsonable = {"version:": 2, "compounds": compounds}
-        with  open(name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json', 'w') as f:
+        self.save_filename = name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json'
+        with  open(self.save_filename, 'w') as f:
             dump(jsonable, f, indent=4)
+
+    def save(self):
+        print(self.save_filename)
+        if self.save_filename is None or self.save_filename == "" or self.save_filename == ".json":
+            self.save_to_json()
+        else:
+            compounds: list[dict] = []
+            i: int = 0
+            nr_of_rows: int = self.rowCount()
+            while i < nr_of_rows:
+                compound_item: CompoundItem = cast(CompoundItem, self.child(i))
+                jsonable: dict = compound_item._model.get_jsonable()
+                jsonable.update({"measurements": compound_item.m_model.get_jsonable()})
+                jsonable.update({"f1_fits": compound_item.f1_model.get_jsonable()})
+                jsonable.update({"f2_fits": compound_item.f2_model.get_jsonable()})
+                jsonable.update({"tau_fits": compound_item.t_model.get_jsonable()})
+                compounds.append(jsonable)
+                i = i + 1
+
+            jsonable = {"version:": 2, "compounds": compounds}
+            try:
+                with  open(self.save_filename, 'w') as f:
+                    dump(jsonable, f, indent=4)
+            except Exception as e:
+                self.save_to_json()
