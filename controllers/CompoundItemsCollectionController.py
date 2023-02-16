@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QObject, pyqtSlot, QLocale
-from PyQt6.QtWidgets import QInputDialog, QMessageBox, QFileDialog, QWidget
+from PyQt6.QtWidgets import QInputDialog, QMessageBox, QWidget
 from models import CompoundItemsCollectionModel
 from json import dump, load
 from os import path

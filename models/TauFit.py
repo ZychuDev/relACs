@@ -79,18 +79,34 @@ class TauFit(QObject):
         return b1*(1+b3*field*field)/(1+b2*field*field)
 
     @staticmethod
-    def Raman(temp:float, c_raman:float, n_raman:float) -> float:
+    def Raman(temp:float, c_raman_1:float, n_raman_1:float) -> float:
         """Raman part of model
 
         Args:
             temp (float): Temperature.
-            c_raman (float): 
-            n_raman (float): 
+            c_raman_1 (float): 
+            n_raman_1 (float): 
 
         Returns:
             float: Raman
         """
-        return c_raman* power(temp, n_raman)
+        return c_raman_1* power(temp, n_raman_1)
+
+    @staticmethod
+    def Raman_2(temp:float, field:float, c_raman_2:float, n_raman_2:float, m_2: float) -> float:
+        """Raman part of model
+
+        Args:
+            field(float): Field.
+            temp (float): Temperature.
+            c_raman_2 (float): 
+            n_raman_2 (float): 
+            m_2(float):
+
+        Returns:
+            float: Raman_2
+        """
+        return c_raman_2* power(temp, n_raman_2) * power(field, m_2)
 
     @staticmethod
     def Orbach(temp:float, tau_0:float, delta_e:float):
@@ -108,28 +124,33 @@ class TauFit(QObject):
 
     @staticmethod
     def model(temp:float, field:float, a_dir:float, n_dir:float, b1:float, b2:float,
-     b3: float, c_raman:float, n_raman:float, tau_0:float, delta_e:float) -> float:
+     b3: float, c_raman_1:float, n_raman_1:float, c_raman_2:float, n_raman_2:float, m_2:float, tau_0:float, delta_e:float) -> float:
         """Relaxation time model
 
         Args:
-            temp (float): Temperature.
-            field (float): Magnetic field strange.
-            a_dir (float): 
-            n_dir (float): 
-            b1 (float): 
-            b2 (float): 
-            b3 (float): 
-            c_raman (float): 
-            n_raman (float): 
-            tau_0 (float): 
-            delta_e (float): 
+            temp (float): _description_
+            field (float): _description_
+            a_dir (float): _description_
+            n_dir (float): _description_
+            b1 (float): _description_
+            b2 (float): _description_
+            b3 (float): _description_
+            c_raman_1 (float): _description_
+            n_raman_1 (float): _description_
+            c_raman_2 (float): _description_
+            n_raman_2 (float): _description_
+            m_2 (float): _description_
+            tau_0 (float): _description_
+            delta_e (float): _description_
 
         Returns:
             float: Inverse of relaxation time
         """
+
         return a_dir*temp*(field**n_dir) \
             + b1*(1+b3*field*field)/(1+b2*field*field) \
-            + c_raman * power(temp, n_raman) \
+            + c_raman_1 * power(temp, n_raman_1) \
+            + c_raman_2 * power(temp, n_raman_2) * power(field, m_2) \
             + tau_0 *exp(-delta_e/(temp))
 
 
@@ -137,6 +158,7 @@ class TauFit(QObject):
 
         super().__init__()
         self._name: str = name
+        self._compound = compound
         self.residual_error: float = 0.0
         self.saved_residual_error: float = 0.0
         logaritmic = ["a_dir", "b1", "b2", "b3", "tau_0"]
@@ -404,7 +426,7 @@ class TauFit(QObject):
 
         if len(tmp) < 2:
             return
-        print(list(set(self._points) - set(tmp)))
+
         point: Point = list(set(self._points) - set(tmp))[0]
         
         self._points = tmp
@@ -630,7 +652,7 @@ class TauFit(QObject):
         all_temp = set()
         for t in tmp:
             all_temp.add(t)
-        final_series_tmp = [Series()]*7
+        final_series_tmp = [Series()]*8
         for t in list(all_temp):
             field = linspace(min(field), max(field), 50)
             field = Series(field)
@@ -640,9 +662,9 @@ class TauFit(QObject):
             for s in range(len(final_series_tmp)):
                final_series_tmp[s] = final_series_tmp[s].append(one_point_series[s], ignore_index=True)
 
-        df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=["Temp", "Field", "Orbach", "Raman", "QTM", "Direct", "Tau"])
+        df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "Tau"])
 
-        final_series_field = [Series()]*7
+        final_series_field = [Series()]*8
         all_field = set()
         for f in field:
             all_field.add(f)
@@ -656,21 +678,22 @@ class TauFit(QObject):
             for s in range(len(final_series_field)):
                 final_series_field[s] = final_series_field[s].append(one_point_series[s], ignore_index=True)
 
-        df_field: DataFrame = DataFrame(list(zip(*final_series_field)), columns=["Temp", "Field", "Orbach", "Raman", "QTM", "Direct", "Tau"])
+        df_field: DataFrame = DataFrame(list(zip(*final_series_field)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "Tau"])
         return concat([df_param, df_experimental, df_model, df_tmp, df_field], axis=1)
 
     def partial_result(self, temp, field, return_df = True):
         p = self.get_saved_parameters_values()
-        orbach= 1/TauFit.Orbach(temp, p[7], p[8])
+        orbach= 1/TauFit.Orbach(temp, p[10], p[11])
         raman = 1/TauFit.Raman(temp, p[5], p[6])
+        raman_2 = 1/TauFit.Raman(temp, field, p[7], p[8], p[9])
         qtm = 1/TauFit.qtm(field, p[2], p[3], p[4])
         direct = 1/TauFit.direct(temp, field, p[0], p[1])
         sum = 1/TauFit.model(temp, field, *p)
 
         if return_df:
-            return DataFrame(list(zip(orbach, raman, qtm, direct, sum)), columns=["Orbach Tau", "Raman Tau", "QTM Tau", "Direct Tau", "Tau"])
+            return DataFrame(list(zip(orbach, raman, raman_2, qtm, direct, sum)), columns=["Orbach Tau", "Raman Tau", "Raman_2 Tau", "QTM Tau", "Direct Tau", "Tau"])
         else:
-            return [orbach, raman, qtm, direct, sum]
+            return [orbach, raman, raman_2, qtm, direct, sum]
 
     def get_jsonable(self) -> dict:
         """Marshal object to python dictionary.

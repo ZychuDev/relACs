@@ -1,9 +1,10 @@
 from PyQt6.QtCore import QLocale, QSize, Qt
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QPushButton
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QPushButton, QGroupBox
 from PyQt6.QtGui import QDoubleValidator, QIntValidator
 from configparser import RawConfigParser 
 
 from functools import partial
+from models import Parameter
 
 def edit_default_settings():
     """Display Dialog Window dor editing default settings
@@ -20,8 +21,9 @@ def edit_default_settings():
     for p in r:
         ranges[p] = [float(s) for s in config['Ranges'][p].split(',')]
 
-    layout = QVBoxLayout()
-    ranges_edit = {}
+    layout:QVBoxLayout = QVBoxLayout()
+    ranges_edit: dict = {}
+    ranges_group:QGroupBox = QGroupBox("Parameters ranges")
     for p in ranges:
         l = QHBoxLayout()
         low = QLineEdit()
@@ -44,14 +46,17 @@ def edit_default_settings():
 
         ranges_edit[p] = [low, up]
         l.addWidget(low)
-        label = QLabel(p)
+        label = QLabel(Parameter.name_to_symbol[p])
         label.setMinimumSize(QSize(65, 0))
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         l.addWidget(label)
         l.addWidget(up)
         layout.addLayout(l)
+    ranges_group.setLayout(layout)
 
-    headers_edit = {}
+    layout = QVBoxLayout()
+    headers_group:QGroupBox = QGroupBox("Headers")
+    headers_edit:dict = {}
     headers = dict(config['Headers']).items()
     for key, val in headers:
         l = QHBoxLayout()
@@ -67,12 +72,15 @@ def edit_default_settings():
         l.addWidget(edit)
         headers_edit[key] = edit
         layout.addLayout(l)
-    
+    headers_group.setLayout(layout)
+
+    layout = QVBoxLayout()
+    epsilons_group:QGroupBox = QGroupBox("Epsilons")
     epsilons_edit = {}
     epsilons = dict(config['Epsilons'])
     for key, val in epsilons.items():
         l = QHBoxLayout()
-        label = QLabel(key)
+        label = QLabel(f'\u03B5<span style=\" vertical-align:sub;\">{key}</span>')
         label.setMinimumSize(QSize(150, 0))
         label.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
@@ -89,7 +97,10 @@ def edit_default_settings():
         l.addWidget(edit)
         epsilons_edit[key] = edit
         layout.addLayout(l)
+    epsilons_group.setLayout(layout)
 
+    layout = QVBoxLayout()
+    plot_group:QGroupBox = QGroupBox("Plot")
     plot_edit = {}
     plot_settings = dict(config['Plot'])
     for key , val in plot_settings.items():
@@ -110,7 +121,10 @@ def edit_default_settings():
         l.addWidget(edit)
         plot_edit[key] = edit
         layout.addLayout(l)
+    plot_group.setLayout(layout)
 
+    layout = QVBoxLayout()
+    tolerances_group:QGroupBox = QGroupBox("Fit tolerances")
     tolerance_edit = {}
     tolerance_settings = dict(config['Tolerance'])
     for key , val in tolerance_settings.items():
@@ -131,7 +145,21 @@ def edit_default_settings():
         l.addWidget(edit)
         tolerance_edit[key] = edit
         layout.addLayout(l)
+    tolerances_group.setLayout(layout)
+# git commit -m "2.1 release. Old saves no longer supported, new Raman model."
+    
+    layout_1:QHBoxLayout = QHBoxLayout()
+    layout_2: QVBoxLayout = QVBoxLayout()
+    layout_2.addWidget(headers_group)
+    layout_2.addWidget(epsilons_group)
+    layout_2.addWidget(plot_group)
+    layout_2.addWidget(tolerances_group)
 
+    layout_1.addWidget(ranges_group)
+    layout_1.addLayout(layout_2)
+
+    layout: QVBoxLayout = QVBoxLayout()
+    layout.addLayout(layout_1)
     button = QPushButton("Apply new default settigs")
     button.clicked.connect(partial(write_default_settings, ranges_edit, headers_edit, epsilons_edit, plot_edit, tolerance_edit, dlg))
     layout.addWidget(button)
@@ -179,8 +207,11 @@ def reset_settings(dlg):
         "b1":"1e-64, 1e+15",
         "b2":"1e-64, 10.0",
         "b3":"1e-64, 10.0",
-        "c_raman ":"0.0, 1.0",
-        "n_raman":"0.0, 15.0",
+        "c_raman_1":"0.0, 1.0",
+        "n_raman_1":"0.0, 15.0",
+        "c_raman_2":"0.0, 1.0",
+        "n_raman_2":"0.0, 15.0",
+        "m_2": "1.0, 5.0",
         "tau_0":"0.0, 1e+27",
         "delta_e ":"0.0, 3000.0",
     }

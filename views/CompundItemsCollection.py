@@ -1,6 +1,6 @@
 from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex
 from PyQt6.QtGui import QColor, QBrush
-from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget
+from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget, QMessageBox
 
 from models import CompoundItemsCollectionModel, Compound 
 from controllers import CompoundItemsCollectionController, CompoundItemController
@@ -66,6 +66,14 @@ class CompoundItemsCollection(StandardItem):
         with open(filepath, "r") as f:
             jsonable = load(f)
 
+        if jsonable["version"] == "2.1":
+            msg: QMessageBox = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("Chosen file is corrupted!")
+            msg.setWindowTitle("Loading from .json file stoped.")
+            msg.exec()
+            return
+
         self.from_json(jsonable)
 
     def from_json(self, json: dict):
@@ -110,7 +118,7 @@ class CompoundItemsCollection(StandardItem):
             compounds.append(jsonable)
             i = i + 1
 
-        jsonable = {"version:": 2, "compounds": compounds}
+        jsonable = {"version": 2.1, "compounds": compounds}
         self.save_filename = name[0] + '.json' if len(name[0].split('.')) == 1 else name[0][:-5] + '.json'
         with  open(self.save_filename, 'w') as f:
             dump(jsonable, f, indent=4)
@@ -133,7 +141,7 @@ class CompoundItemsCollection(StandardItem):
                 compounds.append(jsonable)
                 i = i + 1
 
-            jsonable = {"version:": 2, "compounds": compounds}
+            jsonable = {"version": 2.1, "compounds": compounds}
             try:
                 with  open(self.save_filename, 'w') as f:
                     dump(jsonable, f, indent=4)

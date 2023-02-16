@@ -83,7 +83,7 @@ class ParameterSlider(QWidget):
 
 
         self.slider.valueChanged.connect(lambda: self.parameter.set_value(self.slider_to_param())) #lambda: self.set_edit_value_silent()
-        self.line_edit.editingFinished.connect(lambda: self.parameter.set_value(round(float(self.line_edit.text()), 8) if not self.parameter.is_log else 10 ** round(float(self.line_edit.text()), 8)))#lambda: self.set_slider_value_silent(self.edit_to_slider())
+        self.line_edit.editingFinished.connect(lambda: self.parameter.set_value(round(float(self.line_edit.text()), 8) if not self.parameter.is_log else 10 ** round(float(self.line_edit.text()), 8)))
         self.blocked_check.stateChanged.connect(self.on_checkbox_clicked)
         self.blocked_on_0.stateChanged.connect(self.on_0_checkbox_clicked)
 

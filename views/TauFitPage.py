@@ -31,7 +31,7 @@ class MplCanvas(FigureCanvasQTAgg):
         self.ax.yaxis.set_major_locator(LinearLocator(8))
         self.temp_label = r"$\frac{K}{T}$"
         self.field_label = r"$\frac{H}{Oe}$"
-        title = r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman}T^{N_{Raman}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}}$"
+        title = r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman_{1}}T^{N_{Raman_{1}}} + C_{Raman_{2}}T^{N_{Raman_{2}}}H^{m_{2}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}}$"
         self.ax.set(xlabel=self.temp_label, ylabel=r"$\ln{\frac{\tau}{s}}$",
          title=title)
 
@@ -189,6 +189,7 @@ class TauFitPage(QWidget):
         self._direct = None
         self._orbach = None
         self._raman = None
+        self._raman_2 = None
         self._qtm = None
         self._sum = None
         self._saved_sum = None
@@ -216,6 +217,7 @@ class TauFitPage(QWidget):
         self.save_button.clicked.connect(self.save)
         self.reset_button.clicked.connect(self.reset)
         self.copy_parameters_button.clicked.connect(self.copy_parameters)
+        self.adjust_range_button.clicked.connect(self.on_adjust_range)
 
         self.shortcut: QShortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
         self.shortcut.activated.connect(self.on_undo)
@@ -230,6 +232,10 @@ class TauFitPage(QWidget):
     def on_redo(self):
         if self.tau_fit is not None:
             self.tau_fit.redo()
+
+    def on_adjust_range(self):
+        if self.tau_fit is not None:
+            self.tau_fit._compound.emit_change_ranges()
 
     def make_auto_fit(self):
         self.tau_fit.make_auto_fit()
@@ -442,6 +448,9 @@ class TauFitPage(QWidget):
             if self._raman is not None:
                 self._raman.remove()
 
+            if self._raman_2 is not None:
+                self._raman_2.remove()
+
             if self._qtm is not None:
                 self._qtm.remove()
 
@@ -454,6 +463,7 @@ class TauFitPage(QWidget):
             self._direct = None
             self._orbach = None
             self._raman = None
+            self._raman_2 = None
             self._qtm = None
             self._sum = None
             self._saved_sum = None
@@ -474,8 +484,9 @@ class TauFitPage(QWidget):
 
         p: tuple[float, ...] = self.tau_fit.get_parameters_values()
         direct = -log(TauFit.direct(tmp, field, p[0], p[1]))
-        orbach = -log(TauFit.Orbach(tmp, p[7], p[8]))
+        orbach = -log(TauFit.Orbach(tmp, p[10], p[11]))
         raman = -log(TauFit.Raman(tmp, p[5], p[6]))
+        raman_2 = -log(TauFit.Raman_2(tmp, field, p[7], p[8], p[9]))
         qtm = -log(TauFit.qtm(field, p[2], p[3], p[4]))
         sum = -log(TauFit.model(tmp, field, *p))
         sum_saved = -log(TauFit.model(tmp, field, *self.tau_fit.get_saved_parameters_values()))
@@ -497,6 +508,12 @@ class TauFitPage(QWidget):
         else:
             self._raman.set_xdata(xx)
             self._raman.set_ydata(raman)
+
+        if self._raman_2 is None:
+            self._raman_2 = self.canvas_slice.ax.plot(xx, raman_2, "p--", label="Raman_2")[0]
+        else:
+            self._raman_2.set_xdata(xx)
+            self._raman_2.set_ydata(raman_2)
 
         if self._qtm is None:
             self._qtm = self.canvas_slice.ax.plot(xx, qtm, "g--", label="QTM")[0]

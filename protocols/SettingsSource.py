@@ -26,6 +26,6 @@ class SettingsSource(Protocol):
         ...
 
     def emit_change_ranges(self) -> None:
-        """Emits chnage ranges signal
+        """Emits change ranges signal
         """
         ...

@@ -15,6 +15,7 @@ class Compound(QObject):
     """
     name_changed: pyqtSignal= pyqtSignal(str)
     change_ranges: pyqtSignal = pyqtSignal()
+
     def __init__(self, name: str, molar_mass: float, collection: Collection["Compound"]|None, tree:QTreeView, displayer: Displayer):
         super().__init__()
 
@@ -35,7 +36,6 @@ class Compound(QObject):
         """Emits chnage ranges signal
         """
         self.change_ranges.emit()
-
 
     def change_range(self, p: str, min:float, max:float):
         if p in self._ranges:

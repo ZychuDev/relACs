@@ -43,8 +43,11 @@ class Parameter(QObject):
         "b1" : "B\u2081",
         "b2" : "B\u2082",
         "b3" : "B\u2083",
-        "c_raman" : "C<span style=\" vertical-align:sub;\">raman</span></p>",
-        "n_raman" : "N<span style=\" vertical-align:sub;\">raman</span></p>",
+        "c_raman_1" : "C<span style=\" vertical-align:sub;\">Raman<sub>1</sub></span></p>",
+        "n_raman_1" : "N<span style=\" vertical-align:sub;\">Raman<sub>1</sub></span></p>",
+        "c_raman_2" : "C<span style=\" vertical-align:sub;\">Raman<sub>2</sub></span></p>",
+        "n_raman_2" : "N<span style=\" vertical-align:sub;\">Raman<sub>2</sub></span></p>",
+        "m_2" : "m<sub>2</sub></p>",
         "tau_0" : "&tau;<span style=\" vertical-align:sub;\">0</span><span style=\" vertical-align:super;\">-1</span></p>",
         "delta_e" : "\u0394E"
     }
@@ -120,13 +123,11 @@ class Parameter(QObject):
             v (float): New parameter value.
             silent (bool): Determines whether to emit value_changed signal.
         """
-        # if v < self.min:
-        #     print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
-        #     v = self.min
+        if v < self.min:
+            v = self.min
 
-        # if v > self.max:
-        #     print(f"Value {v} is out of bonds ({self.min} {self.max}) for parameter {self.name}")
-        #     v = self.max
+        if v > self.max:
+            v = self.max
 
         self.value = v
         self.set_error(0)

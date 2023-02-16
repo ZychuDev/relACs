@@ -623,6 +623,7 @@ class FitPage(QWidget):
 
         self._update_fit_plots()
         self._update_measurements_plots()
+        self._recreate_and_draw()
 
     def on_click(self, event):
         mouse = event.mouseevent
