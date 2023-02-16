@@ -146,7 +146,6 @@ def edit_default_settings():
         tolerance_edit[key] = edit
         layout.addLayout(l)
     tolerances_group.setLayout(layout)
-# git commit -m "2.1 release. Old saves no longer supported, new Raman model."
     
     layout_1:QHBoxLayout = QHBoxLayout()
     layout_2: QVBoxLayout = QVBoxLayout()
