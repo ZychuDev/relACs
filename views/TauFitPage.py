@@ -37,7 +37,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
 
 class MplCanvas3D(FigureCanvasQTAgg):
-    def __init__(self, parent=None, width: int=10, height: int=5, dpi: int=100):
+    def __init__(self, parent=None, width: int=10, height: int=8, dpi: int=100):
         self.fig: Figure = figure(figsize=(1,1), dpi = int(100), constrained_layout=True)
         self.fig.patch.set_facecolor("#ffffff")
         super().__init__(self.fig)
@@ -51,6 +51,7 @@ class MplCanvas3D(FigureCanvasQTAgg):
         self.axes.xaxis.set_rotate_label(False) 
         self.axes.yaxis.set_rotate_label(False) 
         self.axes.zaxis.set_rotate_label(False) 
+
 
 
 class TauFitPage(QWidget):
@@ -205,7 +206,7 @@ class TauFitPage(QWidget):
         right.setLayout(right_layout)
         horizontal_spliter.addWidget(right)
         horizontal_spliter.setStretchFactor(0,1)
-        horizontal_spliter.setStretchFactor(1,3)
+        horizontal_spliter.setStretchFactor(1,5)
 
         horizontal_layout.addWidget(horizontal_spliter)
         self.setLayout(horizontal_layout)
@@ -510,7 +511,7 @@ class TauFitPage(QWidget):
             self._raman.set_ydata(raman)
 
         if self._raman_2 is None:
-            self._raman_2 = self.canvas_slice.ax.plot(xx, raman_2, "p--", label="Raman_2")[0]
+            self._raman_2 = self.canvas_slice.ax.plot(xx, raman_2, "c--", label="Raman_2")[0]
         else:
             self._raman_2.set_xdata(xx)
             self._raman_2.set_ydata(raman_2)

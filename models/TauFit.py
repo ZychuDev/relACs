@@ -427,6 +427,7 @@ class TauFit(QObject):
         if len(tmp) < 2:
             return
 
+        print("Tmp:", tmp)
         point: Point = list(set(self._points) - set(tmp))[0]
         
         self._points = tmp
@@ -606,7 +607,7 @@ class TauFit(QObject):
         save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
         if save_name is not None:
             try:
-                with open(save_name + ".csv", "w") as f:
+                with open(save_name + (".csv" if save_name[-4:] != ".csv" else ""), "w") as f:
                     self.get_result().to_csv(f.name, index=False, sep = ";")
             except Exception as e:
                 print(e)
@@ -685,7 +686,7 @@ class TauFit(QObject):
         p = self.get_saved_parameters_values()
         orbach= 1/TauFit.Orbach(temp, p[10], p[11])
         raman = 1/TauFit.Raman(temp, p[5], p[6])
-        raman_2 = 1/TauFit.Raman(temp, field, p[7], p[8], p[9])
+        raman_2 = 1/TauFit.Raman_2(temp, field, p[7], p[8], p[9])
         qtm = 1/TauFit.qtm(field, p[2], p[3], p[4])
         direct = 1/TauFit.direct(temp, field, p[0], p[1])
         sum = 1/TauFit.model(temp, field, *p)

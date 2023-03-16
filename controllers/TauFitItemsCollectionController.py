@@ -18,7 +18,7 @@ class TauFitItemsCollectionController(QObject):
 
         name = QFileDialog.getSaveFileName(QWidget(), 'Save file')
         try:
-            with  open(name[0] + '.csv', 'w') as f:
+            with  open(name[0] + (".csv" if name[0][-4:] != ".csv" else ""), 'w') as f:
                 df.to_csv(f.name, index=False, sep= ";")
         except Exception as e:
             print(e)

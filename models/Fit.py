@@ -330,7 +330,7 @@ class Fit(QObject):
         save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
         if save_name is not None:
             try:
-                with open(save_name + ".csv", "w") as f:
+                with open(save_name + (".csv" if save_name[-4:] != ".csv" else ""), "w") as f:
                     self.get_result().to_csv(f.name, index=False, sep = ";")
             except Exception as e:
                 print(e)
