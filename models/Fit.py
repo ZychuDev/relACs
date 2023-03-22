@@ -10,7 +10,7 @@ from protocols import SettingsSource, Collection
 from readers import SettingsReader
 
 from pandas import DataFrame, Series, concat # type: ignore
-from numpy import ndarray, pi, power, finfo, diag, sum, sqrt, pi, power, logspace
+from numpy import ndarray, pi, power, finfo, diag, sum, sqrt, pi, power, linspace, log10
 from numpy import max as np_max
 from numpy import min as np_min
 from scipy.optimize import least_squares # type: ignore
@@ -336,7 +336,7 @@ class Fit(QObject):
                 print(e)
                 return
 
-    def get_result(self) -> DataFrame:
+    def get_result(self,) -> DataFrame:
         """Get DataFrame with results of fitting process.
 
         Returns:
@@ -344,6 +344,14 @@ class Fit(QObject):
         """
 
         df_param: DataFrame = DataFrame([['T', self._tmp, 0], ['H', self._field, 0]], columns=['Name', 'Value','Error'])
+
+    
+        df_experimental: DataFrame = self._df[["Frequency", "ChiPrimeMol","ChiBisMol"]]
+        columns_names: list[str] = [f"Frequency T={self._tmp} H={self._field}",
+            f"ChiPrimeMol T={self._tmp} H={self._field}", f"ChiBisMol T={self._tmp} H={self._field}"]
+        df_experimental.columns = columns_names
+        df_experimental.reset_index(drop=True, inplace=True)
+        
         df_model_final: DataFrame = DataFrame()
         for i, r in enumerate(self.relaxations):
             for p in r.saved_parameters:
@@ -351,28 +359,20 @@ class Fit(QObject):
                 row = { "Name": f"{name}{i+1}", "Value": p.value, "Error": p.error}
                 df_param = df_param.append(row, ignore_index = True)
 
-            df_experimental: DataFrame = self._df[["Frequency", "ChiPrimeMol","ChiBisMol"]]
-            columns_names: list[str] = [f"Frequency T={self._tmp} H={self._field}",
-             f"ChiPrimeMol T={self._tmp} H={self._field}", f"ChiBisMol T={self._tmp} H={self._field}"]
-            # df_experimental.columns = columns_names
-            # df_experimental.reset_index(drop=True, inplace=True)
-
-            df_model: DataFrame = DataFrame(columns = columns_names)
+            df_model: DataFrame = DataFrame()
             displayed: DataFrame = self._df.loc[self._df["Hidden"] == False]
 
-            xx = logspace(displayed["FrequencyLog"].min(), displayed["FrequencyLog"].max(), self.resolution)
-            df_model[columns_names[0]] = Series(xx)
-
-            yy = Fit.model(xx, *self.relaxations[i].get_saved_parameters_values())
-            df_model[columns_names[1]] = Series(yy.real)
-            df_model[columns_names[2]] = Series(-yy.imag)
-
+            xx:ndarray = linspace(displayed["Frequency"].min(), displayed["Frequency"].max(), self.resolution)
+            df_model["Model"+columns_names[0]] = Series(xx)
+            yy = Fit.model(log10(xx), *self.relaxations[i].get_saved_parameters_values())
+            df_model["Model"+columns_names[1]] = Series(yy.real)
+            df_model["Model"+columns_names[2]] = Series(-yy.imag)
             df_model_final = concat([df_model_final, df_model], axis=1)
 
         if i != 0:
             columns = list(df_model_final.columns)
             for j in range(0, len(columns), 3):
-                rel_str:str = f"rel_nr={j//3 + 1}"
+                rel_str:str = f" rel_nr={j//3 + 1}"
                 columns[j] += rel_str
                 columns[j+1] += rel_str
                 columns[j+2] += rel_str
