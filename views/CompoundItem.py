@@ -93,7 +93,7 @@ class CompoundItem(StandardItem):
         buttons_layout.addWidget(force_button)
         layout.addLayout(buttons_layout)
 
-        guess_button = QPushButton("Guess the magnetic susceptibility")
+        guess_button = QPushButton("Guess the magnetic susceptibility parameters")
         guess_button.clicked.connect(lambda: self.guess(new_ranges))
         layout.addWidget(guess_button)
         dlg.setLayout(layout)

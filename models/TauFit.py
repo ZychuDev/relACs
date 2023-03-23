@@ -427,7 +427,6 @@ class TauFit(QObject):
         if len(tmp) < 2:
             return
 
-        print("Tmp:", tmp)
         point: Point = list(set(self._points) - set(tmp))[0]
         
         self._points = tmp
@@ -625,11 +624,11 @@ class TauFit(QObject):
             row = {"Name": p.name, "Value": p.value, "Error":p.error}
             df_param = df_param.append(row, ignore_index=True)
         
-        tau, tmp, field = self.get_all()
-        df_experimental:DataFrame = DataFrame(list(zip(tmp, field, tau)), columns=["T", "H", "tau"])
+        tau, tmp_o, field_o = self.get_all()
+        df_experimental:DataFrame = DataFrame(list(zip(tmp_o, field_o, tau)), columns=["T", "H", "tau"])
 
-        x = linspace(min(tmp), max(tmp), 50)
-        y = linspace(min(field), max(field), 50)
+        x = linspace(min(tmp_o), max(tmp_o), 50)
+        y = linspace(min(field_o), max(field_o), 50)
         X, Y = meshgrid(x,y)
         Z = 1/TauFit.model(X,Y, *self.get_saved_parameters_values())
 
@@ -651,11 +650,13 @@ class TauFit(QObject):
         df_model: DataFrame = DataFrame(list(zip(temp, fields, tau)), columns=["TempModel", "FieldModel", "TauModel"])
 
         all_temp = set()
-        for t in tmp:
+        for t in tmp_o:
             all_temp.add(t)
         final_series_tmp = [Series()]*8
-        for t in list(all_temp):
-            field = linspace(min(field), max(field), 50)
+        all_temp = list(all_temp)
+        all_temp.sort()
+        for t in all_temp:
+            field = linspace(min(field_o), max(field_o), 50)
             field = Series(field)
             tmp = Series([t] * 50)
             partial_result = self.partial_result(tmp, field , return_df=False)
@@ -667,11 +668,12 @@ class TauFit(QObject):
 
         final_series_field = [Series()]*8
         all_field = set()
-        for f in field:
+        for f in field_o:
             all_field.add(f)
-
+        all_field = list(all_field)
+        all_field.sort()
         for f in list(all_field):
-            tmp = linspace(min(tmp), max(tmp), 50)
+            tmp = linspace(min(tmp_o), max(tmp_o), 50)
             tmp = Series(tmp)
             field = Series([f]*50)
             partial_result = self.partial_result(tmp, field, return_df=False)
