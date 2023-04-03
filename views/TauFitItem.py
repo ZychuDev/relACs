@@ -33,7 +33,7 @@ class TauFitItem(StandardItem):
         menu.addAction("Save to file", self._model.save_to_file)
         menu.addSeparator()
         menu.addAction("Rename", lambda: self._ctrl.rename())
-        menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index()))
+        menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index())if self._model._collection is not None else print("Items is not in collection"))
         menu.exec(menu_position)
 
     def __lt__(self, other):

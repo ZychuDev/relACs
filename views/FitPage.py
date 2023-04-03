@@ -152,7 +152,7 @@ class RelaxationTab(QWidget):
     def update_saved_errors(self):
         for i, p in enumerate(self.relaxation.saved_parameters):
             self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} \u00b1 {str(round(p.error, 8))}"))
-        self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(p.error, 8))))
+        self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(self.relaxation.saved_residual_error, 8))))
 
 class ParametersControl(QTabWidget):
     def __init__(self):

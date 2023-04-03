@@ -51,6 +51,7 @@ class Relaxation(QObject):
             s.set_value(p.value)
             s.set_blocked(p.is_blocked)
             s.set_error(p.error)
+        self.saved_residual_error = self.residual_error
         self.was_saved = True
         self.parameters_saved.emit()
 

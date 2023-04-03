@@ -18,7 +18,7 @@ from scipy.linalg import svd #type: ignore
 from numpy import power, exp, log, finfo, sqrt, diag, linspace, meshgrid, setdiff1d
 from numpy import max as np_max
 
-from math import nextafter
+from math import nextafter, isclose
 
 from pandas import Series, DataFrame, concat #type: ignore
 
@@ -189,6 +189,8 @@ class TauFit(QObject):
     def name(self, val:str):
         if len(val) < 1:
             raise ValueError("Tau fit name must be at least one character long")
+        if self._collection is not None:
+            self._collection.update_names(old_name=self._name, new_name=val)
         self._name = val
         self.name_changed.emit(val)
 
@@ -397,13 +399,14 @@ class TauFit(QObject):
             v (float): Value of actual varying ax of Point to hide.
             z (float): Relaxation time of Point to hide.
         """
-        for p in self._points:
+        
+        for i, p in enumerate(self._points):
             if self.varying == "Field":
-                if p.field == v and p.temp == self.constant and log(p.tau) == z:
+                if isclose(p.field, v, rel_tol=1e-09, abs_tol=0.0) and (abs(p.field-v) < abs(self._points[i-1].field-v) and abs(p.field-v) < abs(self._points[(i+1)%len(self._points)].field-v)) and p.temp == self.constant and log(p.tau) == z:
                     p.is_hidden = not p.is_hidden
                     break
             else:
-                if p.temp == 1/v and p.field == self.constant and log(p.tau) == z:
+                if isclose(p.temp, 1/v, rel_tol=1e-09, abs_tol=0.0)and (abs(p.temp-1/v) < abs(self._points[i-1].temp-1/v) and abs(p.temp-1/v) < abs(self._points[(i+1)%len(self._points)].field-v)) and p.field == self.constant and log(p.tau) == z:
                     p.is_hidden = not p.is_hidden
                     break
         self.points_changed.emit()
@@ -421,18 +424,24 @@ class TauFit(QObject):
             tmp = [p for p in self._points if (p.field, p.temp, log(p.tau)) != (v, self.constant, z)]
 
         else:
-            tmp = [p for p in self._points if (p.temp,  p.field, log(p.tau)) != (1/v, self.constant, z)]
-
+            tmp = [p for p in self._points if (not isclose(p.temp,1/v, rel_tol=1e-09, abs_tol=0.0) or p.field != self.constant or log(p.tau) != z)]
+            
 
         if len(tmp) < 2:
             return
 
-        point: Point = list(set(self._points) - set(tmp))[0]
+        if len(list(set(self._points) - set(tmp))) == 0:
+            print("Error")
+            raise Exception()
         
+        point: Point = list(set(self._points) - set(tmp))[0]
+    
         self._points = tmp
 
         self.points_changed.emit()
         return point
+
+
 
     def get_parameters_values(self) -> tuple[float, float, float, float, float, float, float, float, float, float]:
         """Get all parameters value.
@@ -572,6 +581,7 @@ class TauFit(QObject):
             s.set_blocked(p.is_blocked)
             s.set_blocked_0(p.is_blocked_on_0)
             s.set_error(p.error)
+        self.saved_residual_error = self.residual_error
         self.parameters_saved.emit()
 
     def reset(self):

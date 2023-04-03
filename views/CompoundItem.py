@@ -74,7 +74,7 @@ class CompoundItem(StandardItem):
             label:QLabel = QLabel(Parameter.name_to_symbol[p])
             label.setMinimumSize(QSize(65, 0))
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            print(p)
+            
             new_ranges[p] = (low, up)
             l.addWidget(low)
             l.addWidget(label)

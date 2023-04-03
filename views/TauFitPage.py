@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel, QHBoxLayout,
- QPushButton, QTableWidget, QAbstractScrollArea,
+ QPushButton, QTableWidget, QAbstractScrollArea, QCheckBox,
  QAbstractItemView, QTableWidgetItem, QDialog, QComboBox, QSplitter)
 from PyQt6.QtCore import QSize, QMetaObject, QObject, Qt
 from PyQt6.QtGui import QFont, QPalette, QBrush, QColor, QKeySequence, QShortcut
@@ -18,7 +18,7 @@ from typing import get_args, cast, Literal
 
 from time import time
 
-from numpy import log, meshgrid, ones, linspace
+from numpy import log, meshgrid, ones, linspace, isnan, isinf, concatenate
 from pandas import Series # type: ignore
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -91,8 +91,10 @@ class TauFitPage(QWidget):
         col_1: QVBoxLayout = QVBoxLayout()
         self.adjust_range_button: QPushButton = QPushButton("Adjust ranges")
         self.copy_parameters_button: QPushButton = QPushButton("Copy parameters")
+        self.scale_checkbox: QCheckBox = QCheckBox("Scale slice for model")
         col_1.addWidget(self.adjust_range_button)
         col_1.addWidget(self.copy_parameters_button)
+        col_1.addWidget(self.scale_checkbox)
         control_layout.addLayout(col_1, stretch=1)
 
         col_2: QVBoxLayout = QVBoxLayout()
@@ -219,6 +221,7 @@ class TauFitPage(QWidget):
         self.reset_button.clicked.connect(self.reset)
         self.copy_parameters_button.clicked.connect(self.copy_parameters)
         self.adjust_range_button.clicked.connect(self.on_adjust_range)
+        self.scale_checkbox.stateChanged.connect(self._update_fit_plot)
 
         self.shortcut: QShortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
         self.shortcut.activated.connect(self.on_undo)
@@ -278,12 +281,11 @@ class TauFitPage(QWidget):
 
     def on_constant_value_changed(self):
         self._update_plot_varying()
-        self._update_measurements_plots()
-        self.canvas_3d.draw()
 
-        self.canvas_slice.draw()
-        l = self.canvas_slice.ax.legend()
-        l.set_draggable(True)
+        self._update_measurements_plots()
+        
+        self._update_fit_plot()
+
 
     def set_model_varying(self, s: str):
         if s == "Field" or s == "Temperature":
@@ -352,6 +354,8 @@ class TauFitPage(QWidget):
         l = self.canvas_slice.ax.legend()
         l.set_draggable(True)
 
+        self.canvas_3d.draw()
+
     def _update_slice_varying(self):
         j: int
         for j in range(self.varying_slice_combo_box.count()):
@@ -361,7 +365,7 @@ class TauFitPage(QWidget):
         self.constant_slice_label.setText("Field:" if self.tau_fit.varying == "Temperature" else "Temperature:")
 
         self.constant_value_slice.clear()
-        _, temp, field = self.tau_fit.get_visible()
+        _, temp, field = self.tau_fit.get_all()
 
         tmp: list[float] = temp if self.tau_fit.varying == "Field" else field
         tmp = list(set(tmp))
@@ -431,13 +435,13 @@ class TauFitPage(QWidget):
         self._saved = self.canvas_3d.axes.plot_wireframe(X, Y, S, rstride=1, cstride=1, color='k', label='saved', alpha=0.5)
         self._current = self.canvas_3d.axes.plot_wireframe(X, Y, Z, rstride=1, cstride=1, label='current', linestyles='-', color=mcolors.TABLEAU_COLORS["tab:green"], alpha=0.4)
         self.canvas_3d.axes.set_zlim3d(min(Z.min(), S.min(), min(log(tau))), max(Z.max(),S.max(), max(log(tau))))
+        self.canvas_3d.axes.set_ylim3d(Y.min(), Y.max())
+        self.canvas_3d.axes.set_xlim3d(X.min(), X.max())
         self.canvas_3d.draw()
         self._update_fit_slice()
 
     def _update_fit_slice(self):
-        _, tmp, field = self.tau_fit.get_all_s()
-
-
+        tau, tmp, field = self.tau_fit.get_all_s()
 
         if len(tmp) < 2:
             if self._direct is not None:
@@ -469,9 +473,17 @@ class TauFitPage(QWidget):
             self._sum = None
             self._saved_sum = None
 
-            self.canvas_slice.draw()
+            
+            if len(tau) == 1:
+                tau = tau[0]
+                self._update_measurements_plots()
+                self.canvas_slice.ax.set_ybound(log(tau) - 0.05 , log(tau) + 0.05)
+                
+                
             l = self.canvas_slice.ax.legend()
             l.set_draggable(True)
+            self.canvas_slice.draw()
+
             return
 
         if self.tau_fit.varying == "Field":
@@ -533,6 +545,20 @@ class TauFitPage(QWidget):
         else:
             self._saved_sum.set_xdata(xx)
             self._saved_sum.set_ydata(sum_saved)
+
+        min_y: float = min(log(tau))
+        max_y: float = max(log(tau))
+        if self.scale_checkbox.isChecked():
+            all_values:list[float] = concatenate((direct, orbach, raman, raman_2, qtm, sum, sum_saved), axis=None)
+            all_values = [v for v in all_values if not isnan(v) and not isinf(v)]
+            if len(all_values) != 0:
+                min_y = min(min(all_values), min_y)
+                max_y = max(max(all_values), max_y)
+
+        span_y: float = max_y - min_y
+        if span_y == 0.0:
+            span_y = 0.1
+        self.canvas_slice.ax.set_ybound(min_y - span_y*0.05 , max_y + span_y*0.05)
 
         self.canvas_slice.draw()
         l = self.canvas_slice.ax.legend()
