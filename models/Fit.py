@@ -10,7 +10,7 @@ from protocols import SettingsSource, Collection
 from readers import SettingsReader
 
 from pandas import DataFrame, Series, concat # type: ignore
-from numpy import ndarray, pi, power, finfo, diag, sum, sqrt, pi, power, linspace, log10
+from numpy import ndarray, pi, power, finfo, diag, sum, sqrt, pi, power, linspace, log10, logspace
 from numpy import max as np_max
 from numpy import min as np_min
 from scipy.optimize import least_squares # type: ignore
@@ -362,7 +362,7 @@ class Fit(QObject):
             df_model: DataFrame = DataFrame()
             displayed: DataFrame = self._df.loc[self._df["Hidden"] == False]
 
-            xx:ndarray = linspace(displayed["Frequency"].min(), displayed["Frequency"].max(), self.resolution)
+            xx:ndarray = logspace(displayed["Frequency"].min(), displayed["Frequency"].max(), self.resolution)
             df_model["Model"+columns_names[0]] = Series(xx)
             yy = Fit.model(log10(xx), *self.relaxations[i].get_saved_parameters_values())
             df_model["Model"+columns_names[1]] = Series(yy.real)
