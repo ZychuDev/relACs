@@ -362,7 +362,7 @@ class Fit(QObject):
             df_model: DataFrame = DataFrame()
             displayed: DataFrame = self._df.loc[self._df["Hidden"] == False]
 
-            xx:ndarray = logspace(displayed["Frequency"].min(), displayed["Frequency"].max(), self.resolution)
+            xx:ndarray = logspace(log10(displayed["Frequency"].min()), log10(displayed["Frequency"].max()), self.resolution)
             df_model["Model"+columns_names[0]] = Series(xx)
             yy = Fit.model(log10(xx), *self.relaxations[i].get_saved_parameters_values())
             df_model["Model"+columns_names[1]] = Series(yy.real)
