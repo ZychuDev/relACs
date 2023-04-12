@@ -2,9 +2,9 @@ name: Create windows application
 
 on:
   push:
-    branches: [ "2.0" ]
+    branches: [ "dev-test" ]
   pull_request:
-    branches: [ "2.0" ]
+    branches: [ "dev-test" ]
 
 jobs:
   build:
