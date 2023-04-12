@@ -357,7 +357,8 @@ class Fit(QObject):
             for p in r.saved_parameters:
                 name:str = p.name if p.name != "chi_dif" else "chi_t-chi_s"
                 row = { "Name": f"{name}{i+1}", "Value": p.value, "Error": p.error}
-                df_param = df_param.append(row, ignore_index = True)
+                df_param = concat([df_param, row], ignore_index = True)
+
 
             df_model: DataFrame = DataFrame()
             displayed: DataFrame = self._df.loc[self._df["Hidden"] == False]

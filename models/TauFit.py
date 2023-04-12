@@ -632,7 +632,7 @@ class TauFit(QObject):
         p:Parameter
         for p in self.parameters:
             row = {"Name": p.name, "Value": p.value, "Error":p.error}
-            df_param = df_param.append(row, ignore_index=True)
+            df_param = concat([df_param,row], ignore_index=True)
         
         tau, tmp_o, field_o = self.get_all()
         df_experimental:DataFrame = DataFrame(list(zip(tmp_o, field_o, tau)), columns=["T", "H", "tau"])
@@ -672,7 +672,7 @@ class TauFit(QObject):
             partial_result = self.partial_result(tmp, field , return_df=False)
             one_point_series = [tmp, field] + partial_result
             for s in range(len(final_series_tmp)):
-               final_series_tmp[s] = final_series_tmp[s].append(one_point_series[s], ignore_index=True)
+               final_series_tmp[s] = concat([final_series_tmp[s], one_point_series[s]], ignore_index=True)
 
         df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "Tau"])
 
@@ -689,7 +689,7 @@ class TauFit(QObject):
             partial_result = self.partial_result(tmp, field, return_df=False)
             one_point_series = [tmp, field] + partial_result
             for s in range(len(final_series_field)):
-                final_series_field[s] = final_series_field[s].append(one_point_series[s], ignore_index=True)
+                final_series_field[s] = concat([final_series_field[s], one_point_series[s]], ignore_index=True)
 
         df_field: DataFrame = DataFrame(list(zip(*final_series_field)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "Tau"])
         return concat([df_param, df_experimental, df_model, df_tmp, df_field], axis=1)
