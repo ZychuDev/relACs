@@ -84,7 +84,7 @@ class FitItemsCollection(StandardItem):
             while i < nr_of_rows:
                 child = self.child(i)
                 if child.checkState() == Qt.CheckState.Checked:
-                    final_df = concat([final_df, child._model.get_result()], axis=1)
+                    final_df = concat([final_df, DataFrame(child._model.get_result())], axis=1, ignore_index=True)
                 i += 1
             with open(save_name + (".csv" if save_name[-4:] != ".csv" else ""), "w") as f:
                 final_df.to_csv(f.name, index=False, sep = ";")

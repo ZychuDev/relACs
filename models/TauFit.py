@@ -632,7 +632,7 @@ class TauFit(QObject):
         p:Parameter
         for p in self.parameters:
             row = {"Name": p.name, "Value": p.value, "Error":p.error}
-            df_param = concat([df_param,row], ignore_index=True)
+            df_param = concat([df_param, DataFrame([row])], ignore_index=True)
         
         tau, tmp_o, field_o = self.get_all()
         df_experimental:DataFrame = DataFrame(list(zip(tmp_o, field_o, tau)), columns=["T", "H", "tau"])
