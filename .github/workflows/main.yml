@@ -26,7 +26,7 @@ jobs:
         
     - name: build application and run Inno Setup
       run: | 
-        python -m PyInstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
+        python -m PyInstaller --onefile --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
         iscc ".\relACs.iss"
         
     - name: Create Release
@@ -35,8 +35,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: 2.3.3 #VERSION
-        release_name: Release 2.3.3  #VERSION
+        tag_name: 2.3.4 #VERSION
+        release_name: Release 2.3.4  #VERSION
         draft: false
         prerelease: false
     - name: Upload Release Asset
