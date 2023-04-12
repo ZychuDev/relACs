@@ -357,7 +357,7 @@ class Fit(QObject):
             for p in r.saved_parameters:
                 name:str = p.name if p.name != "chi_dif" else "chi_t-chi_s"
                 row = { "Name": f"{name}{i+1}", "Value": p.value, "Error": p.error}
-                df_param = concat([df_param, DataFrame([row])], ignore_index = True)
+                df_param = concat([df_param, DataFrame([row])], ignore_index=True)
 
 
             df_model: DataFrame = DataFrame()
@@ -368,7 +368,7 @@ class Fit(QObject):
             yy = Fit.model(log10(xx), *self.relaxations[i].get_saved_parameters_values())
             df_model["Model"+columns_names[1]] = Series(yy.real)
             df_model["Model"+columns_names[2]] = Series(-yy.imag)
-            df_model_final = concat([df_model_final, df_model], axis=1, ignore_index=True)
+            df_model_final = concat([df_model_final, df_model], axis=1)
 
         if i != 0:
             columns = list(df_model_final.columns)
@@ -379,7 +379,7 @@ class Fit(QObject):
                 columns[j+2] += rel_str
             df_model_final.columns = columns
 
-        df: DataFrame = concat([df_param, df_experimental, df_model_final], axis=1, ignore_index=True)
+        df: DataFrame = concat([df_param, df_experimental, df_model_final], axis=1)
         return df
 
     def save_all_relaxations(self):
