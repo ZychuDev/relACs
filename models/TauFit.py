@@ -524,8 +524,8 @@ class TauFit(QObject):
             w = s > tol
             cov = (Vh[w].T/s[w]**2) @ Vh[w]
 
-            chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
-            cov *= chi2dof
+            # chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
+            # cov *= chi2dof
 
             perr = sqrt(diag(cov))
         except Exception as e:
