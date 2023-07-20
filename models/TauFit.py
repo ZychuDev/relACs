@@ -481,64 +481,115 @@ class TauFit(QObject):
         Args:
             slice_flag (bool, optional): Determines whether take into account only Points in actual slice. Defaults to False.
         """
-        params = self.get_parameters_values()
-        min: list[float] = self.get_parameters_min_bounds()
-        max: list[float] = self.get_parameters_max_bounds()
-
-        p:Parameter
-        for i, p in enumerate(self.parameters):
-            if p.is_blocked:
-                min[i] = nextafter(p.value, min[i])
-                max[i] = nextafter(p.value, max[i])
-
+        blocked_parameters:list[Parameter] = []
+        blocked_on_0_parameters:list[Parameter] = []
+        not_blocked_parameters:list[Parameter] = []
+        for p in self.parameters:
             if p.is_blocked_on_0:
-                params = list(params)
-                min[i] = nextafter(nextafter(0.0, 1), 0)
-                max[i] = nextafter(nextafter(0.0, 1), 1)
-                params[i] = nextafter(0.0, 1)
+                blocked_on_0_parameters.append(p)
+            elif p.is_blocked:
+                blocked_parameters.append(p)
+            else:
+                not_blocked_parameters.append(p)
 
-            if p.value < min[i] and not p.is_blocked_on_0:
-                tmp: float = nextafter(min[i], max[i])
-                p.set_value(tmp)
-                params = list(params)
-                params[i] = tmp
+        param_str:str = ""
+        for p in not_blocked_parameters:
+            param_str = param_str +f", {p.name}"
 
-        bounds: tuple[list[float], list[float]] = (min, max)
-        cost_f = partial(self.cost_function, slice=slice_flag)
+        
 
-        settings: SettingsReader = SettingsReader()
-        tole = settings.get_tolerances()
+        not_blocked_names = [p.name for p in not_blocked_parameters]
+        not_blocked_params = [p.value for p in not_blocked_parameters]
+        blocked_on_0_parameters_names = [p.name for p in blocked_on_0_parameters]
+
+
+        model_body = """return {a_dir}*temp*(field**{n_dir}) \
+            + {b1}*(1+{b3}*field*field)/(1+{b2}*field*field) \
+            + {c_raman_1} * power(temp, {n_raman_1}) \
+            + {c_raman_2} * power(temp, {n_raman_2}) * power(field, {m_2}) \
+            + {tau_0} *exp(-{delta_e}/(temp)) """.format(
+            a_dir = "a_dir" if ("a_dir" in not_blocked_names) else (0.0 if "a_dir" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "a_dir")).value),
+            n_dir = "n_dir" if ("n_dir" in not_blocked_names) else (0.0 if "n_dir" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "n_dir")).value),
+            b1 = "b1" if ("b1" in not_blocked_names) else (0.0 if "b1" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "b1")).value),
+            b2 = "b2" if ("b2" in not_blocked_names) else (0.0 if "b2" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "b2")).value),
+            b3 = "b3" if ("b3" in not_blocked_names) else (0.0 if "b3" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "b3")).value),
+            c_raman_1 = "c_raman_1" if ("c_raman_1" in not_blocked_names) else (0.0 if "c_raman_1" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "c_raman_1")).value),
+            n_raman_1 = "n_raman_1" if ("n_raman_1" in not_blocked_names) else (0.0 if "n_raman_1" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "n_raman_1")).value),
+            c_raman_2 = "c_raman_2" if ("c_raman_2" in not_blocked_names) else (0.0 if "c_raman_2" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "c_raman_2")).value),
+            n_raman_2 = "n_raman_2" if ("n_raman_2" in not_blocked_names) else (0.0 if "n_raman_2" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "n_raman_2")).value),
+            m_2 = "m_2" if ("m_2" in not_blocked_names) else (0.0 if "m_2" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "m_2")).value),
+            tau_0 = "tau_0" if ("tau_0" in not_blocked_names) else (0.0 if "tau_0" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "tau_0")).value),
+            delta_e = "delta_e" if ("delta_e" in not_blocked_names) else (0.0 if "delta_e" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "delta_e")).value),
+        )
+        meta_model_str = """
+def m_model(temp, field {param_str}):
+    {model_body}
+self.meta_model = m_model
+            """.format(model_body= model_body, param_str=param_str)
+        exec(meta_model_str, {"self":self, "power":power, "exp":exp})
+
+        exec("""
+def meta_auto_fit(self):
+    def cost_function(p, slice=False):
+        if slice:
+            tau, temp, field = self.get_all_s()
+        else:
+            tau, temp, field = self.get_all()
+        temp = Series(temp)
+        field = Series(field)
+        tau = Series(tau)
+        return abs(log(self.meta_model(temp, field, *p)) - log(1/tau))
+
+    settings: SettingsReader = SettingsReader()
+    tole = settings.get_tolerances()
+    try:
         try:
-            try:
-                res = least_squares(cost_f, params, bounds=bounds, ftol=tole["f_tol"], xtol=tole["x_tol"], gtol=tole["g_tol"])
-            except ValueError as e:
-                msg: QMessageBox = QMessageBox()
-                msg.setIcon(QMessageBox.Icon.Warning)
-                msg.setText("One of tolerances is to low. You can adjust them in settings.\n")
-                msg.setText(str(e))
-                msg.setWindowTitle("Auto fit failed")
-                msg.exec()
-                return
-            _, s, Vh = svd(res.jac, full_matrices=False)
-            tol = finfo(float).eps*s[0]*np_max(res.jac.shape)
-            w = s > tol
-            cov = (Vh[w].T/s[w]**2) @ Vh[w]
+            res = least_squares(cost_function, params, ftol=tole["f_tol"], xtol=tole["x_tol"], gtol=tole["g_tol"])
+        except ValueError as e:
+            msg: QMessageBox = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("One of tolerances is to low. You can adjust them in settings.")
+            msg.setText(str(e))
+            msg.setWindowTitle("Auto fit failed")
+            msg.exec()
+            return
+        _, s, Vh = svd(res.jac, full_matrices=False)
+        tol = finfo(float).eps*s[0]*np_max(res.jac.shape)
+        w = s > tol
+        cov = (Vh[w].T/s[w]**2) @ Vh[w]
 
-            # chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
-            # cov *= chi2dof
+        chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
+        cov *= chi2dof
 
-            perr = sqrt(diag(cov))
-        except Exception as e:
-                    msg = QMessageBox()
-                    msg.setIcon(QMessageBox.Icon.Warning)
-                    msg.setText("Something went wrong. Try change starting values of parameters.\n")
-                    msg.setText(str(e))
-                    msg.setWindowTitle("Auto fit failed")
-                    msg.exec()
-                    return
-        for i, p in enumerate(self.parameters):
-            p.set_value(res.x[i])
-        self.set_all_errors(res.cost, perr)
+        perr = sqrt(diag(cov))
+    except Exception as e:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Warning)
+        msg.setText("Something went wrong. Try change starting values of parameters.")
+        msg.setText(str(e))
+        msg.setWindowTitle("Auto fit failed")
+        msg.exec()
+        return
+
+    for i, p in enumerate(not_blocked_parameters):
+        p.set_value(res.x[i])
+        p.set_error(perr[i], silent=True)
+    for p in blocked_parameters:
+        p.set_error(0.0, silent=True)
+    for p in blocked_on_0_parameters:
+        p.set_error(0.0, silent=True)
+             
+    self.residual_error = res.cost
+    self.all_parameters_changed.emit()
+    
+meta_auto_fit(self)
+        """, {
+            "self":self, "slice":slice_flag, "Series": Series, "abs": abs, "log":log, "SettingsReader":SettingsReader, "QMessageBox":QMessageBox,
+            "params":not_blocked_params, "svd":svd, "finfo":finfo, "np_max":np_max, "sum":sum, "sqrt":sqrt, "least_squares": least_squares, "diag":diag,
+            "not_blocked_parameters":not_blocked_parameters, "blocked_parameters":blocked_parameters, "blocked_on_0_parameters":blocked_on_0_parameters,
+        })
+
+        return 
 
     def cost_function(self, p, slice=False):
         """Cost function minimalized in least_square method in fitting process.

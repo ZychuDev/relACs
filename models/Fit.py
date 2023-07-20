@@ -4,6 +4,7 @@ from PyQt6.QtGui import QUndoStack, QUndoCommand
 
 from .Relaxation import Relaxation
 from .Measurement import Measurement 
+from .Parameter import Parameter
 
 from protocols import SettingsSource, Collection
 
@@ -259,71 +260,172 @@ class Fit(QObject):
             auto (bool, optional): Determines whether fit was explicitly call by user. Defaults to False.
             next_fit (Self, optional): Fit to transfer parameters value in case of performing automated fit process for mutiple Fits. Defaults to None.
         """
-        params: tuple = ()
-        min: list = []
-        max: list = []
-        for r_nr in range(len(self.relaxations)):
-            relaxation = self.relaxations[r_nr]
-            params = params + relaxation.get_parameters_values()
-            min = min + relaxation.get_parameters_min_bounds()
-            max = max + relaxation.get_parameters_max_bounds()
+        if len(self.relaxations) == 1:
+            not_blocked_parameters:list[Parameter] = []
+            blocked_parameters:list[Parameter] = []  
 
-        
-        r: Relaxation
-        i: int
-        for i, r in enumerate(self.relaxations):
-            for j, p in enumerate(r.parameters):
+            for j, p in enumerate(self.relaxations[0].parameters):
                 if p.is_blocked:
-                    min[j + i*len(r.parameters)] = nextafter(p.value, min[j + i*len(r.parameters)])
-                    max[j + i*len(r.parameters)] = nextafter(p.value, max[j + i*len(r.parameters)])
+                    blocked_parameters.append(p)
+                else:
+                    not_blocked_parameters.append(p)
 
-        bounds: tuple[list[float], list[float]] = (min, max)
-        minimal: float = np_min(params)
-        maximal: float = np_max(params)
+            param_str = ""
+            for p in not_blocked_parameters:
+                param_str = param_str +f", {p.name}"
 
-        settings: SettingsReader = SettingsReader()
-        tole = settings.get_tolerances()
+            not_blocked_names = [p.name for p in not_blocked_parameters]
+            not_blocked_params = [p.value for p in not_blocked_parameters]
+
+            model_body = "return {chi_s} + ({chi_dif})/((1 + (10**logFrequency*2*pi * power(10, {tau}) * 1j )**(1- {alpha}))**{beta})".format(
+                chi_s="chi_s" if "chi_s" in not_blocked_names else next((x for x in blocked_parameters if x.name == "chi_s")).value,
+                chi_dif="chi_dif" if "chi_dif" in not_blocked_names else next((x for x in blocked_parameters if x.name == "chi_dif")).value,
+                tau="log10_tau" if "log10_tau" in not_blocked_names else next((x for x in blocked_parameters if x.name == "log10_tau")).value,
+                alpha="alpha" if "alpha" in not_blocked_names else next((x for x in blocked_parameters if x.name == "alpha")).value,
+                beta="beta" if "beta" in not_blocked_names else next((x for x in blocked_parameters if x.name == "beta")).value,
+                )
+            meta_model_str = """
+def m_model(logFrequency {param_str}):
+    {model_body}
+self.meta_model = m_model
+            """.format(model_body= model_body, param_str=param_str)
+
+            exec(meta_model_str, {"self":self, "pi":pi, "power":power})
+            exec("""
+def meta_auto_fit(self):
+    def cost_function(p):
+        rest = self._df.loc[self._df["Hidden"] == False]
+        sum_real = 0
+        sum_img = 0
+
+        r = self.meta_model(rest["FrequencyLog"].values, *p)
+        sum_real += r.real
+        sum_img += -r.imag
+
+        dif_real = abs((sum_real - rest['ChiPrimeMol']))
+        dif_img = abs((sum_img - rest['ChiBisMol']))
+                 
+        return  dif_real + dif_img
+                 
+    settings: SettingsReader = SettingsReader()
+    tole = settings.get_tolerances()
+
+    try:
         try:
+            res = least_squares(cost_function, not_blocked_params, ftol=tole["f_tol"], xtol=tole["x_tol"], gtol=tole["g_tol"])
+        except ValueError as e:
+            msg: QMessageBox = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("One of tolerances is to low. You can adjust them in settings.")
+            msg.setText(str(e))
+            msg.setWindowTitle("Auto fit failed")
+            msg.exec()
+            return
+        _, s, Vh = svd(res.jac, full_matrices=False)
+        tol = finfo(float).eps * s[0] * np_max(res.jac.shape)
+        w = s > tol
+        cov = (Vh[w].T/s[w]**2) @ Vh[w] # robust covariance matrix
+
+        chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
+        cov *= chi2dof
+
+        perr = sqrt(diag(cov))
+    except Exception as e:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Warning)
+        msg.setText("Something went wrong. Try change starting values of parameters.")
+        msg.setText(str(e))
+        msg.setWindowTitle("Auto fit failed")
+        msg.exec()
+        return
+
+    for i,p in enumerate(not_blocked_parameters):
+        p.set_value(res.x[i])
+        p.set_error(perr[i], silent=True)
+                 
+    for p in blocked_parameters:
+        p.set_error(0.0, silent=True)
+                 
+    self.relaxations[0].residual_error = res.cost
+    self.relaxations[0].all_parameters_changed.emit()  
+
+                   
+    if auto:
+        self.save_all_relaxations()
+        if next_fit != None: #type: ignore
+            self.copy_all_relxations(next_fit)   
+                              
+meta_auto_fit(self)
+                    """, {"self": self, "SettingsReader":SettingsReader, "not_blocked_params": not_blocked_params, "QMessageBox":QMessageBox, "svd":svd,
+                          "finfo":finfo, "np_max":np_max, "sum":sum, "sqrt":sqrt, "not_blocked_parameters":not_blocked_parameters, "blocked_parameters": blocked_parameters,
+                           "next_fit": next_fit, "least_squares": least_squares, "diag":diag, "auto":auto })
+            return
+        else:
+            params: tuple = ()
+            min: list = []
+            max: list = []
+            for r_nr in range(len(self.relaxations)):
+                relaxation = self.relaxations[r_nr]
+                params = params + relaxation.get_parameters_values()
+                min = min + relaxation.get_parameters_min_bounds()
+                max = max + relaxation.get_parameters_max_bounds()
+
+            
+            r: Relaxation
+            i: int
+            for i, r in enumerate(self.relaxations):
+                for j, p in enumerate(r.parameters):
+                    if p.is_blocked:
+                        min[j + i*len(r.parameters)] = nextafter(p.value, min[j + i*len(r.parameters)])
+                        max[j + i*len(r.parameters)] = nextafter(p.value, max[j + i*len(r.parameters)])
+
+            bounds: tuple[list[float], list[float]] = (min, max)
+            minimal: float = np_min(params)
+            maximal: float = np_max(params)
+
+            settings: SettingsReader = SettingsReader()
+            tole = settings.get_tolerances()
             try:
-                res = least_squares(self.cost_function, params, bounds=bounds, ftol=tole["f_tol"], xtol=tole["x_tol"], gtol=tole["g_tol"])
-            except ValueError as e:
-                msg: QMessageBox = QMessageBox()
+                try:
+                    res = least_squares(self.cost_function, params, bounds=bounds, ftol=tole["f_tol"], xtol=tole["x_tol"], gtol=tole["g_tol"])
+                except ValueError as e:
+                    msg: QMessageBox = QMessageBox()
+                    msg.setIcon(QMessageBox.Icon.Warning)
+                    msg.setText("One of tolerances is to low. You can adjust them in settings.\n")
+                    msg.setText(str(e))
+                    msg.setWindowTitle("Auto fit failed")
+                    msg.exec()
+                    return
+
+                _, s, Vh = svd(res.jac, full_matrices=False)
+                tol = finfo(float).eps * s[0] * np_max(res.jac.shape)
+                w = s > tol
+                cov = (Vh[w].T/s[w]**2) @ Vh[w] # robust covariance matrix
+
+                chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
+                cov *= chi2dof
+
+                perr = sqrt(diag(cov))
+            except Exception as e:
+                msg = QMessageBox()
                 msg.setIcon(QMessageBox.Icon.Warning)
-                msg.setText("One of tolerances is to low. You can adjust them in settings.\n")
+                msg.setText("Something went wrong. Try change starting values of parameters.\n")
                 msg.setText(str(e))
                 msg.setWindowTitle("Auto fit failed")
                 msg.exec()
                 return
 
-            _, s, Vh = svd(res.jac, full_matrices=False)
-            tol = finfo(float).eps * s[0] * np_max(res.jac.shape)
-            w = s > tol
-            cov = (Vh[w].T/s[w]**2) @ Vh[w] # robust covariance matrix
+            for i, r in enumerate(self.relaxations):
+                for j, p in enumerate(r.parameters):
+                    p.set_value(res.x[j + i*len(r.parameters)])
 
-            # chi2dof = sum(res.fun**2)/(res.fun.size - res.x.size)
-            # cov *= chi2dof
+            for i, r in enumerate(self.relaxations):
+                r.set_all_errors(res.cost, perr[i*5 : i*5+5])
 
-            perr = sqrt(diag(cov))
-        except Exception as e:
-            msg = QMessageBox()
-            msg.setIcon(QMessageBox.Icon.Warning)
-            msg.setText("Something went wrong. Try change starting values of parameters.\n")
-            msg.setText(str(e))
-            msg.setWindowTitle("Auto fit failed")
-            msg.exec()
-            return
-
-        for i, r in enumerate(self.relaxations):
-            for j, p in enumerate(r.parameters):
-                p.set_value(res.x[j + i*len(r.parameters)])
-
-        for i, r in enumerate(self.relaxations):
-            r.set_all_errors(res.cost, perr[i*5 : i*5+5])
-
-        if auto:
-            self.save_all_relaxations()
-            if next_fit != None: #type: ignore
-                self.copy_all_relxations(next_fit)
+            if auto:
+                self.save_all_relaxations()
+                if next_fit != None: #type: ignore
+                    self.copy_all_relxations(next_fit)
 
     def save_to_file(self):
         """Savig result to .csv file"""
