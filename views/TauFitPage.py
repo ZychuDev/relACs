@@ -311,6 +311,10 @@ class TauFitPage(QWidget):
         i: int
         for i, p in enumerate(self.tau_fit.parameters):
             self.sliders[i].set_parameter(p)
+            if p.is_blocked_on_0:
+                self.sliders[i].set_disabled(True)
+            else:
+                self.sliders[i].set_disabled(False)
 
         self.cids: list[QMetaObject.Connection] = []
 

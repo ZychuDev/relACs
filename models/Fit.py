@@ -73,6 +73,15 @@ class Fit(QObject):
         Returns:
             Fit: Created Fit
         """
+        df = measurement._df
+        if df.isnull().values.any():
+            msg: QMessageBox = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText(f"Some data in measurement named: {measurement._name} is missing.\n Fit was not created!")
+            msg.setWindowTitle("Fit creation canceled")
+            msg.exec()
+            return None
+        
         fit_name: str = measurement._name + "_Fit_Frequency"
         fit: Fit =  Fit(fit_name, measurement._df.copy(), measurement._tmp, measurement._field, compound, None)
 
@@ -99,6 +108,13 @@ class Fit(QObject):
 
         self._undo_stack: QUndoStack = QUndoStack()
         self.resolution = 50 # TO::DO 
+
+        for r in self.relaxations:
+            r.reset_errors.connect(self.reset_errors_in_all_relaxations)
+
+    def reset_errors_in_all_relaxations(self):
+        for r in self.relaxations:
+            r.set_all_errors(0.0, [0.0,0.0,0.0,0.0,0.0])
 
     @property
     def name(self):

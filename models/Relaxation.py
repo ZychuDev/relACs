@@ -20,6 +20,7 @@ class Relaxation(QObject):
     parameters_saved: pyqtSignal = pyqtSignal()
     all_parameters_changed: pyqtSignal = pyqtSignal()
     all_error_changed: pyqtSignal = pyqtSignal(float)
+    reset_errors: pyqtSignal = pyqtSignal(bool)
 
     def __init__(self, compound: SettingsSource):
 
@@ -42,6 +43,9 @@ class Relaxation(QObject):
         self.residual_error = 0.0
         self.saved_residual_error = 0.0
         self.was_saved: bool = False
+
+        for p in self.parameters:
+            p.reset_errors.connect(lambda: self.reset_errors.emit(True))
 
     def save(self):
         """Set all current parameters as saved.

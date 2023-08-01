@@ -30,6 +30,7 @@ class Parameter(QObject):
     block_state_changed: pyqtSignal = pyqtSignal(bool)
     block_0_state_changed: pyqtSignal = pyqtSignal(bool)
     error_changed: pyqtSignal = pyqtSignal(float)
+    reset_errors: pyqtSignal = pyqtSignal(bool)
     
 
     name_to_symbol:dict[PARAMETER_NAME|TAU_PARAMETER_NAME, str] = {
@@ -116,7 +117,7 @@ class Parameter(QObject):
         """
         return (self.min, self.max)
 
-    def set_value(self, v: float, silent: bool=False):
+    def set_value(self, v: float, silent: bool=False, new_error:float=0.0, emit_reset_errors=False):
         """Set parameter internal value to new one
         
         Args:
@@ -130,9 +131,11 @@ class Parameter(QObject):
             v = self.max
 
         self.value = v
-        self.set_error(0)
+        self.set_error(new_error)
         if not silent:
             self.value_changed.emit(v)
+        if emit_reset_errors:
+            self.reset_errors.emit(True)
 
     def get_value(self):
         """Get current parameter value

@@ -205,12 +205,14 @@ class CompoundItem(StandardItem):
                     upper = float(edit_lines[p.name][1].text())
                     self._model.change_range(p.name, lower, upper)
                     value = p.get_value()
+                    error = p.error
                     p.set_range(lower, upper)
                     if value < lower:
                         value = lower
                     if value > upper:
                         value = upper
-                    p.set_value(value)
+                    p.set_value(value, new_error=error)
+                    r.residual_error = 0.0
                     for m in range(len(r.parameters)):
                         pp = r.parameters[m]
                         if pp.name == p.name:
@@ -229,12 +231,14 @@ class CompoundItem(StandardItem):
                     upper = float(edit_lines[p.name][1].text())
                     self._model.change_range(p.name, lower, upper)
                     value = p.get_value()
+                    error = p.error
                     p.set_range(lower, upper)
                     if value < lower:
                         value = lower
                     if value > upper:
                         value = upper
-                    p.set_value(value)
+                    p.set_value(value, new_error=error)
+                    r.residual_error = 0.0
                     for m in range(len(r.parameters)):
                         pp = r.parameters[m]
                         if pp.name == p.name:
@@ -250,12 +254,14 @@ class CompoundItem(StandardItem):
                 upper = float(edit_lines[p.name][1].text())
                 self._model.change_range(p.name, lower, upper)
                 value = p.get_value()
+                error = p.error
                 p.set_range(lower, upper)
                 if value < lower:
                     value = lower
                 if value > upper:
                     value = upper
-                p.set_value(value)
+                p.set_value(value, new_error=error)
+                r.residual_error = 0.0
                 for k in range(len(t_f.parameters)):
                     pp = t_f.parameters[k]
                     if pp.name == p.name:

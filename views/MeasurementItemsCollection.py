@@ -103,8 +103,9 @@ class MeasurementItemsCollection(StandardItem):
         for i in range(self.rowCount()):
             item: MeasurementItem = cast(MeasurementItem, self.child(i))
             new_fit: Fit = Fit.from_measurement(item._model, self._model._compound)
-            self.parent().child(1)._model.append_fit(new_fit, display=first)
-            first = False
+            if new_fit is not None:
+                self.parent().child(1)._model.append_fit(new_fit, display=first)
+                first = False
 
     def make_fits_checked(self):
         i : int
@@ -113,8 +114,9 @@ class MeasurementItemsCollection(StandardItem):
             item: MeasurementItem = cast(MeasurementItem, self.child(i))
             if item.checkState() == Qt.CheckState.Checked:
                 new_fit: Fit = Fit.from_measurement(item._model, self._model._compound)
-                self.parent().child(1)._model.append_fit(new_fit, display=first)
-                first = False
+                if new_fit is not None:
+                    self.parent().child(1)._model.append_fit(new_fit, display=first)
+                    first = False
 
 
     def make_fits_checked_2(self):
@@ -124,5 +126,6 @@ class MeasurementItemsCollection(StandardItem):
             item: MeasurementItem = cast(MeasurementItem, self.child(i))
             if item.checkState() == Qt.CheckState.Checked:
                 new_fit: Fit = Fit.from_measurement(item._model, self._model._compound, nr_of_relaxations=2)
-                self.parent().child(2)._model.append_fit(new_fit, display=first)
-                first = False
+                if new_fit is not None:
+                    self.parent().child(2)._model.append_fit(new_fit, display=first)
+                    first = False

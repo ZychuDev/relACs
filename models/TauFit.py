@@ -181,6 +181,9 @@ class TauFit(QObject):
 
         self._undo_stack: QUndoStack = QUndoStack()
 
+        for p in self.parameters:
+            p.reset_errors.connect(lambda: self.set_all_errors(0.0, [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]))
+
     @property
     def name(self):
         return self._name

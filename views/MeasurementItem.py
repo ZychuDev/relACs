@@ -1,5 +1,5 @@
 from PyQt6.QtCore import pyqtSlot, QPoint
-from PyQt6.QtWidgets import QMenu
+from PyQt6.QtWidgets import QMenu, QMessageBox
 from PyQt6.QtGui import QColor, QBrush
 
 from models import Measurement, Fit
@@ -42,7 +42,8 @@ class MeasurementItem(StandardItem):
         
     def make_fit(self, nr_of_relaxations=1):
         new_fit: Fit = Fit.from_measurement(self._model, self._model._compound, nr_of_relaxations)
-        self.parent().parent().child(nr_of_relaxations)._model.append_fit(new_fit, display=True)
+        if new_fit is not None:
+            self.parent().parent().child(nr_of_relaxations)._model.append_fit(new_fit, display=True)
 
     def __lt__(self, other):
         if self.sort_mode == "temp":

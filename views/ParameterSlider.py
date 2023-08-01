@@ -82,7 +82,7 @@ class ParameterSlider(QWidget):
         self.set_blocked_0_silent(self.parameter.is_blocked_on_0)
 
 
-        self.slider.valueChanged.connect(lambda: self.parameter.set_value(self.slider_to_param())) #lambda: self.set_edit_value_silent()
+        self.slider.valueChanged.connect(lambda: self.parameter.set_value(self.slider_to_param(), emit_reset_errors=True)) #lambda: self.set_edit_value_silent()
         self.line_edit.editingFinished.connect(lambda: self.parameter.set_value(round(float(self.line_edit.text()), 8) if not self.parameter.is_log else 10 ** round(float(self.line_edit.text()), 8)))
         self.blocked_check.stateChanged.connect(self.on_checkbox_clicked)
         self.blocked_on_0.stateChanged.connect(self.on_0_checkbox_clicked)
@@ -101,6 +101,11 @@ class ParameterSlider(QWidget):
 
     def on_0_checkbox_clicked(self):
         self.parameter.set_blocked_0(self.blocked_on_0.isChecked())
+        if self.parameter.is_blocked_on_0:
+            self.parameter.set_value(0.0) 
+            self.set_disabled(True)
+        else:
+            self.set_disabled(False)
 
     def set_blocked_silent(self, v: bool):
         self.blocked_check.blockSignals(True)
@@ -145,6 +150,10 @@ class ParameterSlider(QWidget):
     
     def fixup_line_edit(self, v: str):
         self.set_edit_value_silent(round(self.parameter.value, 8))
+
+    def set_disabled(self, flag:bool):
+        self.slider.setDisabled(flag)
+        self.line_edit.setDisabled(flag)
 
 
 
