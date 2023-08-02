@@ -35,7 +35,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: 2.4 #VERSION
+        tag_name: 2.4.1 #VERSION
         release_name: Release 2.4.1  #VERSION
         draft: false
         prerelease: false
