@@ -317,6 +317,15 @@ class TauFit(QObject):
         tmp: list = list(zip(*[(p.tau, p.temp, p.field) for p in self._points]))
         return (tmp[0], tmp[1], tmp[2])
 
+    def get_all_visible(self) -> tuple[list[float], list[float], list[float]]:
+        """Get all points.
+
+        Returns:
+            tuple[list[float], list[float], list[float]]: Values in order: tau, temperature, magnetic field strength.
+        """
+        tmp: list = list(zip(*[(p.tau, p.temp, p.field) for p in self._points if not p.is_hidden]))
+        return (tmp[0], tmp[1], tmp[2])
+    
     def get_visible_s(self) -> tuple[list[float], list[float], list[float]]:
         """Get all visible points in actual slice.
 
@@ -535,9 +544,9 @@ self.meta_model = m_model
 def meta_auto_fit(self):
     def cost_function(p, slice=False):
         if slice:
-            tau, temp, field = self.get_all_s()
+            tau, temp, field = self.get_visible_s()
         else:
-            tau, temp, field = self.get_all()
+            tau, temp, field = self.get_all_visible()
         temp = Series(temp)
         field = Series(field)
         tau = Series(tau)
