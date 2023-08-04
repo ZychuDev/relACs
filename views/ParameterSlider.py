@@ -76,7 +76,7 @@ class ParameterSlider(QWidget):
         self.line_edit.setValidator(validator)
         log_str:str = f"<html><head/><body><p>log<span style=\" vertical-align:sub;\">10</span> {self.parameter.symbol}</html>"
         self.label.setText(self.parameter.symbol if not self.parameter.is_log else log_str)
-        self.set_edit_value_silent(round(self.parameter.value, 8))
+        self.set_edit_value_silent(self.parameter.value)
         self.set_slider_value_silent(self.parameter.value)
         self.set_blocked_silent(self.parameter.is_blocked)
         self.set_blocked_0_silent(self.parameter.is_blocked_on_0)
@@ -149,6 +149,7 @@ class ParameterSlider(QWidget):
         return round(result, 8)
     
     def fixup_line_edit(self, v: str):
+        print("fixup")
         self.set_edit_value_silent(round(self.parameter.value, 8))
 
     def set_disabled(self, flag:bool):
