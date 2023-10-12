@@ -124,11 +124,11 @@ class TauFit(QObject):
 
     @staticmethod
     def V_d(temp:float, v: float, d: float):
-        return d *(exp(v/temp)/pow(exp(v/temp -1),2))
+        return d *(exp(-v/temp)/pow(exp(-v/temp) -1.0,2.0))
     
     @staticmethod
     def model(temp:float, field:float, a_dir:float, n_dir:float, b1:float, b2:float,
-     b3: float, c_raman_1:float, n_raman_1:float, c_raman_2:float, n_raman_2:float, m_2:float, tau_0:float, delta_e:float, d:float, v:float) -> float:
+     b3: float, c_raman_1:float, n_raman_1:float, c_raman_2:float, n_raman_2:float, m_2:float, tau_0:float, delta_e:float, v:float, d:float) -> float:
         """Relaxation time model
 
         Args:
@@ -156,7 +156,7 @@ class TauFit(QObject):
             + c_raman_1 * power(temp, n_raman_1) \
             + c_raman_2 * power(temp, n_raman_2) * power(field, m_2) \
             + tau_0 *exp(-delta_e/(temp)) \
-            + d *(exp(v/temp)/pow(exp(v/temp -1),2))
+            + d *(exp(-v/temp)/pow(exp(-v/temp) -1.0,2.0))
 
 
     def __init__(self, name: str, compound: SettingsSource, collection):
@@ -524,7 +524,8 @@ class TauFit(QObject):
             + {b1}*(1+{b3}*field*field)/(1+{b2}*field*field) \
             + {c_raman_1} * power(temp, {n_raman_1}) \
             + {c_raman_2} * power(temp, {n_raman_2}) * power(field, {m_2}) \
-            + {tau_0} *exp(-{delta_e}/(temp)) """.format(
+            + {tau_0} *exp(-{delta_e}/(temp)) \
+            + {d} *(exp(-{v}/temp)/pow(exp(-{v}/temp) -1.0,2.0)) """.format(
             a_dir = "a_dir" if ("a_dir" in not_blocked_names) else (0.0 if "a_dir" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "a_dir")).value),
             n_dir = "n_dir" if ("n_dir" in not_blocked_names) else (0.0 if "n_dir" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "n_dir")).value),
             b1 = "b1" if ("b1" in not_blocked_names) else (0.0 if "b1" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "b1")).value),
@@ -608,6 +609,7 @@ meta_auto_fit(self)
             "not_blocked_parameters":not_blocked_parameters, "blocked_parameters":blocked_parameters, "blocked_on_0_parameters":blocked_on_0_parameters,
         })
 
+        print("asdasda")
         return 
 
     def cost_function(self, p, slice=False):
