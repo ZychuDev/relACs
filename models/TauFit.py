@@ -609,7 +609,6 @@ meta_auto_fit(self)
             "not_blocked_parameters":not_blocked_parameters, "blocked_parameters":blocked_parameters, "blocked_on_0_parameters":blocked_on_0_parameters,
         })
 
-        print("asdasda")
         return 
 
     def cost_function(self, p, slice=False):
@@ -820,14 +819,14 @@ meta_auto_fit(self)
         self.constant = f["constant"]
         self.varying = f["varying"]
 
-        name: TAU_PARAMETER_NAME = "d"
+        name: TAU_PARAMETER_NAME = "v"
         tmp:dict 
         if not any(item["name"] == name for item in f['parameters']):
             tmp = Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = False).get_jsonable()
             f['parameters'].append(Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = False).get_jsonable())
             f['saved_parameters'].append(tmp)
 
-        name = "v"
+        name = "d"
         if not any(item == name for item in f['parameters']):
             tmp = Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = False).get_jsonable()
             f['parameters'].append(tmp)
