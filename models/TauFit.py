@@ -123,8 +123,12 @@ class TauFit(QObject):
         return tau_0 * exp(-delta_e/temp)
 
     @staticmethod
+    def V_d(temp:float, v: float, d: float):
+        return d *(exp(v/temp)/pow(exp(v/temp -1),2))
+    
+    @staticmethod
     def model(temp:float, field:float, a_dir:float, n_dir:float, b1:float, b2:float,
-     b3: float, c_raman_1:float, n_raman_1:float, c_raman_2:float, n_raman_2:float, m_2:float, tau_0:float, delta_e:float) -> float:
+     b3: float, c_raman_1:float, n_raman_1:float, c_raman_2:float, n_raman_2:float, m_2:float, tau_0:float, delta_e:float, d:float, v:float) -> float:
         """Relaxation time model
 
         Args:
@@ -151,7 +155,8 @@ class TauFit(QObject):
             + b1*(1+b3*field*field)/(1+b2*field*field) \
             + c_raman_1 * power(temp, n_raman_1) \
             + c_raman_2 * power(temp, n_raman_2) * power(field, m_2) \
-            + tau_0 *exp(-delta_e/(temp))
+            + tau_0 *exp(-delta_e/(temp)) \
+            + d *(exp(v/temp)/pow(exp(v/temp -1),2))
 
 
     def __init__(self, name: str, compound: SettingsSource, collection):
@@ -182,7 +187,7 @@ class TauFit(QObject):
         self._undo_stack: QUndoStack = QUndoStack()
 
         for p in self.parameters:
-            p.reset_errors.connect(lambda: self.set_all_errors(0.0, [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]))
+            p.reset_errors.connect(lambda: self.set_all_errors(0.0, [0.0] * len(get_args(TAU_PARAMETER_NAME)) ))
 
     @property
     def name(self):
@@ -532,6 +537,8 @@ class TauFit(QObject):
             m_2 = "m_2" if ("m_2" in not_blocked_names) else (0.0 if "m_2" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "m_2")).value),
             tau_0 = "tau_0" if ("tau_0" in not_blocked_names) else (0.0 if "tau_0" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "tau_0")).value),
             delta_e = "delta_e" if ("delta_e" in not_blocked_names) else (0.0 if "delta_e" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "delta_e")).value),
+            v = "v" if ("v" in not_blocked_names) else (0.0 if "v" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "v")).value),
+            d = "d" if ("d" in not_blocked_names) else (0.0 if "d" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "d")).value),
         )
         meta_model_str = """
 def m_model(temp, field {param_str}):
@@ -737,9 +744,9 @@ meta_auto_fit(self)
             for s in range(len(final_series_tmp)):
                final_series_tmp[s] = concat([final_series_tmp[s], one_point_series[s]], ignore_index=True)
 
-        df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "Tau"])
+        df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "V_d" "Tau"])
 
-        final_series_field = [Series()]*8
+        final_series_field = [Series()]*len(df_tmp.columns)
         all_field = set()
         for f in field_o:
             all_field.add(f)
@@ -754,7 +761,7 @@ meta_auto_fit(self)
             for s in range(len(final_series_field)):
                 final_series_field[s] = concat([final_series_field[s], one_point_series[s]], ignore_index=True)
 
-        df_field: DataFrame = DataFrame(list(zip(*final_series_field)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "Tau"])
+        df_field: DataFrame = DataFrame(list(zip(*final_series_field)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "V_d", "Tau"])
         return concat([df_param, df_experimental, df_model, df_tmp, df_field], axis=1)
 
     def partial_result(self, temp, field, return_df = True):
@@ -764,12 +771,13 @@ meta_auto_fit(self)
         raman_2 = 1/TauFit.Raman_2(temp, field, p[7], p[8], p[9])
         qtm = 1/TauFit.qtm(field, p[2], p[3], p[4])
         direct = 1/TauFit.direct(temp, field, p[0], p[1])
+        v_d = 1/TauFit.V_d(temp, p[12], p[13])
         sum = 1/TauFit.model(temp, field, *p)
 
         if return_df:
-            return DataFrame(list(zip(orbach, raman, raman_2, qtm, direct, sum)), columns=["Orbach Tau", "Raman Tau", "Raman_2 Tau", "QTM Tau", "Direct Tau", "Tau"])
+            return DataFrame(list(zip(orbach, raman, raman_2, qtm, direct, sum)), columns=["Orbach Tau", "Raman Tau", "Raman_2 Tau", "QTM Tau", "Direct Tau", "V_d", "Tau"])
         else:
-            return [orbach, raman, raman_2, qtm, direct, sum]
+            return [orbach, raman, raman_2, qtm, direct, v_d, sum]
 
     def get_jsonable(self) -> dict:
         """Marshal object to python dictionary.
@@ -809,6 +817,20 @@ meta_auto_fit(self)
         self.saved_residual_error = f["saved_residual_error"]
         self.constant = f["constant"]
         self.varying = f["varying"]
+
+        name: TAU_PARAMETER_NAME = "d"
+        tmp:dict 
+        if not any(item["name"] == name for item in f['parameters']):
+            tmp = Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = False).get_jsonable()
+            f['parameters'].append(Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = False).get_jsonable())
+            f['saved_parameters'].append(tmp)
+
+        name = "v"
+        if not any(item == name for item in f['parameters']):
+            tmp = Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = False).get_jsonable()
+            f['parameters'].append(tmp)
+            f['saved_parameters'].append(tmp)
+
         for i, p in enumerate(self.parameters):
             p.update_from_json(f["parameters"][i])
 

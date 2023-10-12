@@ -50,10 +50,12 @@ class Parameter(QObject):
         "n_raman_2" : "N<span style=\" vertical-align:sub;\">Raman<sub>2</sub></span></p>",
         "m_2" : "m<sub>2</sub></p>",
         "tau_0" : "&tau;<span style=\" vertical-align:sub;\">0</span><span style=\" vertical-align:super;\">-1</span></p>",
-        "delta_e" : "\u0394E"
+        "delta_e" : "\u0394E",
+        "d" : "D",
+        "v": "V"
     }
 
-    def __init__(self, name:PARAMETER_NAME, min:float, max:float,
+    def __init__(self, name:PARAMETER_NAME|TAU_PARAMETER_NAME, min:float, max:float,
      is_blocked: bool=False, is_log: bool = False, is_blocked_on_0: bool = False):
         super().__init__()
         self.name: str = name

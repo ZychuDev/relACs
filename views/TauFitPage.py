@@ -31,7 +31,7 @@ class MplCanvas(FigureCanvasQTAgg):
         self.ax.yaxis.set_major_locator(LinearLocator(8))
         self.temp_label = r"$\frac{K}{T}$"
         self.field_label = r"$\frac{H}{Oe}$"
-        title = r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman_{1}}T^{N_{Raman_{1}}} + C_{Raman_{2}}T^{N_{Raman_{2}}}H^{m_{2}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}}$"
+        title = r"$\tau^{-1}=A_{dir}TH^{N_{dir}} + \frac{B_1(1+B_3H^2)}{1+B_2H^2} + C_{Raman_{1}}T^{N_{Raman_{1}}} + C_{Raman_{2}}T^{N_{Raman_{2}}}H^{m_{2}}+\tau_0^{-1}\exp{\frac{-\Delta E}{T}} + D\frac{\exp{\frac{V}{T}}}{(\exp{\frac{V}{T}}-1)^2}$"
         self.ax.set(xlabel=self.temp_label, ylabel=r"$\ln{\frac{\tau}{s}}$",
          title=title)
 
@@ -194,6 +194,7 @@ class TauFitPage(QWidget):
         self._raman = None
         self._raman_2 = None
         self._qtm = None
+        self._v_d = None
         self._sum = None
         self._saved_sum = None
         self.canvas_slice: MplCanvas = MplCanvas(self, width=5, height=4, dpi=100)
@@ -463,6 +464,9 @@ class TauFitPage(QWidget):
             if self._qtm is not None:
                 self._qtm.remove()
 
+            if self._v_d is not None:
+                self._v_d.remove()
+
             if self._sum is not None:
                 self._sum.remove()
 
@@ -474,6 +478,7 @@ class TauFitPage(QWidget):
             self._raman = None
             self._raman_2 = None
             self._qtm = None
+            self._v_d = None
             self._sum = None
             self._saved_sum = None
 
@@ -505,6 +510,7 @@ class TauFitPage(QWidget):
         raman = -log(TauFit.Raman(tmp, p[5], p[6]))
         raman_2 = -log(TauFit.Raman_2(tmp, field, p[7], p[8], p[9]))
         qtm = -log(TauFit.qtm(field, p[2], p[3], p[4]))
+        v_d = -log(TauFit.V_d(tmp, p[12], p[13]))
         sum = -log(TauFit.model(tmp, field, *p))
         sum_saved = -log(TauFit.model(tmp, field, *self.tau_fit.get_saved_parameters_values()))
 
@@ -538,6 +544,12 @@ class TauFitPage(QWidget):
             self._qtm.set_xdata(xx)
             self._qtm.set_ydata(qtm)
 
+        if self._v_d is None:
+            self._v_d = self.canvas_slice.ax.plot(xx, v_d, "--", label="V_d", color=mcolors.TABLEAU_COLORS["tab:pink"])[0]
+        else:
+            self._v_d.set_xdata(xx)
+            self._v_d.set_ydata(v_d)
+        
         if self._sum is None:
             self._sum = self.canvas_slice.ax.plot(xx, sum, "b-", label="Current sum")[0]
         else:
@@ -553,7 +565,7 @@ class TauFitPage(QWidget):
         min_y: float = min(log(tau))
         max_y: float = max(log(tau))
         if self.scale_checkbox.isChecked():
-            all_values:list[float] = concatenate((direct, orbach, raman, raman_2, qtm, sum, sum_saved), axis=None)
+            all_values:list[float] = concatenate((direct, orbach, raman, raman_2, qtm, v_d, sum, sum_saved), axis=None)
             all_values = [v for v in all_values if not isnan(v) and not isinf(v)]
             if len(all_values) != 0:
                 min_y = min(min(all_values), min_y)
