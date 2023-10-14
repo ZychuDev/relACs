@@ -166,13 +166,14 @@ class TauFit(QObject):
         self._compound = compound
         self.residual_error: float = 0.0
         self.saved_residual_error: float = 0.0
-        logaritmic = ["a_dir", "b1", "b2", "b3", "tau_0"]
+        self.logaritmic = ["a_dir", "b1", "b2", "b3", "tau_0", "d"]
+
         self.parameters: TauParameters  = tuple( 
-            Parameter(name, compound.get_min(name), compound.get_max(name), is_log = name in logaritmic) for name in get_args(TAU_PARAMETER_NAME)
+            Parameter(name, compound.get_min(name), compound.get_max(name), is_log = name in self.logaritmic) for name in get_args(TAU_PARAMETER_NAME)
         )
 
         self.saved_parameters: TauParameters = tuple( 
-            Parameter(name, compound.get_min(name), compound.get_max(name), is_log = name in logaritmic) for name in get_args(TAU_PARAMETER_NAME)
+            Parameter(name, compound.get_min(name), compound.get_max(name), is_log = name in self.logaritmic) for name in get_args(TAU_PARAMETER_NAME)
         )
 
         self._points: list[Point] = []
@@ -541,6 +542,7 @@ class TauFit(QObject):
             v = "v" if ("v" in not_blocked_names) else (0.0 if "v" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "v")).value),
             d = "d" if ("d" in not_blocked_names) else (0.0 if "d" in blocked_on_0_parameters_names else next((x for x in blocked_parameters if x.name == "d")).value),
         )
+
         meta_model_str = """
 def m_model(temp, field {param_str}):
     {model_body}
@@ -828,7 +830,7 @@ meta_auto_fit(self)
 
         name = "d"
         if not any(item == name for item in f['parameters']):
-            tmp = Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = False).get_jsonable()
+            tmp = Parameter(name, self._compound.get_min(name), self._compound.get_max(name), is_log = name in self.logaritmic).get_jsonable()
             f['parameters'].append(tmp)
             f['saved_parameters'].append(tmp)
 

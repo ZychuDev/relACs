@@ -51,8 +51,8 @@ class Parameter(QObject):
         "m_2" : "m<sub>2</sub></p>",
         "tau_0" : "&tau;<span style=\" vertical-align:sub;\">0</span><span style=\" vertical-align:super;\">-1</span></p>",
         "delta_e" : "\u0394E",
-        "d" : "D",
-        "v": "V"
+        "v": "v<span style=\" vertical-align:sub;\">ph</span></p>",
+        "d" : "d<span style=\" vertical-align:sub;\">ph</span></p>",
     }
 
     def __init__(self, name:PARAMETER_NAME|TAU_PARAMETER_NAME, min:float, max:float,
