@@ -735,7 +735,8 @@ meta_auto_fit(self)
         all_temp = set()
         for t in tmp_o:
             all_temp.add(t)
-        final_series_tmp = [Series()]*8
+        columns_names: list[str] = ["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "V_d" "Tau"]
+        final_series_tmp = [Series()]*len(columns_names)
         all_temp = list(all_temp)
         all_temp.sort()
         for t in all_temp:
@@ -747,9 +748,8 @@ meta_auto_fit(self)
             for s in range(len(final_series_tmp)):
                final_series_tmp[s] = concat([final_series_tmp[s], one_point_series[s]], ignore_index=True)
 
-        df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "V_d" "Tau"])
-
-        final_series_field = [Series()]*len(df_tmp.columns)
+        df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=columns_names)
+        final_series_field = [Series()]*(len(columns_names)+1)
         all_field = set()
         for f in field_o:
             all_field.add(f)
@@ -763,7 +763,6 @@ meta_auto_fit(self)
             one_point_series = [tmp, field] + partial_result
             for s in range(len(final_series_field)):
                 final_series_field[s] = concat([final_series_field[s], one_point_series[s]], ignore_index=True)
-
         df_field: DataFrame = DataFrame(list(zip(*final_series_field)), columns=["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "V_d", "Tau"])
         return concat([df_param, df_experimental, df_model, df_tmp, df_field], axis=1)
 
@@ -778,7 +777,7 @@ meta_auto_fit(self)
         sum = 1/TauFit.model(temp, field, *p)
 
         if return_df:
-            return DataFrame(list(zip(orbach, raman, raman_2, qtm, direct, sum)), columns=["Orbach Tau", "Raman Tau", "Raman_2 Tau", "QTM Tau", "Direct Tau", "V_d", "Tau"])
+            return DataFrame(list(zip(orbach, raman, raman_2, qtm, direct, v_d, sum)), columns=["Orbach Tau", "Raman Tau", "Raman_2 Tau", "QTM Tau", "Direct Tau", "V_d Tau", "Tau"])
         else:
             return [orbach, raman, raman_2, qtm, direct, v_d, sum]
 
