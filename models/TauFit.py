@@ -735,7 +735,7 @@ meta_auto_fit(self)
         all_temp = set()
         for t in tmp_o:
             all_temp.add(t)
-        columns_names: list[str] = ["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "V_d" "Tau"]
+        columns_names: list[str] = ["Temp", "Field", "Orbach", "Raman", "Raman_2", "QTM", "Direct", "V_d", "Tau"]
         final_series_tmp = [Series()]*len(columns_names)
         all_temp = list(all_temp)
         all_temp.sort()
@@ -749,7 +749,7 @@ meta_auto_fit(self)
                final_series_tmp[s] = concat([final_series_tmp[s], one_point_series[s]], ignore_index=True)
 
         df_tmp: DataFrame = DataFrame(list(zip(*final_series_tmp)), columns=columns_names)
-        final_series_field = [Series()]*(len(columns_names)+1)
+        final_series_field = [Series()]*(len(columns_names))
         all_field = set()
         for f in field_o:
             all_field.add(f)
