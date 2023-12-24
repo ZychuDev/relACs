@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QObject, pyqtSignal, pyqtBoundSignal
-from PyQt6.QtWidgets import QFileDialog, QWidget, QMessageBox
-from PyQt6.QtGui import QUndoStack, QUndoCommand
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtBoundSignal, QLocale, QSize, Qt
+from PyQt6.QtWidgets import QFileDialog, QWidget, QMessageBox, QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QPushButton
+from PyQt6.QtGui import QUndoStack, QUndoCommand, QDoubleValidator
 
 from .Relaxation import Relaxation
 from .Measurement import Measurement 
@@ -550,6 +550,138 @@ meta_auto_fit(self)
                 s_p.update_from_json(r_j["saved_parameters"][k])
 
             self.relaxations.append(r)
+
+    def adjust_range(self, r_nr: int):
+        dlg:QDialog = QDialog()
+        default_locale: QLocale = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
+        dlg.setLocale(default_locale)
+        dlg.setWindowTitle(f"Set parameters ranges for relaxation nr {r_nr+1}")
+        layout: QVBoxLayout = QVBoxLayout()
+        new_ranges: dict[str,tuple[QLineEdit, QLineEdit]] = {}
+        p: str
+
+        for p in self.relaxations[r_nr].parameters:
+            l: QHBoxLayout = QHBoxLayout()
+
+            v: QDoubleValidator = QDoubleValidator()
+            loc: QLocale = QLocale(QLocale.c())
+            loc.setNumberOptions(QLocale.NumberOption.RejectGroupSeparator)
+            v.setLocale(loc)
+
+            low: QLineEdit = QLineEdit()
+            low.setLocale(default_locale)
+            low.setValidator(v)
+            low.setText(str(p.min))
+
+            up: QLineEdit = QLineEdit()
+            up.setLocale(default_locale)
+            up.setValidator(v)
+            up.setText(str(p.max))
+
+            label:QLabel = QLabel(p.symbol)
+            label.setMinimumSize(QSize(65, 0))
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            
+            new_ranges[p.name] = (low, up)
+            l.addWidget(low)
+            l.addWidget(label)
+            l.addWidget(up)
+
+            layout.addLayout(l)
+
+        buttons_layout: QHBoxLayout = QHBoxLayout()
+        button: QPushButton = QPushButton("Apply")
+        button.clicked.connect(lambda: self.set_new_ranges(new_ranges, False, dlg, r_nr))
+
+        force_button: QPushButton() = QPushButton("Force change")
+        force_button.clicked.connect(lambda: self.set_new_ranges(new_ranges, True, dlg, r_nr))
+
+        buttons_layout.addWidget(button)
+        buttons_layout.addWidget(force_button)
+        layout.addLayout(buttons_layout)
+
+        guess_button = QPushButton("Guess the magnetic susceptibility parameters")
+        guess_button.clicked.connect(lambda: self.guess(new_ranges))
+        layout.addWidget(guess_button)
+        dlg.setLayout(layout)
+        dlg.exec()
+
+
+    def guess(self, ranges: dict[str,tuple[QLineEdit, QLineEdit]]):
+        max_chi_prime: float = -1e16
+        max_chi_bis: float = -1e16
+
+        max_chi_prime = max(self._df["ChiPrimeMol"].max(), max_chi_prime)
+        max_chi_bis = max(self._df["ChiBisMol"].max(), max_chi_bis)
+
+
+        ranges["chi_dif"][0].setText("0.0")
+        ranges["chi_dif"][1].setText(f"{5.0*max_chi_bis}")
+        ranges["chi_s"][0].setText("0.0")
+        ranges["chi_s"][1].setText(f"{max_chi_prime}")
+
+    def set_new_ranges(self, edit_lines: dict[str,tuple[QLineEdit, QLineEdit]], force: bool, dlg:QDialog, r_nr: int):
+        pa: str
+        message: str
+        msg: QMessageBox
+        for pa in edit_lines:
+            if float(edit_lines[pa][0].text()) >=  float(edit_lines[pa][1].text()):
+                message = f"Each upper bound must be strictly greater than lower bound\n Bounds for parameter: {p} are invalid"
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Warning)
+                msg.setText(message)
+                msg.setWindowTitle("Incorrect bounds")
+                msg.exec()
+                return
+
+        f: Fit
+        r: Relaxation
+        p: Parameter
+        pp: Parameter
+
+        lower: float
+        upper: float
+        value: float
+
+        if not force:
+                for r in self.relaxations[r_nr]:
+                    for p in r.saved_parameters:
+                        lower = float(edit_lines[p.name][0].text())
+                        upper = float(edit_lines[p.name][1].text())
+                        value = p.get_value()
+                        if value < lower or value > upper:
+                            message = (f"Bounds for parameter: {p.name} are invalid\n"
+                            +f"In {f.name} saved value of paramater is not in given range\n"
+                            +f"Lower : {lower}\nUpper: {upper}\nActual: {value}\n" 
+                            +"Force new ranges or change saved values of the parameters")
+                            msg = QMessageBox()
+                            msg.setIcon(QMessageBox.Icon.Warning)
+                            msg.setText(message)
+                            msg.setWindowTitle("Incorrect bounds")
+                            msg.exec()
+                            return
+        
+                r = self.relaxations[r_nr]
+                for k in range(len(r.saved_parameters)):
+                    p = r.saved_parameters[k]
+                    lower = float(edit_lines[p.name][0].text())
+                    upper = float(edit_lines[p.name][1].text())
+                    value = p.get_value()
+                    error = p.error
+                    p.set_range(lower, upper)
+                    if value < lower:
+                        value = lower
+                    if value > upper:
+                        value = upper
+                    p.set_value(value, new_error=error)
+                    r.residual_error = 0.0
+                    for m in range(len(r.parameters)):
+                        pp = r.parameters[m]
+                        if pp.name == p.name:
+                            pp.set_range(lower, upper)
+                            pp.set_value(value)
+                    
+        dlg.close()
 
     def undo(self):
         self._undo_stack.undo()

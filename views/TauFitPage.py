@@ -240,7 +240,7 @@ class TauFitPage(QWidget):
 
     def on_adjust_range(self):
         if self.tau_fit is not None:
-            self.tau_fit._compound.emit_change_ranges()
+            self.tau_fit.adjust_parameters()
 
     def make_auto_fit(self):
         self.tau_fit.make_auto_fit()
@@ -662,14 +662,14 @@ class TauFitPage(QWidget):
     def _update_errors(self):
         i:int
         for i, p in enumerate(self.tau_fit.parameters):
-            self.fit_error.setItem(1, i, QTableWidgetItem(f"{round(p.value, 8)} \u00b1 {str(round(p.error, 8))}"))
-        self.fit_error.setItem(1, i+1, QTableWidgetItem(str(round(self.tau_fit.residual_error, 8))))
+            self.fit_error.setItem(1, i, QTableWidgetItem(f"{p.value:.{8}e}  \u00b1 {p.error:.{8}e} "))
+        self.fit_error.setItem(1, i+1, QTableWidgetItem(f"{self.tau_fit.residual_error:.{8}e}"))
     
     def _update_saved_errors(self):
         i:int
         for i, p in enumerate(self.tau_fit.saved_parameters):
-            self.fit_error.setItem(0, i, QTableWidgetItem(f"{round(p.value, 8)} \u00b1 {str(round(p.error, 8))}"))
-        self.fit_error.setItem(0, i+1, QTableWidgetItem(str(round(self.tau_fit.saved_residual_error, 8))))
+            self.fit_error.setItem(0, i, QTableWidgetItem(f"{p.value:.{8}e} \u00b1 {p.error:.{8}e}"))
+        self.fit_error.setItem(0, i+1, QTableWidgetItem(f"{self.tau_fit.saved_residual_error:.{8}e}"))
 
     def copy_parameters(self):
         dlg: QDialog = QDialog()

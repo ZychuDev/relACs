@@ -78,6 +78,7 @@ class CompoundItemsCollection(StandardItem):
 
     def from_json(self, json: dict):
         names_to_skip: set[str] = set()
+        initial_nr_of_rows = self.rowCount()
         for compound in json["compounds"]:
             try:
                 self._model.append_existing_compound(Compound(compound["name"], compound["molar_mass"], cast(Collection, self._model), self._model._tree, self._model._displayer))
@@ -88,8 +89,9 @@ class CompoundItemsCollection(StandardItem):
 
         i: int = 0
         nr_of_rows: int = self.rowCount()
-        while i < nr_of_rows:
-            compound_item: CompoundItem = cast(CompoundItem, self.child(i))
+        while i < nr_of_rows - initial_nr_of_rows:
+            compound_item: CompoundItem = cast(CompoundItem, self.child(i + initial_nr_of_rows))
+
             compound_json = json["compounds"][i]
 
             if compound_json["name"] not in names_to_skip:

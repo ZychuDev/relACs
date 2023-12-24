@@ -308,7 +308,7 @@ class FitPage(QWidget):
 
     def on_adjust_range(self):
         if self.fit is not None:
-            self.fit._compound.emit_change_ranges()
+            self.fit.adjust_range(self.left_side.currentIndex())
 
     def make_auto_fit(self):
         self.fit.make_auto_fit()

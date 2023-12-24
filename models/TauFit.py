@@ -1,6 +1,6 @@
-from PyQt6.QtCore import QObject, pyqtSignal
-from PyQt6.QtWidgets import QFileDialog, QWidget, QMessageBox
-from PyQt6.QtGui import QUndoStack, QUndoCommand
+from PyQt6.QtCore import QObject, pyqtSignal, QLocale, QSize, Qt
+from PyQt6.QtWidgets import QFileDialog, QWidget, QMessageBox, QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QPushButton, QMessageBox
+from PyQt6.QtGui import QUndoStack, QUndoCommand,QDoubleValidator
 
 from .Parameter import Parameter, TAU_PARAMETER_NAME
 from .Point import Point
@@ -841,6 +841,118 @@ meta_auto_fit(self)
 
         for point in f["points"]:
             self.append_point(point["tau"], point["temp"], point["field"], point["is_hidden"])
+
+    def adjust_parameters(self):
+        dlg:QDialog = QDialog()
+        default_locale: QLocale = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
+        dlg.setLocale(default_locale)
+        dlg.setWindowTitle("Set parameters ranges")
+        layout: QVBoxLayout = QVBoxLayout()
+        new_ranges: dict[str,tuple[QLineEdit, QLineEdit]] = {}
+        p: str
+        for p in self.parameters:
+            l: QHBoxLayout = QHBoxLayout()
+
+            v: QDoubleValidator = QDoubleValidator()
+            loc: QLocale = QLocale(QLocale.c())
+            loc.setNumberOptions(QLocale.NumberOption.RejectGroupSeparator)
+            v.setLocale(loc)
+
+            low: QLineEdit = QLineEdit()
+            low.setLocale(default_locale)
+            low.setValidator(v)
+            low.setText(str(p.min))
+
+            up: QLineEdit = QLineEdit()
+            up.setLocale(default_locale)
+            up.setValidator(v)
+            up.setText(str(p.max))
+
+            label:QLabel = QLabel(p.symbol)
+            label.setMinimumSize(QSize(65, 0))
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            
+            new_ranges[p.name] = (low, up)
+            l.addWidget(low)
+            l.addWidget(label)
+            l.addWidget(up)
+
+            layout.addLayout(l)
+
+        buttons_layout: QHBoxLayout = QHBoxLayout()
+        button: QPushButton = QPushButton("Apply")
+        button.clicked.connect(lambda: self.set_new_ranges(new_ranges, False, dlg))
+
+        force_button: QPushButton() = QPushButton("Force change")
+        force_button.clicked.connect(lambda: self.set_new_ranges(new_ranges, True, dlg))
+
+        buttons_layout.addWidget(button)
+        buttons_layout.addWidget(force_button)
+        layout.addLayout(buttons_layout)
+
+        dlg.setLayout(layout)
+        dlg.exec() 
+    
+    def set_new_ranges(self, edit_lines: dict[str,tuple[QLineEdit, QLineEdit]], force: bool, dlg:QDialog):
+        pa: str
+        message: str
+        msg: QMessageBox
+        for pa in edit_lines:
+            if float(edit_lines[pa][0].text()) >=  float(edit_lines[pa][1].text()):
+                message = f"Each upper bound must be strictly greater than lower bound\n Bounds for parameter: {p} are invalid"
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Icon.Warning)
+                msg.setText(message)
+                msg.setWindowTitle("Incorrect bounds")
+                msg.exec()
+                return
+
+        p: Parameter
+        pp: Parameter
+        t_f: TauFit #self
+
+        lower: float
+        upper: float
+        value: float
+
+        if not force:
+            for p in self.saved_parameters:
+                lower = float(edit_lines[p.name][0].text())
+                upper = float(edit_lines[p.name][1].text())
+                value = p.get_value()
+                if value < lower or value > upper:
+                    message = (f"Bounds for parameter: {p.symbol} are invalid\n"
+                    +f"In {self.name} saved value of paramater is not in given range\n"
+                    +f"Lower : {lower}\nUpper: {upper}\nActual: {value}\n" 
+                    +"Force new ranges or change saved values of the parameters")
+
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Icon.Warning)
+                    msg.setText(message)
+                    msg.setWindowTitle("Incorrect bounds")
+                    msg.exec()
+                    return
+        
+            for j in range(len(self.saved_parameters)):
+                p = self.saved_parameters[j]
+                lower = float(edit_lines[p.name][0].text())
+                upper = float(edit_lines[p.name][1].text())
+                value = p.get_value()
+                error = p.error
+                p.set_range(lower, upper)
+                if value < lower:
+                    value = lower
+                if value > upper:
+                    value = upper
+                p.set_value(value, new_error=error)
+                self.residual_error = 0.0
+                for k in range(len(self.parameters)):
+                    pp = self.parameters[k]
+                    if pp.name == p.name:
+                        pp.set_range(lower, upper)
+                        pp.set_value(value)
+
+        dlg.close()
 
     def undo(self):
         self._undo_stack.undo()
