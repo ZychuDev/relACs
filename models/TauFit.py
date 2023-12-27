@@ -677,6 +677,7 @@ meta_auto_fit(self)
         """
         for i, p in enumerate(self.parameters):
             o = other.saved_parameters[i]
+            p.set_range(*o.get_range())
             p.set_value(o.value)
             p.set_blocked(o.is_blocked)
             p.set_blocked_0(o.is_blocked_on_0)
@@ -704,7 +705,7 @@ meta_auto_fit(self)
         df_param: DataFrame = DataFrame(columns=["Name", "Value", "Error"])
         p:Parameter
         for p in self.parameters:
-            row = {"Name": p.name, "Value": p.value, "Error":p.error}
+            row = {"Name": p.name, "Value": p.value if not p.is_blocked_on_0 else 0.0, "Error":p.error}
             df_param = concat([df_param, DataFrame([row])], ignore_index=True)
         
         tau, tmp_o, field_o = self.get_all()
@@ -933,24 +934,26 @@ meta_auto_fit(self)
                     msg.exec()
                     return
         
-            for j in range(len(self.saved_parameters)):
-                p = self.saved_parameters[j]
-                lower = float(edit_lines[p.name][0].text())
-                upper = float(edit_lines[p.name][1].text())
-                value = p.get_value()
-                error = p.error
-                p.set_range(lower, upper)
-                if value < lower:
-                    value = lower
-                if value > upper:
-                    value = upper
-                p.set_value(value, new_error=error)
-                self.residual_error = 0.0
-                for k in range(len(self.parameters)):
-                    pp = self.parameters[k]
-                    if pp.name == p.name:
-                        pp.set_range(lower, upper)
-                        pp.set_value(value)
+        for j in range(len(self.saved_parameters)):
+            p = self.saved_parameters[j]
+            lower = float(edit_lines[p.name][0].text())
+            upper = float(edit_lines[p.name][1].text())
+            value = p.get_value()
+            error = p.error
+            p.set_range(lower, upper)
+            if value < lower:
+                value = lower
+            if value > upper:
+                value = upper
+            p.set_value(value, new_error=error)
+            self.residual_error = 0.0
+            for k in range(len(self.parameters)):
+                pp = self.parameters[k]
+                if pp.name == p.name:
+                    value = pp.get_value()
+                    value = min(upper, max(value, lower))
+                    pp.set_range(lower, upper)
+                    pp.set_value(value)
 
         dlg.close()
 

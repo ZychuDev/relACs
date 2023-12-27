@@ -1,6 +1,6 @@
-from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt
-from PyQt6.QtGui import QColor, QBrush
-from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget, QInputDialog, QMessageBox
+from PyQt6.QtCore import pyqtSlot, QPoint, QModelIndex, Qt, QLocale, QSize
+from PyQt6.QtGui import QColor, QBrush, QDoubleValidator
+from PyQt6.QtWidgets import QMenu, QFileDialog, QWidget, QInputDialog, QMessageBox,  QMessageBox, QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QPushButton, QComboBox
 
 from models import FitItemsCollectionModel, Fit, TauFit
 from controllers import FitItemsCollectionController, FitItemController
@@ -36,6 +36,9 @@ class FitItemsCollection(StandardItem):
         menu.addSeparator()
 
         menu.addAction("Make Tau fits from checked data", self.make_tau_fits_checked)
+        menu.addSeparator()
+        
+        menu.addAction("Adjust ranges for all checked", self.adjust_range_selected)
         menu.addSeparator()
 
         menu.addAction("Make auto fit for all checked", self.make_fit_selected)
@@ -98,6 +101,84 @@ class FitItemsCollection(StandardItem):
                 child._model.make_auto_fit(auto = True, next_fit=self.child(i+1)._model if i != nr_of_rows-1 else None)
             i += 1
 
+    def adjust_range_selected(self):
+        nr_of_rows: int = self.rowCount()
+        child = self.child(0)
+
+        if nr_of_rows == 0:
+            msg: QMessageBox = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setText("There is no Fit in collection")
+            msg.setWindowTitle("Collection is empty!")
+            msg.exec()
+            return
+        
+        dlg:QDialog = QDialog()
+        default_locale: QLocale = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
+        dlg.setLocale(default_locale)
+        dlg.setWindowTitle(f"Set parameters ranges for all fits")
+        layout: QVBoxLayout = QVBoxLayout()
+
+        lh: QHBoxLayout = QHBoxLayout()
+
+        inf_l:QLabel = QLabel("Relaxation nr")
+        inf_l.setMinimumSize(QSize(64, 0))
+        inf_l.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+        cb:QComboBox = QComboBox()
+        cb.addItem("1")
+        cb.addItem("2")
+    
+        lh.addWidget(inf_l)
+        lh.addWidget(cb)
+        layout.addLayout(lh)
+
+        new_ranges: dict[str,tuple[QLineEdit, QLineEdit]] = {}
+        p: str
+
+        for p in child._model.relaxations[0].parameters:
+            l: QHBoxLayout = QHBoxLayout()
+
+            v: QDoubleValidator = QDoubleValidator()
+            loc: QLocale = QLocale(QLocale.c())
+            loc.setNumberOptions(QLocale.NumberOption.RejectGroupSeparator)
+            v.setLocale(loc)
+
+            low: QLineEdit = QLineEdit()
+            low.setLocale(default_locale)
+            low.setValidator(v)
+            low.setText(str(p.min))
+
+            up: QLineEdit = QLineEdit()
+            up.setLocale(default_locale)
+            up.setValidator(v)
+            up.setText(str(p.max))
+
+            label:QLabel = QLabel(p.symbol)
+            label.setMinimumSize(QSize(65, 0))
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            
+            new_ranges[p.name] = (low, up)
+            l.addWidget(low)
+            l.addWidget(label)
+            l.addWidget(up)
+
+            layout.addLayout(l)
+
+        buttons_layout: QHBoxLayout = QHBoxLayout()
+        button: QPushButton = QPushButton("Apply")
+        button.clicked.connect(lambda: self.set_new_ranges(new_ranges, False, dlg, cb))
+
+        force_button: QPushButton() = QPushButton("Force change")
+        force_button.clicked.connect(lambda: self.set_new_ranges(new_ranges, True, dlg, cb))
+
+        buttons_layout.addWidget(button)
+        buttons_layout.addWidget(force_button)
+        layout.addLayout(buttons_layout)
+
+        dlg.setLayout(layout)
+        dlg.exec()
+
     def remove_selected(self):
         i: int = 0
         nr_of_rows: int = self.rowCount()
@@ -108,6 +189,18 @@ class FitItemsCollection(StandardItem):
                 nr_of_rows -= 1
                 i -= 1
             i += 1
+
+    def set_new_ranges(self, new_ranges, force, dlg, cb):
+        i: int = 0
+        nr_of_rows: int = self.rowCount()
+        while i < nr_of_rows:
+            print(i)
+            child = self.child(i)
+            if child.checkState() == Qt.CheckState.Checked:
+                child._model.set_new_ranges(new_ranges, force, dlg, cb.currentIndex(), False)
+            i += 1
+
+        dlg.close()
 
     def make_tau_fits_checked(self):
         i : int

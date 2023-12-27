@@ -474,7 +474,7 @@ meta_auto_fit(self)
         for i, r in enumerate(self.relaxations):
             for p in r.saved_parameters:
                 name:str = p.name if p.name != "chi_dif" else "chi_t-chi_s"
-                row = { "Name": f"{name}{i+1}", "Value": p.value, "Error": p.error}
+                row = { "Name": f"{name}{i+1}", "Value": p.value if not p.is_blocked_on_0 else 0.0, "Error": p.error}
                 df_param = concat([df_param, DataFrame([row])], ignore_index=True)
 
 
@@ -620,7 +620,7 @@ meta_auto_fit(self)
         ranges["chi_s"][0].setText("0.0")
         ranges["chi_s"][1].setText(f"{max_chi_prime}")
 
-    def set_new_ranges(self, edit_lines: dict[str,tuple[QLineEdit, QLineEdit]], force: bool, dlg:QDialog, r_nr: int):
+    def set_new_ranges(self, edit_lines: dict[str,tuple[QLineEdit, QLineEdit]], force: bool, dlg:QDialog, r_nr: int, close=True):
         pa: str
         message: str
         msg: QMessageBox
@@ -644,44 +644,47 @@ meta_auto_fit(self)
         value: float
 
         if not force:
-                for r in self.relaxations[r_nr]:
-                    for p in r.saved_parameters:
-                        lower = float(edit_lines[p.name][0].text())
-                        upper = float(edit_lines[p.name][1].text())
-                        value = p.get_value()
-                        if value < lower or value > upper:
-                            message = (f"Bounds for parameter: {p.name} are invalid\n"
-                            +f"In {f.name} saved value of paramater is not in given range\n"
-                            +f"Lower : {lower}\nUpper: {upper}\nActual: {value}\n" 
-                            +"Force new ranges or change saved values of the parameters")
-                            msg = QMessageBox()
-                            msg.setIcon(QMessageBox.Icon.Warning)
-                            msg.setText(message)
-                            msg.setWindowTitle("Incorrect bounds")
-                            msg.exec()
-                            return
+            r = self.relaxations[r_nr]
+            for p in r.saved_parameters:
+                lower = float(edit_lines[p.name][0].text())
+                upper = float(edit_lines[p.name][1].text())
+                value = p.get_value()
+                if value < lower or value > upper:
+                    message = (f"Bounds for parameter: {p.name} are invalid\n"
+                    +f"In {f.name} saved value of paramater is not in given range\n"
+                    +f"Lower : {lower}\nUpper: {upper}\nActual: {value}\n" 
+                    +"Force new ranges or change saved values of the parameters")
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Icon.Warning)
+                    msg.setText(message)
+                    msg.setWindowTitle("Incorrect bounds")
+                    msg.exec()
+                    return
         
-                r = self.relaxations[r_nr]
-                for k in range(len(r.saved_parameters)):
-                    p = r.saved_parameters[k]
-                    lower = float(edit_lines[p.name][0].text())
-                    upper = float(edit_lines[p.name][1].text())
-                    value = p.get_value()
-                    error = p.error
-                    p.set_range(lower, upper)
-                    if value < lower:
-                        value = lower
-                    if value > upper:
-                        value = upper
-                    p.set_value(value, new_error=error)
-                    r.residual_error = 0.0
-                    for m in range(len(r.parameters)):
-                        pp = r.parameters[m]
-                        if pp.name == p.name:
-                            pp.set_range(lower, upper)
-                            pp.set_value(value)
+        r = self.relaxations[r_nr]
+        for k in range(len(r.saved_parameters)):
+            p = r.saved_parameters[k]
+            lower = float(edit_lines[p.name][0].text())
+            upper = float(edit_lines[p.name][1].text())
+            value = p.get_value()
+            error = p.error
+            p.set_range(lower, upper)
+            if value < lower:
+                value = lower
+            if value > upper:
+                value = upper
+            p.set_value(value, new_error=error)
+            r.residual_error = 0.0
+            for m in range(len(r.parameters)):
+                pp = r.parameters[m]
+                if pp.name == p.name:
+                    value = pp.get_value()
+                    value = min(upper, max(value, lower))
+                    pp.set_range(lower, upper)
+                    pp.set_value(value)
                     
-        dlg.close()
+        if close:       
+            dlg.close()
 
     def undo(self):
         self._undo_stack.undo()

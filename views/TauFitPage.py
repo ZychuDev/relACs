@@ -387,6 +387,9 @@ class TauFitPage(QWidget):
         l = self.canvas_slice.ax.legend()
         l.set_draggable(True)
 
+        #Terible temporary/pernament fix
+        self.on_points_changed()
+
     def _update_plot_varying(self):
         tau, tmp, field = self.tau_fit.get_all()
         tau = log(tau)

@@ -78,8 +78,10 @@ class Relaxation(QObject):
         """
         for i, p in enumerate(self.parameters):
             o = other.saved_parameters[i]
+            p.set_range(*o.get_range())
             p.set_value(o.value)
             p.set_blocked(o.is_blocked)
+            p.set_blocked_0(o.is_blocked_on_0)
             p.set_error(o.error)
 
         self.all_parameters_changed.emit()
