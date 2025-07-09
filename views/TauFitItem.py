@@ -7,6 +7,7 @@ from controllers import TauFitItemController
 from .StandardItem import StandardItem
 
 from typing import Literal
+from functools import partial
 
 class TauFitItem(StandardItem):
     def __init__(self, model: TauFit, ctrl: TauFitItemController):
@@ -30,7 +31,11 @@ class TauFitItem(StandardItem):
 
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
-        menu.addAction("Save to file", self._model.save_to_file)
+        save_menu = QMenu("Save to file")
+        save_menu.addAction("Export as CSV", partial(self._model.save_to_file, "csv"))
+        save_menu.addAction("Export as TXT", partial(self._model.save_to_file, "txt"))
+        save_menu.addAction("Export as HDF", partial(self._model.save_to_file, "hdf"))
+        menu.addMenu(save_menu)
         menu.addSeparator()
         menu.addAction("Rename", lambda: self._ctrl.rename())
         menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index())if self._model._collection is not None else print("Items is not in collection"))

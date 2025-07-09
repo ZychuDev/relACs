@@ -686,13 +686,21 @@ meta_auto_fit(self)
 
         self.all_parameters_changed.emit()
 
-    def save_to_file(self):
+    def save_to_file(self, extension:Literal["csv", "txt", "hdf"]):
         """Savig result to .csv file"""
         save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
         if save_name is not None:
             try:
-                with open(save_name + (".csv" if save_name[-4:] != ".csv" else ""), "w") as f:
-                    self.get_result().to_csv(f.name, index=False, sep = ";")
+                with open(save_name + (f".{extension}" if save_name[-(len(extension)+1):] != f".{extension}" else ""), "w") as f:
+                    match extension:
+                        case "csv":
+                            self.get_result().to_csv(f.name, index=False, sep = ";")
+                        case "txt":
+                            self.get_result().to_string(f.name, index=False)
+                        case "hdf":
+                            self.get_result().to_hdf(f.name, index=False)
+                        case _:
+                            raise ValueError(f"Unknows file extension {extension}")
             except Exception as e:
                 print(e)
                 return

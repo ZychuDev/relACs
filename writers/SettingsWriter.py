@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QLocale, QSize, Qt
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QPushButton, QGroupBox
+from PyQt6.QtWidgets import QDialog, QCheckBox, QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QPushButton, QGroupBox
 from PyQt6.QtGui import QDoubleValidator, QIntValidator
 from configparser import RawConfigParser 
 
@@ -15,6 +15,24 @@ def edit_default_settings():
     config = RawConfigParser()
     config.optionxform = str
     config.read('default_settings.ini')
+
+    d = config["Default"]
+    layout:QVBoxLayout = QVBoxLayout()
+    default_edit: dict = {}
+    default_group:QGroupBox = QGroupBox("Default")
+    l = QHBoxLayout()
+    b = QCheckBox()
+    b.setChecked(d["DropCoruptedRows"] == 'yes')
+
+    label = QLabel("Drop corrupted entries when loading measurements")
+    label.setMinimumSize(QSize(150, 0))
+    label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+    l.addWidget(b)
+    l.addWidget(label)
+    layout.addLayout(l)
+    default_group.setLayout(layout)
+    default_edit["DropCoruptedRows"] = b
 
     r = config['Ranges']
     ranges = {}
@@ -149,6 +167,7 @@ def edit_default_settings():
     
     layout_1:QHBoxLayout = QHBoxLayout()
     layout_2: QVBoxLayout = QVBoxLayout()
+    layout_2.addWidget(default_group)
     layout_2.addWidget(headers_group)
     layout_2.addWidget(epsilons_group)
     layout_2.addWidget(plot_group)
@@ -160,7 +179,7 @@ def edit_default_settings():
     layout: QVBoxLayout = QVBoxLayout()
     layout.addLayout(layout_1)
     button = QPushButton("Apply new default settigs")
-    button.clicked.connect(partial(write_default_settings, ranges_edit, headers_edit, epsilons_edit, plot_edit, tolerance_edit, dlg))
+    button.clicked.connect(partial(write_default_settings, default_edit, ranges_edit, headers_edit, epsilons_edit, plot_edit, tolerance_edit, dlg))
     layout.addWidget(button)
 
     reset_button = QPushButton("Reset settings")
@@ -169,7 +188,7 @@ def edit_default_settings():
     dlg.setLayout(layout)
     dlg.exec()
 
-def write_default_settings(ranges_edit:dict, headers_edit:dict, epsilons_edit:dict, plot_edit:dict, tolerance_edit:dict ,dlg:QDialog):
+def write_default_settings(default_edit:dict, ranges_edit:dict, headers_edit:dict, epsilons_edit:dict, plot_edit:dict, tolerance_edit:dict ,dlg:QDialog):
     """Write new default settings.
 
     Args:
@@ -182,6 +201,7 @@ def write_default_settings(ranges_edit:dict, headers_edit:dict, epsilons_edit:di
     config = RawConfigParser()
     config.optionxform = str #type: ignore
     config['Ranges'] = {key:f"{edit[0].text()}, {edit[1].text()}" for key, edit in ranges_edit.items()}
+    config['Default'] = {"DropCoruptedRows":"yes" if default_edit["DropCoruptedRows"].isChecked() else "no"}
     config['Headers'] = {key:header.text() for key, header in headers_edit.items()}
     config['Epsilons'] = {key:epsilon.text() for key, epsilon in epsilons_edit.items()}
     config['Plot'] = {key:value.text() for key, value in plot_edit.items()}
@@ -195,6 +215,7 @@ def write_default_settings(ranges_edit:dict, headers_edit:dict, epsilons_edit:di
 def reset_settings(dlg):
     config = RawConfigParser()
     config.optionxform = str #type: ignore
+
     config['Ranges'] = {
         "alpha":"0.0, 1.0",
         "beta":"0.0, 1.0",
@@ -215,6 +236,10 @@ def reset_settings(dlg):
         "delta_e ":"0.0, 3000.0",
     }
 
+    config['Default'] = {
+        "DropCoruptedRows":"yes"
+        }
+    
     config['Headers'] = {
         "Temperature" : "Temperature (K)",
         "MagneticField ": "Magnetic Field (Oe)",

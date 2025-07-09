@@ -93,6 +93,8 @@ class MeasurementItemsCollectionController(QObject):
             first: bool = True
             for x in fields:
                 for y in x:
+                    if settings.get_default()['drop']:
+                        y.dropna(inplace=True)
                     if first:
                         self._model.append_measurement(Measurement.from_data_frame(y, filename, self._model._compound, self._model), display=True)
                         first = False
@@ -184,6 +186,8 @@ class MeasurementItemsCollectionController(QObject):
         first: bool = True
         for x in fields:
             for y in x:
+                if settings.get_default()['drop']:
+                    y.dropna(inplace=True)
                 if first:
                     self._model.append_measurement(Measurement.from_data_frame(y, filename, self._model._compound, self._model), display=True)
                     first = False

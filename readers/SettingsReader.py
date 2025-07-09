@@ -27,3 +27,8 @@ class SettingsReader():
             "x_tol" : float(self.config['Tolerance']['xtol']),
             "g_tol" : float(self.config['Tolerance']['gtol']),
         }
+    
+    def get_default(self) -> dict[str, bool]:
+        return {
+            "drop": self.config['Default']['DropCoruptedRows'] == 'yes'
+        }

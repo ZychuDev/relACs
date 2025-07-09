@@ -18,7 +18,7 @@ from scipy.optimize import least_squares # type: ignore
 from scipy.linalg import svd #type: ignore
 from math import nextafter
 
-from typing import Self 
+from typing import Self, Literal
 
 class Fit(QObject):
     """Represent one fit for Havriliak-Negami model with n-relaxation.
@@ -445,13 +445,21 @@ meta_auto_fit(self)
                 if next_fit != None: #type: ignore
                     self.copy_all_relxations(next_fit)
 
-    def save_to_file(self):
+    def save_to_file(self, extension:Literal["csv", "txt", "hdf"]):
         """Savig result to .csv file"""
         save_name, _ = QFileDialog.getSaveFileName(QWidget(), 'Save file')
         if save_name is not None:
             try:
-                with open(save_name + (".csv" if save_name[-4:] != ".csv" else ""), "w") as f:
-                    self.get_result().to_csv(f.name, index=False, sep = ";")
+                with open(save_name + (f".{extension}" if save_name[-(len(extension)+1):] != f".{extension}" else ""), "w") as f:
+                    match extension:
+                        case "csv":
+                            self.get_result().to_csv(f.name, index=False, sep = ";")
+                        case "txt":
+                            self.get_result().to_string(f.name, index=False)
+                        case "hdf":
+                            self.get_result().to_hdf(f.name, index=False)
+                        case _:
+                            raise ValueError(f"Unknows file extension {extension}")
             except Exception as e:
                 print(e)
                 return

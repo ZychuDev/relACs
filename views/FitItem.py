@@ -7,6 +7,8 @@ from controllers import FitItemController
 from .StandardItem import StandardItem
 
 from typing import Literal
+from functools import partial
+
 class FitItem(StandardItem):
     def __init__(self, model: Fit, ctrl: FitItemController):
         super().__init__(model._name, 14, False)
@@ -30,7 +32,11 @@ class FitItem(StandardItem):
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
         menu.addAction("Make fit", self._model.make_auto_fit)
-        menu.addAction("Save to file", self._model.save_to_file)
+        save_menu = QMenu("Save to file")
+        save_menu.addAction("Export as CSV", partial(self._model.save_to_file, "csv"))
+        save_menu.addAction("Export as TXT", partial(self._model.save_to_file, "txt"))
+        save_menu.addAction("Export as HDF", partial(self._model.save_to_file, "hdf"))
+        menu.addMenu(save_menu)
         menu.addSeparator()
         menu.addAction("Rename", lambda: self._ctrl.rename())
         menu.addAction("Delete", lambda: self._model._collection.remove(self._model.name, self.index()) if self._model._collection is not None else print("Items is not in collection"))
