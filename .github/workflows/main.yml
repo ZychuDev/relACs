@@ -27,6 +27,8 @@ jobs:
     - name: build application and run Inno Setup
       run: | 
         python -m PyInstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
+        dir dist
+        pwd
         iscc ".\relACs.iss"
         
     - name: Create Release
