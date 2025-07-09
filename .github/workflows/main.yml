@@ -50,7 +50,7 @@ jobs:
         asset_name: relACs_setup.exe
         asset_content_type: application/x-msdownload
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v3
       with:
         name: relACs_setup.exe
         path: ./dist/relACs_setup.exe
