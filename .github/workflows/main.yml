@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python 3.11
+    - name: Set up Python 3.13
       uses: actions/setup-python@v3
       with:
         python-version: 3.13
@@ -27,8 +27,6 @@ jobs:
     - name: build application and run Inno Setup
       run: | 
         python -m PyInstaller --onefile --noconsole --icon="assets\img\relACs.ico" --name="relACs" --uac-admin main.py
-        dir dist
-        pwd
         iscc ".\relACs.iss"
         
     - name: Create Release
@@ -37,8 +35,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: 2.4.10 #VERSION
-        release_name: Release 2.4.10  #VERSION
+        tag_name: 2.4.11 #VERSION
+        release_name: Release 2.4.11  #VERSION
         draft: false
         prerelease: false
     - name: Upload Release Asset

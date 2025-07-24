@@ -21,6 +21,7 @@ class TauFitItemsCollection(StandardItem):
     def show_menu(self, menu_position: QPoint):
         menu = QMenu()
         menu.addAction("Save all to file", self._ctrl.save_all_to_file)
+        menu.addAction("Load points from file", self._ctrl.load_points)
         menu.exec(menu_position)
 
     def on_displayed_item_changed(self, tau_fit:TauFit):
