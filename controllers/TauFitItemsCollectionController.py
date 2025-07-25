@@ -68,7 +68,7 @@ class TauFitItemsCollectionController(QObject):
                 T = float(T_str)
                 H = float(H_str)
                 tau = float(tau_str)
-                points.append((T, H, tau))
+                points.append((tau, T, H))
 
 
         new_fit: TauFit = TauFit(name, self._model._compound, self._model)
