@@ -107,7 +107,7 @@ class Fit(QObject):
             self._collection = collection
 
         self._undo_stack: QUndoStack = QUndoStack()
-        self.resolution = 50 # TO::DO 
+        self.resolution = 500 # TO::DO 
 
         for r in self.relaxations:
             r.reset_errors.connect(self.reset_errors_in_all_relaxations)

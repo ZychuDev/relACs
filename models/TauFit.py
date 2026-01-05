@@ -711,6 +711,7 @@ meta_auto_fit(self)
         Returns:
             DataFrame: Result of fit in DataFrame format.
         """
+        RESOLUTION:int = 500
         df_param: DataFrame = DataFrame(columns=["Name", "Value", "Error"])
         p:Parameter
         for p in self.parameters:
@@ -720,8 +721,8 @@ meta_auto_fit(self)
         tau, tmp_o, field_o = self.get_all()
         df_experimental:DataFrame = DataFrame(list(zip(tmp_o, field_o, tau)), columns=["T", "H", "tau"])
 
-        x = linspace(min(tmp_o), max(tmp_o), 50)
-        y = linspace(min(field_o), max(field_o), 50)
+        x = linspace(min(tmp_o), max(tmp_o), RESOLUTION)
+        y = linspace(min(field_o), max(field_o), RESOLUTION)
         X, Y = meshgrid(x,y)
         Z = 1/TauFit.model(X,Y, *self.get_saved_parameters_values())
 
@@ -750,9 +751,9 @@ meta_auto_fit(self)
         all_temp = list(all_temp)
         all_temp.sort()
         for t in all_temp:
-            field = linspace(min(field_o), max(field_o), 50)
+            field = linspace(min(field_o), max(field_o), RESOLUTION)
             field = Series(field)
-            tmp = Series([t] * 50)
+            tmp = Series([t] * RESOLUTION)
             partial_result = self.partial_result(tmp, field , return_df=False)
             one_point_series = [tmp, field] + partial_result
             for s in range(len(final_series_tmp)):
@@ -766,9 +767,9 @@ meta_auto_fit(self)
         all_field = list(all_field)
         all_field.sort()
         for f in list(all_field):
-            tmp = linspace(min(tmp_o), max(tmp_o), 50)
+            tmp = linspace(min(tmp_o), max(tmp_o), RESOLUTION)
             tmp = Series(tmp)
-            field = Series([f]*50)
+            field = Series([f]*RESOLUTION)
             partial_result = self.partial_result(tmp, field, return_df=False)
             one_point_series = [tmp, field] + partial_result
             for s in range(len(final_series_field)):
